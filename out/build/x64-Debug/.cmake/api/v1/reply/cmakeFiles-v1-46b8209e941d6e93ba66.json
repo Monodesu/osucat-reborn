@@ -16,7 +16,7 @@
 		},
 		{
 			"isGenerated" : true,
-			"path" : "out/build/x64-Debug (默认值)/CMakeFiles/3.17.20032601-MSVC_2/CMakeSystem.cmake"
+			"path" : "out/build/x64-Debug/CMakeFiles/3.17.20032601-MSVC_2/CMakeSystem.cmake"
 		},
 		{
 			"isCMake" : true,
@@ -235,7 +235,7 @@
 		},
 		{
 			"isGenerated" : true,
-			"path" : "out/build/x64-Debug (默认值)/CMakeFiles/3.17.20032601-MSVC_2/CMakeCCompiler.cmake"
+			"path" : "out/build/x64-Debug/CMakeFiles/3.17.20032601-MSVC_2/CMakeCCompiler.cmake"
 		},
 		{
 			"isCMake" : true,
@@ -444,7 +444,7 @@
 		},
 		{
 			"isGenerated" : true,
-			"path" : "out/build/x64-Debug (默认值)/CMakeFiles/3.17.20032601-MSVC_2/CMakeCXXCompiler.cmake"
+			"path" : "out/build/x64-Debug/CMakeFiles/3.17.20032601-MSVC_2/CMakeCXXCompiler.cmake"
 		},
 		{
 			"isCMake" : true,
@@ -508,7 +508,7 @@
 		},
 		{
 			"isGenerated" : true,
-			"path" : "out/build/x64-Debug (默认值)/CMakeFiles/3.17.20032601-MSVC_2/CMakeRCCompiler.cmake"
+			"path" : "out/build/x64-Debug/CMakeFiles/3.17.20032601-MSVC_2/CMakeRCCompiler.cmake"
 		},
 		{
 			"isCMake" : true,
@@ -577,7 +577,7 @@
 		},
 		{
 			"isGenerated" : true,
-			"path" : "out/build/x64-Debug (默认值)/CMakeFiles/3.17.20032601-MSVC_2/CMakeCCompiler.cmake"
+			"path" : "out/build/x64-Debug/CMakeFiles/3.17.20032601-MSVC_2/CMakeCCompiler.cmake"
 		},
 		{
 			"isCMake" : true,
@@ -666,7 +666,7 @@
 		},
 		{
 			"isGenerated" : true,
-			"path" : "out/build/x64-Debug (默认值)/CMakeFiles/3.17.20032601-MSVC_2/CMakeCXXCompiler.cmake"
+			"path" : "out/build/x64-Debug/CMakeFiles/3.17.20032601-MSVC_2/CMakeCXXCompiler.cmake"
 		},
 		{
 			"path" : "osucat-reborn/CMakeLists.txt"
@@ -675,7 +675,7 @@
 	"kind" : "cmakeFiles",
 	"paths" : 
 	{
-		"build" : "H:/osucat-reborn/out/build/x64-Debug (默认值)",
+		"build" : "H:/osucat-reborn/out/build/x64-Debug",
 		"source" : "H:/osucat-reborn"
 	},
 	"version" : 

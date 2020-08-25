@@ -2,8 +2,8 @@
 // 或项目特定的包含文件。
 
 #pragma once
-
-constexpr auto DEBUGMODE = false;
+char OC_ROOT_PATH[512];
+constexpr auto DEBUGMODE = true;
 
 #include <easywsclient/easywsclient.hpp>
 #include <json/json.hpp>

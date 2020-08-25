@@ -16,15 +16,16 @@ struct Target{
 };
 
 struct Request {
-    enum class RequestType {
-        FRIEND,
-        GROUP,
-    };
-    RequestType request_type;
+    //enum class RequestType {
+    //    FRIEND,
+    //    GROUP,
+    //};
+    //std::string GR_SubType;
+    //RequestType request_type;
     int64_t time;
     int64_t group_id;
     int64_t user_id;
-    int64_t flag;
+    std::string flag;
     std::string message;//∏Ωº”–≈œ¢
 
 };

@@ -26,7 +26,7 @@ namespace osucat {
 						cout << message << "\n" << endl;
 					}
 					if (_stricmp(message.substr(0, 6).c_str(), "{\"data") != 0) { //忽略回执消息
-						json j = json::parse(message);	
+						json j = json::parse(message);
 						/*
 						Message事件处理
 						*/
@@ -48,7 +48,8 @@ namespace osucat {
 							tar.message = j["message"].get<string>();
 							char msg[32768];
 							if (tar.message_type == Target::MessageType::PRIVATE) {
-								sprintf_s(msg, u8"[%s] [osucat]: 收到来自好友 %lld 的消息：%s", osucat::OCUtils::unixTime2Str(tar.time).c_str(), tar.user_id, tar.message.c_str());
+								sprintf_s(msg, u8"[%s] [osucat]: 收到来自好友 %lld 的消息：%s", utils::unixTime2Str(tar.time).c_str(), tar.user_id, tar.message.c_str());
+								cout << msg << endl;
 								if (tar.message[0] == '!' || tar.message.find(u8"！") == 0) {
 									string str = tar.message;
 									str = tar.message[0] < 0 ? tar.message.substr(3) : tar.message.substr(1);
@@ -67,7 +68,8 @@ namespace osucat {
 								}
 							}
 							if (tar.message_type == Target::MessageType::GROUP) {
-								sprintf_s(msg, u8"[%s] [osucat]: 收到来自群 %lld 的 %lld 的消息：%s", osucat::OCUtils::unixTime2Str(tar.time).c_str(), tar.group_id, tar.user_id, tar.message.c_str());
+								sprintf_s(msg, u8"[%s] [osucat]: 收到来自群 %lld 的 %lld 的消息：%s", utils::unixTime2Str(tar.time).c_str(), tar.group_id, tar.user_id, tar.message.c_str());
+								cout << msg << endl;
 								if (tar.message[0] == '!' || tar.message.find(u8"！") == 0) {
 									string str = tar.message;
 									str = tar.message[0] < 0 ? tar.message.substr(3) : tar.message.substr(1);
@@ -85,7 +87,7 @@ namespace osucat {
 									}
 								}
 							}
-							cout << msg << endl;
+
 						}
 						/*
 						Request事件处理
@@ -99,7 +101,7 @@ namespace osucat {
 							if (j["request_type"].get<string>() == "friend") {
 								//req.request_type = Request::RequestType::FRIEND;
 								char msg[4096];
-								sprintf_s(msg, u8"[%s] [osucat]: 收到来自用户 %lld 的好友请求：%s\n", osucat::OCUtils::unixTime2Str(req.time).c_str(), req.user_id, req.message.c_str());
+								sprintf_s(msg, u8"[%s] [osucat]: 收到来自用户 %lld 的好友请求：%s\n", utils::unixTime2Str(req.time).c_str(), req.user_id, req.message.c_str());
 								cout << msg << endl;
 								json jp;
 								jp["action"] = "set_friend_add_request";
@@ -115,7 +117,7 @@ namespace osucat {
 								if (j["sub_type"].get<string>() == "invite") {
 									//只有受邀入群才会被处理
 									char msg[4096];
-									sprintf_s(msg, u8"[%s] [osucat]: 收到来自用户 %lld 的群组邀请请求：%s\n", osucat::OCUtils::unixTime2Str(req.time).c_str(), req.user_id, req.message.c_str());
+									sprintf_s(msg, u8"[%s] [osucat]: 收到来自用户 %lld 的群组邀请请求：%s\n", utils::unixTime2Str(req.time).c_str(), req.user_id, req.message.c_str());
 									cout << msg << endl;
 									json jp;
 									jp["action"] = "set_group_add_request";
@@ -126,8 +128,8 @@ namespace osucat {
 									};
 									jp["echo"] = "success";
 									wsp->send(jp.dump());
-								}		
-							}					
+								}
+							}
 						}
 					}
 					//wsp->close();
@@ -136,19 +138,23 @@ namespace osucat {
 		}
 		static bool cmdParse(string msg, Target tar, string* params) {
 			if (_stricmp(msg.substr(0, 4).c_str(), "help") == 0) {
-				help(msg.substr(4), tar, params);
+				help(msg.substr(4), params);
 				return true;
 			}
 			if (_stricmp(msg.substr(0, 5).c_str(), "about") == 0) {
-				about(tar, params);
+				about(params);
+				return true;
+			}
+			if (_stricmp(msg.substr(0, 7).c_str(), "contact") == 0) {
+				contact(msg.substr(7), tar, params);
 				return true;
 			}
 			return false;
 		}
 		//done
-		static void help(string cmd, Target tar, string* params) {
-			OCUtils::trim(cmd);
-			OCUtils::string_replace(cmd, " ", "");
+		static void help(string cmd, string* params) {
+			utils::trim(cmd);
+			utils::string_replace(cmd, " ", "");
 			//string dir = (string)OC_ROOT_PATH + "\\", fileStr;
 			if (_stricmp(cmd.substr(0, 4).c_str(), "bind") == 0) {
 				*params = u8"[CQ:image,file=osucat\\help\\绑定.png]";
@@ -173,15 +179,47 @@ namespace osucat {
 			*params = u8"[CQ:image,file=osucat\\help\\帮助.png]";
 			return;
 		}
-		static void about(Target tar, string* params) {
+		static void about(string* params) {
 			*params = u8"[CQ:image,file=osucat\\help\\about.png]";
 		}
 		static void contact(string cmd, Target tar, string* params) {
-			OCUtils::trim(cmd);
-
-
+			utils::trim(cmd);
+			*params = u8"[CQ:at,qq=" + to_string(tar.user_id) + u8"] 你想传达的话已成功传达给麻麻了哦。";
+			Target activepushTar;
+			activepushTar.message_type = Target::MessageType::PRIVATE;
+			activepushTar.user_id = 451577581;
+			activepushTar.message = u8"收到来自用户 " + to_string(tar.user_id) + u8" 的消息：" + cmd;
+			activepush(activepushTar);
 		}
 	private:
+		/*
+		通过message_type来判断是群组消息还是好友消息
+		message在这里等同于params
+		*/
+		static void activepush(Target tar) {
+			if (tar.message_type == Target::MessageType::PRIVATE) {
+				json jp;
+				jp["user_id"] = tar.user_id;
+				jp["message"] = tar.message;
+				try {
+					NetConnection::HttpPost("http://127.0.0.1:5700/send_private_msg", jp);
+				}
+				catch (osucat::NetWork_Exception& ex) {
+					cout << ex.Show() << endl;
+				}
+			}
+			if (tar.message_type == Target::MessageType::GROUP) {
+				json jp;
+				jp["group_id"] = tar.group_id;
+				jp["message"] = tar.message;
+				try {
+					NetConnection::HttpPost("http://127.0.0.1:5700/send_group_msg", jp);
+				}
+				catch (osucat::NetWork_Exception& ex) {
+					cout << ex.Show() << endl;
+				}
+			}
+		}
 	};
 
 }

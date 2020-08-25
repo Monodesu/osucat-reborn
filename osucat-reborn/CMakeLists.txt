@@ -8,6 +8,6 @@ include_directories(include) # 设置 src 目录为包含目录, 可根据实际
 
 
 # 将源代码添加到此项目的可执行文件。
-add_executable (osucat-httpapi "osucat-reborn.cpp" "osucat-reborn.h" "include/easywsclient/easywsclient.hpp" "include/easywsclient/easywsclient.cpp" "api.hpp" "include/json/json.hpp"  "utils.hpp" "osucat-main.hpp")
+add_executable (osucat-httpapi "osucat-reborn.cpp" "osucat-reborn.h" "include/easywsclient/easywsclient.hpp" "include/easywsclient/easywsclient.cpp" "api.hpp" "include/json/json.hpp"  "utils.hpp" "osucat-main.hpp" "HTTP.hpp" "osucat_exception.hpp")
 
 # TODO: 如有需要，请添加测试并安装目标。

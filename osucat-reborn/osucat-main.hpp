@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 
 using json = nlohmann::json;
 using namespace std;
@@ -8,15 +8,15 @@ namespace osucat {
 	public:
 		static void monitors() {
 			using easywsclient::WebSocket;
-			cout << u8"ws¿Í»§¶Ë×¼±¸¾ÍĞ÷...µÈ´ıÁ¬½ÓÖĞ..." << endl;
+			cout << u8"wså®¢æˆ·ç«¯å‡†å¤‡å°±ç»ª...ç­‰å¾…è¿æ¥ä¸­..." << endl;
 			std::unique_ptr<WebSocket> ws(WebSocket::from_url("ws://localhost:6700/"));
 			if (ws == false) {
-				printf(u8"³¢ÊÔÁ¬½Óµ½websocket·şÎñÆ÷Ê§°Ü¡£");
+				printf(u8"å°è¯•è¿æ¥åˆ°websocketæœåŠ¡å™¨å¤±è´¥ã€‚");
 				return;
 			}
-			cout << u8"Á¬½Ó³É¹¦£¬ÕıÔÚ¼àÌı..." << endl;
+			cout << u8"è¿æ¥æˆåŠŸï¼Œæ­£åœ¨ç›‘å¬..." << endl;
 			if (DEBUGMODE) {
-				cout << u8"DebugÄ£Ê½ÒÑÆôÓÃ..." << endl;
+				cout << u8"Debugæ¨¡å¼å·²å¯ç”¨..." << endl;
 			}
 			while (true) {
 				WebSocket::pointer wsp = &*ws;
@@ -25,10 +25,10 @@ namespace osucat {
 					if (DEBUGMODE) {
 						cout << message << "\n" << endl;
 					}
-					if (_stricmp(message.substr(0, 6).c_str(), "{\"data") != 0) { //ºöÂÔ»ØÖ´ÏûÏ¢
+					if (_stricmp(message.substr(0, 6).c_str(), "{\"data") != 0) { //å¿½ç•¥å›æ‰§æ¶ˆæ¯
 						json j = json::parse(message);
 						/*
-						MessageÊÂ¼ş´¦Àí
+						Messageäº‹ä»¶å¤„ç†
 						*/
 						if (j["post_type"].get<string>() == "message") {
 							json sj = json::parse(message)["sender"];
@@ -48,9 +48,9 @@ namespace osucat {
 							tar.message = j["message"].get<string>();
 							char msg[32768];
 							if (tar.message_type == Target::MessageType::PRIVATE) {
-								sprintf_s(msg, u8"[%s] [osucat]: ÊÕµ½À´×ÔºÃÓÑ %lld µÄÏûÏ¢£º%s", utils::unixTime2Str(tar.time).c_str(), tar.user_id, tar.message.c_str());
+								sprintf_s(msg, u8"[%s] [osucat]: æ”¶åˆ°æ¥è‡ªå¥½å‹ %lld çš„æ¶ˆæ¯ï¼š%s", utils::unixTime2Str(tar.time).c_str(), tar.user_id, tar.message.c_str());
 								cout << msg << endl;
-								if (tar.message[0] == '!' || tar.message.find(u8"£¡") == 0) {
+								if (tar.message[0] == '!' || tar.message.find(u8"ï¼") == 0) {
 									string str = tar.message;
 									str = tar.message[0] < 0 ? tar.message.substr(3) : tar.message.substr(1);
 									string params = { 0 };
@@ -68,9 +68,9 @@ namespace osucat {
 								}
 							}
 							if (tar.message_type == Target::MessageType::GROUP) {
-								sprintf_s(msg, u8"[%s] [osucat]: ÊÕµ½À´×ÔÈº %lld µÄ %lld µÄÏûÏ¢£º%s", utils::unixTime2Str(tar.time).c_str(), tar.group_id, tar.user_id, tar.message.c_str());
+								sprintf_s(msg, u8"[%s] [osucat]: æ”¶åˆ°æ¥è‡ªç¾¤ %lld çš„ %lld çš„æ¶ˆæ¯ï¼š%s", utils::unixTime2Str(tar.time).c_str(), tar.group_id, tar.user_id, tar.message.c_str());
 								cout << msg << endl;
-								if (tar.message[0] == '!' || tar.message.find(u8"£¡") == 0) {
+								if (tar.message[0] == '!' || tar.message.find(u8"ï¼") == 0) {
 									string str = tar.message;
 									str = tar.message[0] < 0 ? tar.message.substr(3) : tar.message.substr(1);
 									string params = { 0 };
@@ -90,7 +90,7 @@ namespace osucat {
 
 						}
 						/*
-						RequestÊÂ¼ş´¦Àí
+						Requestäº‹ä»¶å¤„ç†
 						*/
 						if (j["post_type"].get<string>() == "request") {
 							Request req;
@@ -101,7 +101,7 @@ namespace osucat {
 							if (j["request_type"].get<string>() == "friend") {
 								//req.request_type = Request::RequestType::FRIEND;
 								char msg[4096];
-								sprintf_s(msg, u8"[%s] [osucat]: ÊÕµ½À´×ÔÓÃ»§ %lld µÄºÃÓÑÇëÇó£º%s\n", utils::unixTime2Str(req.time).c_str(), req.user_id, req.message.c_str());
+								sprintf_s(msg, u8"[%s] [osucat]: æ”¶åˆ°æ¥è‡ªç”¨æˆ· %lld çš„å¥½å‹è¯·æ±‚ï¼š%s\n", utils::unixTime2Str(req.time).c_str(), req.user_id, req.message.c_str());
 								cout << msg << endl;
 								json jp;
 								jp["action"] = "set_friend_add_request";
@@ -115,9 +115,9 @@ namespace osucat {
 							if (j["request_type"].get<string>() == "group") {
 								//req.request_type = Request::RequestType::GROUP;
 								if (j["sub_type"].get<string>() == "invite") {
-									//Ö»ÓĞÊÜÑûÈëÈº²Å»á±»´¦Àí
+									//åªæœ‰å—é‚€å…¥ç¾¤æ‰ä¼šè¢«å¤„ç†
 									char msg[4096];
-									sprintf_s(msg, u8"[%s] [osucat]: ÊÕµ½À´×ÔÓÃ»§ %lld µÄÈº×éÑûÇëÇëÇó£º%s\n", utils::unixTime2Str(req.time).c_str(), req.user_id, req.message.c_str());
+									sprintf_s(msg, u8"[%s] [osucat]: æ”¶åˆ°æ¥è‡ªç”¨æˆ· %lld çš„ç¾¤ç»„é‚€è¯·è¯·æ±‚ï¼š%s\n", utils::unixTime2Str(req.time).c_str(), req.user_id, req.message.c_str());
 									cout << msg << endl;
 									json jp;
 									jp["action"] = "set_group_add_request";
@@ -149,6 +149,10 @@ namespace osucat {
 				contact(msg.substr(7), tar, params);
 				return true;
 			}
+			if (_stricmp(msg.substr(0, 4).c_str(), "ping") == 0) {
+				ping(params);
+				return true;
+			}
 			return false;
 		}
 		//done
@@ -157,26 +161,26 @@ namespace osucat {
 			utils::string_replace(cmd, " ", "");
 			//string dir = (string)OC_ROOT_PATH + "\\", fileStr;
 			if (_stricmp(cmd.substr(0, 4).c_str(), "bind") == 0) {
-				*params = u8"[CQ:image,file=osucat\\help\\°ó¶¨.png]";
+				*params = u8"[CQ:image,file=osucat\\help\\ç»‘å®š.png]";
 				return;
 			}
 			if (_stricmp(cmd.substr(0, 4).c_str(), "info") == 0) {
-				*params = u8"[CQ:image,file=osucat\\help\\¸öÈËĞÅÏ¢.png]";
+				*params = u8"[CQ:image,file=osucat\\help\\ä¸ªäººä¿¡æ¯.png]";
 				return;
 			}
 			if (_stricmp(cmd.substr(0, 5).c_str(), "score") == 0) {
-				*params = u8"[CQ:image,file=osucat\\help\\³É¼¨.png]";
+				*params = u8"[CQ:image,file=osucat\\help\\æˆç»©.png]";
 				return;
 			}
 			if (_stricmp(cmd.substr(0, 6).c_str(), "custom") == 0) {
-				*params = u8"[CQ:image,file=osucat\\help\\×Ô¶¨Òå.png]";
+				*params = u8"[CQ:image,file=osucat\\help\\è‡ªå®šä¹‰.png]";
 				return;
 			}
 			if (_stricmp(cmd.substr(0, 5).c_str(), "other") == 0) {
-				*params = u8"[CQ:image,file=osucat\\help\\ÆäËû.png]";
+				*params = u8"[CQ:image,file=osucat\\help\\å…¶ä»–.png]";
 				return;
 			}
-			*params = u8"[CQ:image,file=osucat\\help\\°ïÖú.png]";
+			*params = u8"[CQ:image,file=osucat\\help\\å¸®åŠ©.png]";
 			return;
 		}
 		static void about(string* params) {
@@ -184,17 +188,28 @@ namespace osucat {
 		}
 		static void contact(string cmd, Target tar, string* params) {
 			utils::trim(cmd);
-			*params = u8"[CQ:at,qq=" + to_string(tar.user_id) + u8"] ÄãÏë´«´ïµÄ»°ÒÑ³É¹¦´«´ï¸øÂéÂéÁËÅ¶¡£";
+			*params = u8"[CQ:at,qq=" + to_string(tar.user_id) + u8"] ä½ æƒ³ä¼ è¾¾çš„è¯å·²æˆåŠŸä¼ è¾¾ç»™éº»éº»äº†å“¦ã€‚";
 			Target activepushTar;
 			activepushTar.message_type = Target::MessageType::PRIVATE;
 			activepushTar.user_id = 451577581;
-			activepushTar.message = u8"ÊÕµ½À´×ÔÓÃ»§ " + to_string(tar.user_id) + u8" µÄÏûÏ¢£º" + cmd;
+			activepushTar.message = u8"æ”¶åˆ°æ¥è‡ªç”¨æˆ· " + to_string(tar.user_id) + u8" çš„æ¶ˆæ¯ï¼š" + cmd;
 			activepush(activepushTar);
+		}
+		static void ping(string* params) {
+			//Database db;
+			//db.Connect();
+			//db.addcallcount();
+			vector<string> rtnmsg;
+			rtnmsg.push_back("pong");
+			rtnmsg.push_back("paw");
+			rtnmsg.push_back("meow");
+			rtnmsg.push_back("[CQ:face,id=30]");
+			*params = rtnmsg[utils::randomNum(0, rtnmsg.size() - 1)];
 		}
 	private:
 		/*
-		Í¨¹ımessage_typeÀ´ÅĞ¶ÏÊÇÈº×éÏûÏ¢»¹ÊÇºÃÓÑÏûÏ¢
-		messageÔÚÕâÀïµÈÍ¬ÓÚparams
+		é€šè¿‡message_typeæ¥åˆ¤æ–­æ˜¯ç¾¤ç»„æ¶ˆæ¯è¿˜æ˜¯å¥½å‹æ¶ˆæ¯
+		messageåœ¨è¿™é‡Œç­‰åŒäºparams
 		*/
 		static void activepush(Target tar) {
 			if (tar.message_type == Target::MessageType::PRIVATE) {

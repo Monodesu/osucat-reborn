@@ -1,12 +1,12 @@
 # ninja log v5
-7	456	620041172	osucat-reborn/CMakeFiles/osucat-httpapi.dir/include/easywsclient/easywsclient.cpp.obj	1b01981d91ba2f78
-0	1584	620041173	osucat-reborn/CMakeFiles/osucat-httpapi.dir/osucat-reborn.cpp.obj	e60f10228c69eb7d
-1587	1921	620041173	osucat-reborn/osucat-httpapi.exe	a4c89b8339ee199b
-0	12	0	clean	9992afb1f91dc381
-8	561	620041387	osucat-reborn/CMakeFiles/osucat-httpapi.dir/include/easywsclient/easywsclient.cpp.obj	1b01981d91ba2f78
-0	1589	620041388	osucat-reborn/CMakeFiles/osucat-httpapi.dir/osucat-reborn.cpp.obj	e60f10228c69eb7d
-1593	1931	620041388	osucat-reborn/osucat-httpapi.exe	a4c89b8339ee199b
-0	11	0	clean	9992afb1f91dc381
-8	451	620041432	osucat-reborn/CMakeFiles/osucat-httpapi.dir/include/easywsclient/easywsclient.cpp.obj	1b01981d91ba2f78
-0	1605	620041433	osucat-reborn/CMakeFiles/osucat-httpapi.dir/osucat-reborn.cpp.obj	e60f10228c69eb7d
-1607	1917	620041433	osucat-reborn/osucat-httpapi.exe	a4c89b8339ee199b
+2	428	620045172	osucat-reborn/CMakeFiles/osucat-httpapi.dir/include/easywsclient/easywsclient.cpp.obj	2252f1a1bae44e7b
+0	1585	620045174	osucat-reborn/CMakeFiles/osucat-httpapi.dir/osucat-reborn.cpp.obj	12e4afa72a944728
+1587	2068	620045174	osucat-reborn/osucat-httpapi.exe	fd90ce4b7d89a6ce
+0	43	0	clean	3c4015dbeb3e9b3
+3	559	620045512	osucat-reborn/CMakeFiles/osucat-httpapi.dir/include/easywsclient/easywsclient.cpp.obj	2252f1a1bae44e7b
+0	1526	620045513	osucat-reborn/CMakeFiles/osucat-httpapi.dir/osucat-reborn.cpp.obj	12e4afa72a944728
+1533	1721	620045514	osucat-reborn/osucat-httpapi.exe	fd90ce4b7d89a6ce
+0	7	0	clean	3c4015dbeb3e9b3
+3	431	620045659	osucat-reborn/CMakeFiles/osucat-httpapi.dir/include/easywsclient/easywsclient.cpp.obj	2252f1a1bae44e7b
+1	1489	620045660	osucat-reborn/CMakeFiles/osucat-httpapi.dir/osucat-reborn.cpp.obj	12e4afa72a944728
+1491	1647	620045661	osucat-reborn/osucat-httpapi.exe	fd90ce4b7d89a6ce

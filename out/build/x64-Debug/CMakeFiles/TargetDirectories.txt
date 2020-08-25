@@ -1,5 +1,5 @@
-H:/osucat-reborn/out/build/x64-Debug/CMakeFiles/edit_cache.dir
-H:/osucat-reborn/out/build/x64-Debug/CMakeFiles/rebuild_cache.dir
-H:/osucat-reborn/out/build/x64-Debug/osucat-reborn/CMakeFiles/osucat-httpapi.dir
-H:/osucat-reborn/out/build/x64-Debug/osucat-reborn/CMakeFiles/edit_cache.dir
-H:/osucat-reborn/out/build/x64-Debug/osucat-reborn/CMakeFiles/rebuild_cache.dir
+C:/Users/fanta/source/repos/osucat/out/build/x64-Debug/CMakeFiles/edit_cache.dir
+C:/Users/fanta/source/repos/osucat/out/build/x64-Debug/CMakeFiles/rebuild_cache.dir
+C:/Users/fanta/source/repos/osucat/out/build/x64-Debug/osucat-reborn/CMakeFiles/osucat-httpapi.dir
+C:/Users/fanta/source/repos/osucat/out/build/x64-Debug/osucat-reborn/CMakeFiles/edit_cache.dir
+C:/Users/fanta/source/repos/osucat/out/build/x64-Debug/osucat-reborn/CMakeFiles/rebuild_cache.dir

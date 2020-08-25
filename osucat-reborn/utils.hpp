@@ -1209,8 +1209,37 @@ namespace osucat::utils {
 
 		time_t t_ = mktime(&tm_); //已经减了8个时区
 		ttm->tm_sec = t_; //秒时间
-	}
+	}    
+	inline std::string escape(const std::string& str, const bool escape_comma = true) {
 
+		std::string res = str;
+		string_replace(res, "&", "&amp;");
+		string_replace(res, "[", "&#91;");
+		string_replace(res, "]", "&#93;");
+		if (escape_comma) string_replace(res, ",", "&#44;");
+		return res;
+	}
+	// 对字符串做 CQ 码去转义
+	inline std::string unescape(const std::string& str) {
+		std::string res = str;
+		string_replace(res, "&#44;", ",");
+		string_replace(res, "&#91;", "[");
+		string_replace(res, "&#93;", "]");
+		string_replace(res, "&amp;", "&");
+		return res;
+	}
+	//这功能有缺陷
+	string GetMiddleText(string regularStr, string frontStr, string behindStr) {
+		string str;
+		try {
+			str = regularStr.substr(regularStr.find(frontStr) + 1);
+			str = str.substr(0, str.find(behindStr));
+			return str;
+		}
+		catch (std::exception) {
+			return "";
+		}
+	}
 };
 
 

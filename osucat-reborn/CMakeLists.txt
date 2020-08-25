@@ -10,7 +10,7 @@ include_directories(extern/Magick++/include)
 
 #file(GLOB_RECURSE SOURCE_FILES src/*.cpp) # 递归搜索 src 目录中的源文件, 可根据实际情况修改
 # 将源代码添加到此项目的可执行文件。
-add_executable (osucat-reborn "osucat-reborn.cpp" "osucat-reborn.h" "include/easywsclient/easywsclient.hpp" "include/easywsclient/easywsclient.cpp" "api.hpp" "include/json/json.hpp"  "utils.hpp" "osucat-main.hpp" "HTTP.hpp" "osucat_exception.hpp" "osu_api_v1.hpp"  "badge.hpp" "mysql.hpp" "imageMaker.hpp" "include/oppai-cpp/oppai/mods.hpp" "include/oppai-cpp/oppai/oppai.c" "include/oppai-cpp/oppai.hpp" )
+add_executable (osucat-reborn "osucat-reborn.cpp" "osucat-reborn.h" "include/easywsclient/easywsclient.hpp" "include/easywsclient/easywsclient.cpp" "api.hpp" "include/json/json.hpp"  "utils.hpp" "osucat-main.hpp" "HTTP.hpp" "osucat_exception.hpp" "osu_api_v1.hpp"  "badge.hpp" "mysql.hpp" "imageMaker.hpp" "include/oppai-cpp/oppai/mods.hpp" "include/oppai-cpp/oppai/oppai.c" "include/oppai-cpp/oppai.hpp")
 
 target_link_libraries(osucat-reborn
         "${CMAKE_CURRENT_SOURCE_DIR}\\extern\\Mysql\\lib\\libmysql.lib"

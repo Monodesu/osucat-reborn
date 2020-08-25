@@ -2,6 +2,8 @@
 #ifndef MYSQL_HPP
 #define MYSQL_HPP
 
+#include <mysql.h>
+
 #define SQL_USER "root"
 #define SQL_HOST "127.0.0.1"
 //#define SQL_HOST "osucat.desu.life"

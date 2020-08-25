@@ -28,10 +28,9 @@ constexpr auto DEBUGMODE = false;
 #include <codecvt>
 #include <optional>
 
-#pragma comment( lib, "ws2_32" )
+#pragma comment(lib, "ws2_32")
 #pragma comment(lib, "winhttp.lib")
 
-#include <mysql.h>
 #include "utils.hpp"
 #include "api.hpp"
 #include "osucat_exception.hpp"

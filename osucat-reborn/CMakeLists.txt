@@ -5,9 +5,16 @@ cmake_minimum_required (VERSION 3.8)
 set(CMAKE_CXX_STANDARD 17)
 
 include_directories(include) # 设置 src 目录为包含目录, 可根据实际情况修改
+include_directories(extern/Mysql/include)
+include_directories(extern/Magick++/include)
 
-
+#file(GLOB_RECURSE SOURCE_FILES src/*.cpp) # 递归搜索 src 目录中的源文件, 可根据实际情况修改
 # 将源代码添加到此项目的可执行文件。
-add_executable (osucat-httpapi "osucat-reborn.cpp" "osucat-reborn.h" "include/easywsclient/easywsclient.hpp" "include/easywsclient/easywsclient.cpp" "api.hpp" "include/json/json.hpp"  "utils.hpp" "osucat-main.hpp" "HTTP.hpp" "osucat_exception.hpp")
+add_executable (osucat-reborn "osucat-reborn.cpp" "osucat-reborn.h" "include/easywsclient/easywsclient.hpp" "include/easywsclient/easywsclient.cpp" "api.hpp" "include/json/json.hpp"  "utils.hpp" "osucat-main.hpp" "HTTP.hpp" "osucat_exception.hpp" "osu_api_v1.hpp"  "badge.hpp" "mysql.hpp" "imageMaker.hpp"    "include/oppai-cpp/oppai/mods.hpp" "include/oppai-cpp/oppai/oppai.c" "include/oppai-cpp/oppai.hpp" "extern/Magick++/include/Magick++.h" "extern/Mysql/include/mysql.h")
 
+target_link_libraries(osucat-reborn
+        "H:\\osucat-reborn\\osucat-reborn\\extern\\Mysql\\lib\\libmysql.lib"
+        "H:\\osucat-reborn\\osucat-reborn\\extern\\Mysql\\lib\\mysqlclient.lib"
+        "H:\\osucat-reborn\\osucat-reborn\\extern\\Magick++\\lib\\CORE_RL_Magick++_.lib"
+)
 # TODO: 如有需要，请添加测试并安装目标。

@@ -63,49 +63,57 @@ build rebuild_cache: phony CMakeFiles\rebuild_cache.util
 # =============================================================================
 
 # =============================================================================
-# Object build statements for EXECUTABLE target osucat-httpapi
+# Object build statements for EXECUTABLE target osucat-reborn
 
 
 #############################################
-# Order-only phony target for osucat-httpapi
+# Order-only phony target for osucat-reborn
 
-build cmake_object_order_depends_target_osucat-httpapi_Debug: phony || osucat-reborn\CMakeFiles\osucat-httpapi.dir
+build cmake_object_order_depends_target_osucat-reborn_Debug: phony || osucat-reborn\CMakeFiles\osucat-reborn.dir
 
-build osucat-reborn\CMakeFiles\osucat-httpapi.dir\osucat-reborn.cpp.obj: CXX_COMPILER__osucat-httpapi_Debug ..\..\..\osucat-reborn\osucat-reborn.cpp || cmake_object_order_depends_target_osucat-httpapi_Debug
+build osucat-reborn\CMakeFiles\osucat-reborn.dir\osucat-reborn.cpp.obj: CXX_COMPILER__osucat-reborn_Debug ..\..\..\osucat-reborn\osucat-reborn.cpp || cmake_object_order_depends_target_osucat-reborn_Debug
   FLAGS = /DWIN32 /D_WINDOWS /W3 /GR /EHsc /MDd /Zi /Ob0 /Od /RTC1   -std:c++17
-  INCLUDES = -I..\..\..\osucat-reborn\include
-  OBJECT_DIR = osucat-reborn\CMakeFiles\osucat-httpapi.dir
-  OBJECT_FILE_DIR = osucat-reborn\CMakeFiles\osucat-httpapi.dir
-  TARGET_COMPILE_PDB = osucat-reborn\CMakeFiles\osucat-httpapi.dir\
-  TARGET_PDB = osucat-reborn\osucat-httpapi.pdb
+  INCLUDES = -I..\..\..\osucat-reborn\include -I..\..\..\osucat-reborn\extern\Mysql\include -I..\..\..\osucat-reborn\extern\Magick++\include
+  OBJECT_DIR = osucat-reborn\CMakeFiles\osucat-reborn.dir
+  OBJECT_FILE_DIR = osucat-reborn\CMakeFiles\osucat-reborn.dir
+  TARGET_COMPILE_PDB = osucat-reborn\CMakeFiles\osucat-reborn.dir\
+  TARGET_PDB = osucat-reborn\osucat-reborn.pdb
 
-build osucat-reborn\CMakeFiles\osucat-httpapi.dir\include\easywsclient\easywsclient.cpp.obj: CXX_COMPILER__osucat-httpapi_Debug ..\..\..\osucat-reborn\include\easywsclient\easywsclient.cpp || cmake_object_order_depends_target_osucat-httpapi_Debug
+build osucat-reborn\CMakeFiles\osucat-reborn.dir\include\easywsclient\easywsclient.cpp.obj: CXX_COMPILER__osucat-reborn_Debug ..\..\..\osucat-reborn\include\easywsclient\easywsclient.cpp || cmake_object_order_depends_target_osucat-reborn_Debug
   FLAGS = /DWIN32 /D_WINDOWS /W3 /GR /EHsc /MDd /Zi /Ob0 /Od /RTC1   -std:c++17
-  INCLUDES = -I..\..\..\osucat-reborn\include
-  OBJECT_DIR = osucat-reborn\CMakeFiles\osucat-httpapi.dir
-  OBJECT_FILE_DIR = osucat-reborn\CMakeFiles\osucat-httpapi.dir\include\easywsclient
-  TARGET_COMPILE_PDB = osucat-reborn\CMakeFiles\osucat-httpapi.dir\
-  TARGET_PDB = osucat-reborn\osucat-httpapi.pdb
+  INCLUDES = -I..\..\..\osucat-reborn\include -I..\..\..\osucat-reborn\extern\Mysql\include -I..\..\..\osucat-reborn\extern\Magick++\include
+  OBJECT_DIR = osucat-reborn\CMakeFiles\osucat-reborn.dir
+  OBJECT_FILE_DIR = osucat-reborn\CMakeFiles\osucat-reborn.dir\include\easywsclient
+  TARGET_COMPILE_PDB = osucat-reborn\CMakeFiles\osucat-reborn.dir\
+  TARGET_PDB = osucat-reborn\osucat-reborn.pdb
+
+build osucat-reborn\CMakeFiles\osucat-reborn.dir\include\oppai-cpp\oppai\oppai.c.obj: C_COMPILER__osucat-reborn_Debug ..\..\..\osucat-reborn\include\oppai-cpp\oppai\oppai.c || cmake_object_order_depends_target_osucat-reborn_Debug
+  FLAGS = /DWIN32 /D_WINDOWS /W3 /MDd /Zi /Ob0 /Od /RTC1
+  INCLUDES = -I..\..\..\osucat-reborn\include -I..\..\..\osucat-reborn\extern\Mysql\include -I..\..\..\osucat-reborn\extern\Magick++\include
+  OBJECT_DIR = osucat-reborn\CMakeFiles\osucat-reborn.dir
+  OBJECT_FILE_DIR = osucat-reborn\CMakeFiles\osucat-reborn.dir\include\oppai-cpp\oppai
+  TARGET_COMPILE_PDB = osucat-reborn\CMakeFiles\osucat-reborn.dir\
+  TARGET_PDB = osucat-reborn\osucat-reborn.pdb
 
 
 # =============================================================================
-# Link build statements for EXECUTABLE target osucat-httpapi
+# Link build statements for EXECUTABLE target osucat-reborn
 
 
 #############################################
-# Link the executable osucat-reborn\osucat-httpapi.exe
+# Link the executable osucat-reborn\osucat-reborn.exe
 
-build osucat-reborn\osucat-httpapi.exe: CXX_EXECUTABLE_LINKER__osucat-httpapi_Debug osucat-reborn\CMakeFiles\osucat-httpapi.dir\osucat-reborn.cpp.obj osucat-reborn\CMakeFiles\osucat-httpapi.dir\include\easywsclient\easywsclient.cpp.obj
+build osucat-reborn\osucat-reborn.exe: CXX_EXECUTABLE_LINKER__osucat-reborn_Debug osucat-reborn\CMakeFiles\osucat-reborn.dir\osucat-reborn.cpp.obj osucat-reborn\CMakeFiles\osucat-reborn.dir\include\easywsclient\easywsclient.cpp.obj osucat-reborn\CMakeFiles\osucat-reborn.dir\include\oppai-cpp\oppai\oppai.c.obj | ..\..\..\osucat-reborn\extern\Mysql\lib\libmysql.lib ..\..\..\osucat-reborn\extern\Mysql\lib\mysqlclient.lib ..\..\..\osucat-reborn\extern\Magick++\lib\CORE_RL_Magick++_.lib
   FLAGS = /DWIN32 /D_WINDOWS /W3 /GR /EHsc /MDd /Zi /Ob0 /Od /RTC1
   LINK_FLAGS = /machine:x64 /debug /INCREMENTAL /subsystem:console
-  LINK_LIBRARIES = kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib
-  OBJECT_DIR = osucat-reborn\CMakeFiles\osucat-httpapi.dir
+  LINK_LIBRARIES = ..\..\..\osucat-reborn\extern\Mysql\lib\libmysql.lib  ..\..\..\osucat-reborn\extern\Mysql\lib\mysqlclient.lib  ..\..\..\osucat-reborn\extern\Magick++\lib\CORE_RL_Magick++_.lib  kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib
+  OBJECT_DIR = osucat-reborn\CMakeFiles\osucat-reborn.dir
   POST_BUILD = cd .
   PRE_LINK = cd .
-  TARGET_COMPILE_PDB = osucat-reborn\CMakeFiles\osucat-httpapi.dir\
-  TARGET_FILE = osucat-reborn\osucat-httpapi.exe
-  TARGET_IMPLIB = osucat-reborn\osucat-httpapi.lib
-  TARGET_PDB = osucat-reborn\osucat-httpapi.pdb
+  TARGET_COMPILE_PDB = osucat-reborn\CMakeFiles\osucat-reborn.dir\
+  TARGET_FILE = osucat-reborn\osucat-reborn.exe
+  TARGET_IMPLIB = osucat-reborn\osucat-reborn.lib
+  TARGET_PDB = osucat-reborn\osucat-reborn.pdb
 
 
 #############################################
@@ -133,9 +141,9 @@ build osucat-reborn\rebuild_cache: phony osucat-reborn\CMakeFiles\rebuild_cache.
 # =============================================================================
 # Target aliases.
 
-build osucat-httpapi: phony osucat-reborn\osucat-httpapi.exe
+build osucat-reborn: phony osucat-reborn\osucat-reborn.exe
 
-build osucat-httpapi.exe: phony osucat-reborn\osucat-httpapi.exe
+build osucat-reborn.exe: phony osucat-reborn\osucat-reborn.exe
 
 # =============================================================================
 # Folder targets.
@@ -152,7 +160,7 @@ build all: phony osucat-reborn\all
 #############################################
 # Folder: H:/osucat-reborn/out/build/x64-Debug/osucat-reborn
 
-build osucat-reborn\all: phony osucat-reborn\osucat-httpapi.exe
+build osucat-reborn\all: phony osucat-reborn\osucat-reborn.exe
 
 # =============================================================================
 # Built-in targets

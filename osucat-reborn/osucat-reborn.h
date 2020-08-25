@@ -8,26 +8,39 @@ constexpr auto DEBUGMODE = false;
 #include <easywsclient/easywsclient.hpp>
 #include <json/json.hpp>
 #include <iostream>
+#include <algorithm>
+#include <sstream>
 #include <stdio.h>
 #include <string>
+#include <cmath>
 #include <memory>
 #include <time.h>
 #include <stdlib.h>
 #include <WinSock2.h>
 #include <Windows.h>
+#include <vector>
+#include <set>
 #include <schannel.h>
 #include <winhttp.h>
 #include <fstream>
-#include <iostream>
 #include <regex>
-#include <sstream>
+#include <thread>
 #include <codecvt>
+#include <optional>
 
 #pragma comment( lib, "ws2_32" )
 #pragma comment(lib, "winhttp.lib")
 
+#include <mysql.h>
+#include <Magick++.h>
 #include "utils.hpp"
 #include "api.hpp"
 #include "osucat_exception.hpp"
 #include "HTTP.hpp"
+#include "osu_api_v1.hpp"
+#include "badge.hpp"
+#include "mysql.hpp"
+#include "oppai-cpp/oppai.hpp"
+#include "imageMaker.hpp"
+#include "osucat-main.hpp"
 // TODO: 在此处引用程序需要的其他标头。

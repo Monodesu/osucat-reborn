@@ -1,5 +1,4 @@
 ﻿#include "osucat-reborn.h"
-#include "osucat-main.hpp"
 
 using namespace std;
 static unsigned old_code_page;

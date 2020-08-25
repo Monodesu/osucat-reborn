@@ -32,7 +32,6 @@ constexpr auto DEBUGMODE = false;
 #pragma comment(lib, "winhttp.lib")
 
 #include <mysql.h>
-#include <Magick++.h>
 #include "utils.hpp"
 #include "api.hpp"
 #include "osucat_exception.hpp"

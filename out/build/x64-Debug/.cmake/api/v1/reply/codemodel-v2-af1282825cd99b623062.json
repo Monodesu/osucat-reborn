@@ -52,9 +52,9 @@
 			[
 				{
 					"directoryIndex" : 1,
-					"id" : "osucat-reborn::@a3a6fbb26c2d8321fc16",
-					"jsonFile" : "target-osucat-reborn-Debug-5fab3eaaa8899ae133d5.json",
-					"name" : "osucat-reborn",
+					"id" : "osucat-httpapi::@a3a6fbb26c2d8321fc16",
+					"jsonFile" : "target-osucat-httpapi-Debug-c986c37786876e9fab67.json",
+					"name" : "osucat-httpapi",
 					"projectIndex" : 0
 				}
 			]

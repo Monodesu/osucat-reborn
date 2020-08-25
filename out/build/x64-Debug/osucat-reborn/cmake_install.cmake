@@ -1,8 +1,8 @@
-# Install script for directory: H:/osucat-reborn/osucat-reborn
+# Install script for directory: C:/Users/fanta/source/repos/osucat/osucat-reborn
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
-  set(CMAKE_INSTALL_PREFIX "H:/osucat-reborn/out/install/x64-Debug")
+  set(CMAKE_INSTALL_PREFIX "C:/Users/fanta/source/repos/osucat/out/install/x64-Debug")
 endif()
 string(REGEX REPLACE "/$" "" CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}")
 

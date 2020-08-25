@@ -1,8 +1,8 @@
-# Install script for directory: H:/osucat-reborn
+# Install script for directory: C:/Users/fanta/source/repos/osucat
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
-  set(CMAKE_INSTALL_PREFIX "H:/osucat-reborn/out/install/x64-Debug")
+  set(CMAKE_INSTALL_PREFIX "C:/Users/fanta/source/repos/osucat/out/install/x64-Debug")
 endif()
 string(REGEX REPLACE "/$" "" CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}")
 
@@ -34,7 +34,7 @@ endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for each subdirectory.
-  include("H:/osucat-reborn/out/build/x64-Debug/osucat-reborn/cmake_install.cmake")
+  include("C:/Users/fanta/source/repos/osucat/out/build/x64-Debug/osucat-reborn/cmake_install.cmake")
 
 endif()
 
@@ -46,5 +46,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "H:/osucat-reborn/out/build/x64-Debug/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "C:/Users/fanta/source/repos/osucat/out/build/x64-Debug/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")

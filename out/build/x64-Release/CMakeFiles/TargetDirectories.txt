@@ -1,5 +1,0 @@
-H:/osucat-reborn/out/build/x64-Release/CMakeFiles/edit_cache.dir
-H:/osucat-reborn/out/build/x64-Release/CMakeFiles/rebuild_cache.dir
-H:/osucat-reborn/out/build/x64-Release/osucat-reborn/CMakeFiles/osucat-reborn.dir
-H:/osucat-reborn/out/build/x64-Release/osucat-reborn/CMakeFiles/edit_cache.dir
-H:/osucat-reborn/out/build/x64-Release/osucat-reborn/CMakeFiles/rebuild_cache.dir

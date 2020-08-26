@@ -8,6 +8,10 @@ using namespace std;
 namespace osucat {
 	class main {
 	public:
+		static void _CreateDUThread() {
+			thread dailyUpdateThread(bind(&_DailyUpdate));
+			dailyUpdateThread.detach();
+		}
 #pragma region 消息处理
 		static void osucatMain(string message) {
 			if (_stricmp(message.substr(0, 6).c_str(), "{\"data") != 0) { //忽略回执消息
@@ -91,10 +95,6 @@ namespace osucat {
 				tar.message_type == Target::MessageType::PRIVATE ? activepushTar.user_id = tar.user_id : activepushTar.group_id = tar.group_id;
 				activepushTar.message = params;
 				activepush(activepushTar);
-				/*这里只是消息处理 不需要addcallcount*/
-				/*Database db;
-				db.Connect();
-				db.addcallcount();	// addcallcount上移*/
 			}
 		}
 #pragma endregion
@@ -3312,7 +3312,7 @@ namespace osucat {
 			db.addbadge(uid, temp);
 			*params = u8"已成功提交。";
 		}
-		/* 娱乐模块 */
+		/* 娱乐指令 */
 		static void memyselfact(string cmd, Target tar, SenderInfo senderinfo, string* params) {
 			utils::trim(cmd);
 			string username = senderinfo.card == "" ? senderinfo.nikename : senderinfo.card;
@@ -3339,6 +3339,237 @@ namespace osucat {
 				return;
 			}
 			*params = "参数错误。";
+		}
+		static void _UpdateManually(Target tar) {
+			char dugtmp[256];
+			Target activepushTar;
+			activepushTar.message_type = tar.message_type == Target::MessageType::PRIVATE ? Target::MessageType::PRIVATE : Target::MessageType::GROUP;
+			tar.message_type == Target::MessageType::PRIVATE ? activepushTar.user_id = tar.user_id : activepushTar.group_id = tar.group_id;
+			activepushTar.message = u8"正在启动更新";
+			activepush(activepushTar);
+			activepushTar.message_type = Target::MessageType::PRIVATE;
+			activepushTar.user_id = MONO;
+			activepushTar.message = u8"管理员 " + to_string(tar.user_id) + u8"手动发起了每日更新 正在启动更新";
+			activepush(activepushTar);
+			sprintf_s(dugtmp, u8"[%s] [osucat][updater]：启动更新", utils::unixTime2Str(time(NULL)).c_str());
+			cout << dugtmp << endl;
+			auto start = chrono::system_clock::now();
+			Database db;
+			db.Connect();
+			vector<int64_t> temp = db.GetUserSet();
+			char timeStr[30] = { 0 };
+			time_t now = time(NULL);
+			tm* tm_now = localtime(&now);
+			strftime(timeStr, sizeof(timeStr), "%Y-%m-%d 04:00:00", tm_now);
+			for (int i = 0; i < temp.size(); ++i) {
+				thread DUP(bind(&dailyUpdatePoster, i, temp[i], timeStr));
+				DUP.detach();
+				Sleep(2000);
+			}
+			auto end = chrono::system_clock::now();
+			auto duration = chrono::duration_cast<chrono::microseconds>(end - start);
+			string message = u8"已完成，一共更新了 " + to_string(temp.size()) + u8" 个用户的数据，共耗时 "
+				+ utils::Duration2StrWithoutDAY(double(duration.count()) * chrono::microseconds::period::num
+					/ chrono::microseconds::period::den);
+			activepushTar.message = message;
+			activepush(activepushTar);
+			activepushTar.message_type = tar.message_type == Target::MessageType::PRIVATE ? Target::MessageType::PRIVATE : Target::MessageType::GROUP;
+			tar.message_type == Target::MessageType::PRIVATE ? activepushTar.user_id = tar.user_id : activepushTar.group_id = tar.group_id;
+			activepush(activepushTar);
+			sprintf_s(dugtmp, u8"[%s] [osucat][updater]：%s", utils::unixTime2Str(time(NULL)).c_str(), message.c_str());
+		}
+		static void _DailyUpdate() {
+			cout << u8"Daily update thread created!" << endl;
+			char dugtmp[256];
+			while (true) {
+				time_t now = time(NULL);
+				tm* tm_now = localtime(&now);
+				char timeC[16] = { 0 };
+				strftime(timeC, sizeof(timeC), "%H", tm_now);
+				if (to_string(timeC).find("04") == string::npos) {
+					Sleep(1000 * 60);
+				}
+				else {
+					Target activepushTar;
+					activepushTar.message_type = Target::MessageType::PRIVATE;
+					activepushTar.user_id = MONO;
+					activepushTar.message = u8"正在启动更新";
+					activepush(activepushTar);
+					try {
+						system("del .\\work\\avatar\\*.png");
+					}
+					catch (...) {
+					}
+					sprintf_s(dugtmp, u8"[%s] [osucat][updater]：启动更新", utils::unixTime2Str(time(NULL)).c_str());
+					cout << dugtmp << endl;
+					auto start = chrono::system_clock::now();
+					Database db;
+					db.Connect();
+					vector<int64_t> temp = db.GetUserSet();
+					char timeStr[30] = { 0 };
+					strftime(timeStr, sizeof(timeStr), "%Y-%m-%d 04:00:00", tm_now);
+					for (int i = 0; i < temp.size(); ++i) {
+						thread DUP(bind(&dailyUpdatePoster, i, temp[i], timeStr));
+						DUP.detach();
+						Sleep(2000);
+					}
+					auto end = chrono::system_clock::now();
+					auto duration = chrono::duration_cast<chrono::microseconds>(end - start);
+					string message = u8"已完成，一共更新了 " + to_string(temp.size()) + u8" 个用户的数据，共耗时 "
+						+ utils::Duration2StrWithoutDAY(double(duration.count()) * chrono::microseconds::period::num
+							/ chrono::microseconds::period::den);
+					activepushTar.message = message;
+					activepush(activepushTar);
+					sprintf_s(dugtmp, u8"[%s] [osucat][updater]：%s", utils::unixTime2Str(time(NULL)).c_str(), message.c_str());
+					Sleep(1000 * 60 * 60 * 21);
+				}
+			}
+		}
+		static void dailyUpdatePoster(int id, int64_t userid, const string& timeStr) {
+			user_info UI = { 0 };
+			Database db;
+			db.Connect();
+
+			try {
+				if (api::GetUser(userid, osu_api_v1::mode::std, &UI) != 0) {
+					try {
+						db.AddUserData(&UI, timeStr);
+					}
+					catch (osucat::database_exception) {
+					}
+				}
+			}
+			catch (osucat::NetWork_Exception) {
+				try {
+					if (api::GetUser(userid, osu_api_v1::mode::std, &UI) != 0) {
+						try {
+							db.AddUserData(&UI, timeStr);
+						}
+						catch (osucat::database_exception) {
+						}
+					}
+				}
+				catch (osucat::NetWork_Exception) {
+					try {
+						if (api::GetUser(userid, osu_api_v1::mode::std, &UI) != 0) {
+							try {
+								db.AddUserData(&UI, timeStr);
+							}
+							catch (osucat::database_exception) {
+							}
+						}
+					}
+					catch (osucat::NetWork_Exception) {
+					}
+				}
+			}
+
+			try {
+				if (api::GetUser(userid, osu_api_v1::mode::taiko, &UI) != 0) {
+					try {
+						db.AddUserData(&UI, timeStr);
+					}
+					catch (osucat::database_exception) {
+					}
+				}
+			}
+			catch (osucat::NetWork_Exception) {
+				try {
+					if (api::GetUser(userid, osu_api_v1::mode::taiko, &UI) != 0) {
+						try {
+							db.AddUserData(&UI, timeStr);
+						}
+						catch (osucat::database_exception) {
+						}
+					}
+				}
+				catch (osucat::NetWork_Exception) {
+					try {
+						if (api::GetUser(userid, osu_api_v1::mode::taiko, &UI) != 0) {
+							try {
+								db.AddUserData(&UI, timeStr);
+							}
+							catch (osucat::database_exception) {
+							}
+						}
+					}
+					catch (osucat::NetWork_Exception) {
+					}
+				}
+			}
+
+			try {
+				if (api::GetUser(userid, osu_api_v1::mode::ctb, &UI) != 0) {
+					try {
+						db.AddUserData(&UI, timeStr);
+					}
+					catch (osucat::database_exception) {
+					}
+				}
+			}
+			catch (osucat::NetWork_Exception) {
+				try {
+					if (api::GetUser(userid, osu_api_v1::mode::ctb, &UI) != 0) {
+						try {
+							db.AddUserData(&UI, timeStr);
+						}
+						catch (osucat::database_exception) {
+						}
+					}
+				}
+				catch (osucat::NetWork_Exception) {
+					try {
+						if (api::GetUser(userid, osu_api_v1::mode::ctb, &UI) != 0) {
+							try {
+								db.AddUserData(&UI, timeStr);
+							}
+							catch (osucat::database_exception) {
+							}
+						}
+					}
+					catch (osucat::NetWork_Exception) {
+					}
+				}
+			}
+
+			try {
+				if (api::GetUser(userid, osu_api_v1::mode::mania, &UI) != 0) {
+					try {
+						db.AddUserData(&UI, timeStr);
+					}
+					catch (osucat::database_exception) {
+					}
+				}
+			}
+			catch (osucat::NetWork_Exception) {
+				try {
+					if (api::GetUser(userid, osu_api_v1::mode::mania, &UI) != 0) {
+						try {
+							db.AddUserData(&UI, timeStr);
+						}
+						catch (osucat::database_exception) {
+						}
+					}
+				}
+				catch (osucat::NetWork_Exception) {
+					try {
+						if (api::GetUser(userid, osu_api_v1::mode::mania, &UI) != 0) {
+							try {
+								db.AddUserData(&UI, timeStr);
+							}
+							catch (osucat::database_exception) {
+							}
+						}
+					}
+					catch (osucat::NetWork_Exception) {
+					}
+				}
+			}
+			char dugtmp[256];
+			sprintf_s(dugtmp, u8"[%s] [osucat][updater]：(No.%d) 用户 %lld 的数据已成功更新。",
+				utils::unixTime2Str(time(NULL)).c_str(),
+				id,
+				userid);
 		}
 #pragma endregion
 #pragma region 交互

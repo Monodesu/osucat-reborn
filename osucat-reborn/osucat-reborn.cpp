@@ -32,19 +32,22 @@ int main()
 	GetCurrentDirectory(512, OC_ROOT_PATH);
 	SetCurrentDirectory(OC_ROOT_PATH);
 	Magick::InitializeMagick(OC_ROOT_PATH);
-	cout << "Done!\n" << endl;
+	cout << "Done!" << endl;
 	cout << "Current Directory Path: \"" << OC_ROOT_PATH << "\"" << endl;
 	if (utils::fileExist("./.active")) {
 		ISACTIVE = true;
-		cout << u8"\nosucat已激活\n" << endl;;
+		cout << u8"osucat is activated!" << endl;;
 	}
 	else {
 		ISACTIVE = false;
-		cout << u8"\nosucat未启用\n程序即将退出.." << endl;;
+		cout << u8"\nosucat is not activated,\nthe program is about to exit..." << endl;;
 	}
 	if (ISACTIVE) {
 		utils::fileExist("./.debug") ? DEBUGMODE = true : DEBUGMODE = false; //判断是否启用了debug模式
-		if (DEBUGMODE) cout << u8"Debug模式已启用...\n" << endl;
+		if (DEBUGMODE) cout << u8"Debug mode is enabled...\n" << endl;
+		cout << u8"Creating daily update thread..." << endl;
+		osucat::main::_CreateDUThread();
+
 		INT rc;
 		WSADATA wsaData;
 		rc = WSAStartup(MAKEWORD(2, 2), &wsaData);
@@ -53,13 +56,13 @@ int main()
 			return 1;
 		}
 		using easywsclient::WebSocket;
-		cout << u8"准备就绪...等待连接中..." << endl;
+		cout << u8"Ready...Waiting for connection..." << endl;
 		std::unique_ptr<WebSocket> ws(WebSocket::from_url("ws://localhost:6700/"));
 		if (ws == false) {
-			printf(u8"尝试连接到websocket服务器失败。");
+			printf(u8"An attempt to connect to the WebSocket server has failed.");
 			return 2;
 		}
-		cout << u8"连接成功，正在监听..." << endl;
+		cout << u8"WebSocket connection was successfully established!" << endl;
 		while (true) {
 			WebSocket::pointer wsp = &*ws;
 			ws->poll();
@@ -70,7 +73,7 @@ int main()
 				});
 		}
 		WSACleanup();
-		cout << u8"ws连接已丢失。" << endl;
+		cout << u8"WebSocket connection closed." << endl;
 	}
 	system("pause");
 	return 0;

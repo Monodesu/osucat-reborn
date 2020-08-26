@@ -262,6 +262,10 @@ namespace osucat {
 						addbadge(msg.substr(8), tar, params);
 						return true;
 					}
+					if (_stricmp(msg.substr(0, 11).c_str(), "dailyupdate") == 0) {
+						_UpdateManually(tar);
+						return true;
+					}
 				}
 				// 拦截其他娱乐模块 //
 #pragma region 娱乐模块

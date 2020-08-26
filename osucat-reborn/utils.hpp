@@ -1199,6 +1199,12 @@ namespace osucat::utils {
 		tm tm_;
 		int year, month, day, hour, minute, second;
 		sscanf(timeStr, "%d-%d-%d %d:%d:%d", &year, &month, &day, &hour, &minute, &second);
+		//std::cout << year << std::endl;
+		//std::cout << month << std::endl;
+		//std::cout << day << std::endl;
+		//std::cout << hour << std::endl;
+		//std::cout << minute << std::endl;
+		//std::cout << second << std::endl;
 		tm_.tm_year = year - 1900;
 		tm_.tm_mon = month - 1;
 		tm_.tm_mday = day;
@@ -1208,8 +1214,8 @@ namespace osucat::utils {
 		tm_.tm_isdst = 0;
 
 		time_t t_ = mktime(&tm_); //已经减了8个时区
-		ttm->tm_sec = t_; //秒时间
-	}    
+		*ttm = tm_; //秒时间
+	}
 	static inline std::string escape(const std::string& str, const bool escape_comma = true) {
 
 		std::string res = str;

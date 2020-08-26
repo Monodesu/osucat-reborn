@@ -6,8 +6,8 @@
 #define OSUCAT_SELF 834276213
 #define MONO 451577581
 
-#define 未绑定 u8"你还没有绑定你的账户，请使用!setid id来绑定~"
-#define 他人未绑定 u8"他还没有绑定他的账户，请让他使用!setid id来绑定哦——"
+#define 未绑定 u8"你还没有绑定你的账户，请使用(!)setid id来绑定~"
+#define 他人未绑定 u8"他还没有绑定他的账户，请让他使用(!)setid id来绑定哦——"
 #define 未从bancho检索到用户 u8"没这个人！"
 #define 未找到最近游玩记录 u8"你最近在这个模式上还没有游玩记录~"
 #define 未找到他人最近游玩记录 u8"他最近在这个模式上还没有游玩记录呢~"

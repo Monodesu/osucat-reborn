@@ -235,7 +235,6 @@ namespace osucat::osu_api_v1 {
                 info->user_id = stoll(data["user_id"].get<string>());
                 info->username = data["username"].get<string>();
                 utils::fakestrptime(data["join_date"].get<string>().c_str(), "%Y-%m-%d %H:%M:%S", &time_temp);
-                //strftime();
                 info->registed_timestamp = (int64_t)mktime(&time_temp) + 16 * 3600;
                 try {
                     info->n50 = stoll(data["count50"].get<string>());

@@ -2817,10 +2817,10 @@ namespace osucat {
 			}
 			int64_t QQ = db.GetQQ(UserID);
 			string picPath;
-			picPath = utils::GetMiddleText(cmd, "[CQ:image,file=", "]");
+			picPath = utils::GetMiddleText(cmd, "[CQ:image,file=", ",url");
 			picPath = picPath.substr(picPath.find(',') + 6);
 			PictureInfo picInfo = getImage(picPath);
-			picPath = picInfo.filename;
+			picPath = ".\\data\\cache\\" + picPath + "." + picInfo.format;
 			if (!utils::fileExist(picPath)) {
 				*params = 接收图片出错;
 				return;
@@ -2846,13 +2846,8 @@ namespace osucat {
 			activepushTar.user_id = MONO;
 			activepushTar.message = u8"有一个新的banner被上传，操作者UID：" + to_string(UserID) + u8"\n操作者QQ：" + to_string(QQ)
 				+ u8" ,请尽快审核哦。\r\nbanner内容：\r\n"
-				+ "[CQ:image,file=" + filepath + "]";
+				+ "[CQ:image,file=" + filepath.substr(14) + "]";
 			activepush(activepushTar);
-			/*send_private_message(
-				DANA,
-				"有一个新的banner被上传，操作者UID：" + to_string(UserID) + " ，操作者QQ：" + to_string(QQ)
-					+ " ,请尽快审核哦。\r\nbanner内容：\r\n"
-					+ MessageSegment::image("osucat/custom/banner_verify/" + to_string(UserID) + ".jpg"));*/
 		}
 		static void setinfopanel_v1(string cmd, Target tar, string* params) {
 			if (cmd.find("[CQ:image,file=") == string::npos) {
@@ -2868,10 +2863,10 @@ namespace osucat {
 			}
 			int64_t QQ = db.GetQQ(UserID);
 			string picPath;
-			picPath = utils::GetMiddleText(cmd, "[CQ:image,file=", "]");
+			picPath = utils::GetMiddleText(cmd, "[CQ:image,file=", ",url");
 			picPath = picPath.substr(picPath.find(',') + 6);
 			PictureInfo picInfo = getImage(picPath);
-			picPath = picInfo.filename;
+			picPath = ".\\data\\cache\\" + picPath + "." + picInfo.format;
 			if (!utils::fileExist(picPath)) {
 				*params = 接收图片出错;
 				return;
@@ -2894,13 +2889,8 @@ namespace osucat {
 			activepushTar.user_id = MONO;
 			activepushTar.message = u8"有一个新的InfoPanel被上传，操作者UID：" + to_string(UserID) + u8"\n操作者QQ：" + to_string(QQ)
 				+ u8" ,请尽快审核哦。\r\nInfoPanel内容：\r\n"
-				+ "[CQ:image,file=" + picPath + "]";
+				+ "[CQ:image,file=osucat\\custom\\infopanel_verify\\" + to_string(UserID) + ".png]";
 			activepush(activepushTar);
-			/*send_private_message(
-				DANA,
-				"有一个新的InfoPanel被上传，操作者UID：" + to_string(UserID) + " ，操作者QQ：" + to_string(QQ)
-					+ " ,请尽快审核哦。\nbanner内容：\n"
-					+ MessageSegment::image("osucat/custom/infopanel_verify/" + to_string(UserID) + ".png"));*/
 		}
 		static void resetbanner_v1(string cmd, Target tar, string* params) {
 			Database db;
@@ -3094,10 +3084,6 @@ namespace osucat {
 				*params = u8"此用户的内容不在待审核清单内。";
 			}
 		}
-
-
-
-
 		/* 娱乐模块 */
 		static void memyselfact(string cmd, Target tar, SenderInfo senderinfo, string* params) {
 			utils::trim(cmd);
@@ -3146,7 +3132,7 @@ namespace osucat {
 					u8"[%s] [osucat][↑]: 发送至好友 %lld 的消息：%s",
 					utils::unixTime2Str(time(NULL)).c_str(),
 					tar.user_id,
-					tar.message);
+					tar.message.c_str());
 				cout << msg << endl;
 			}
 			if (tar.message_type == Target::MessageType::GROUP) {
@@ -3164,7 +3150,7 @@ namespace osucat {
 					u8"[%s] [osucat][↑]: 发送至群 %lld 的消息：%s",
 					utils::unixTime2Str(time(NULL)).c_str(),
 					tar.group_id,
-					tar.message);
+					tar.message.c_str());
 				cout << msg << endl;
 			}
 		}
@@ -3213,21 +3199,25 @@ namespace osucat {
 			rtn.size = 0;
 			rtn.filename = "";
 			rtn.url = "";
+			rtn.format = "";
 			try {
 				string data = NetConnection::HttpPost("http://127.0.0.1:5700/get_image", jp);
-				json j = json::parse(data);
+				cout << data << endl;
+				json j = json::parse(data)["data"];
 				rtn.size = j["size"].get<int32_t>();
-				rtn.filename = j["size"].get<string>();
-				rtn.url = j["size"].get<string>();
+				rtn.filename = j["filename"].get<string>();
+				rtn.url = j["url"].get<string>();
+				rtn.format = rtn.filename.substr(rtn.filename.length() - 4);
 			}
 			catch (osucat::NetWork_Exception& ex) {
 				cout << ex.Show() << endl;
 			}
 			char msg[4096];
 			sprintf_s(msg,
-				u8"[%s] [osucat][↓]: 接收图片 %s | 大小: %ld | URL: %s",
+				u8"[%s] [osucat][↓]: 接收图片 %s | 图片格式：%s | 大小: %ld | URL: %s",
 				utils::unixTime2Str(time(NULL)).c_str(),
 				rtn.filename.c_str(),
+				rtn.format,
 				rtn.size,
 				rtn.url.c_str());
 			cout << msg << endl;

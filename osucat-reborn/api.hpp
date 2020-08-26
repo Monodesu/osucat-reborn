@@ -51,5 +51,6 @@ namespace osucat {
 		int32_t size; //图片大小
 		std::string filename; //原始文件名
 		std::string url; //图片下载地址
+		std::string format; //图片格式 .jpg .png .bmp .gif
 	};
 }

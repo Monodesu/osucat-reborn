@@ -93,7 +93,7 @@ namespace osucat {
 				activepush(activepushTar);
 				Database db;
 				db.Connect();
-				db.addcallcount();
+				db.addcallcount();	// addcallcount上移
 			}
 		}
 #pragma endregion
@@ -2861,7 +2861,6 @@ namespace osucat {
 			}
 			Database db;
 			db.Connect();
-			db.addcallcount();
 			int64_t UserID = db.GetUserID(tar.user_id);
 			if (UserID == 0) {
 				*params = 未绑定;

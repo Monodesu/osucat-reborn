@@ -45,7 +45,7 @@ namespace osu {
     };
 }
 
-namespace OsuCat {
+namespace osucat {
     class Mod {
     public:
         // modÊı×Ö½âÎö

@@ -133,11 +133,11 @@ public:
 
     void mode(int mode_num) { ezpp_set_mode_override(this->ez, mode_num); }
 
-    OsuCat::Mod mods() {
-        return OsuCat::Mod(ezpp_mods(this->ez));
+    osucat::Mod mods() {
+        return osucat::Mod(ezpp_mods(this->ez));
     }
 
-    void mods(OsuCat::Mod& mods) {
+    void mods(osucat::Mod& mods) {
         ezpp_set_mods(this->ez, mods.GetModNumber());
     }
 
@@ -176,7 +176,7 @@ public:
         result.data.mods_num = ezpp_mods(this->ez);
         result.data.length = ezpp_time_at(this->ez, ezpp_nobjects(this->ez) - 1) -
             ezpp_time_at(this->ez, 0);
-        result.data.mods_str = OsuCat::Mod(ezpp_mods(this->ez)).GetModString(inpent);
+        result.data.mods_str = osucat::Mod(ezpp_mods(this->ez)).GetModString(inpent);
         result.data.maxcombo = ezpp_max_combo(this->ez);
         result.data.combo = ezpp_combo(this->ez);
         result.data.n300 = ezpp_n300(this->ez);

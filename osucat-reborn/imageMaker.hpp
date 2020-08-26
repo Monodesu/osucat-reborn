@@ -9,7 +9,7 @@
 using namespace Magick;
 using namespace osucat::osu_api_v1;
 
-namespace osucat::imageMaker {
+namespace osucat {
 	struct ScorePanelData {
 		user_info user_info;
 		oppai_result pp_info;

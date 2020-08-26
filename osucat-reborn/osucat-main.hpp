@@ -98,6 +98,8 @@ namespace osucat {
 			}
 		}
 #pragma endregion
+	private:
+#pragma region 指令
 #pragma region 指令解析
 		static bool cmdParse(string msg, Target tar, SenderInfo senderinfo, string* params) {
 			try {
@@ -3338,7 +3340,8 @@ namespace osucat {
 			}
 			*params = "参数错误。";
 		}
-	private:
+#pragma endregion
+#pragma region 交互
 		/*
 		通过message_type来判断是群组消息还是好友消息
 		message在这里等同于params
@@ -3450,5 +3453,6 @@ namespace osucat {
 			cout << msg << endl;
 			return rtn;
 		}
+#pragma endregion
 	};
 }

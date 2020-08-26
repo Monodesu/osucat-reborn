@@ -26,6 +26,7 @@ int main()
 	osucat::main::monitors();
 
 	WSACleanup();
-	cout << u8"ws连接已关闭。" << endl;
+	cout << u8"ws连接已丢失。" << endl;
+	system("pause");
 	return 0;
 }

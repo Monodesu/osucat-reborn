@@ -154,18 +154,18 @@ namespace osucat::imageMaker {
 					dl.push_back(DrawableText(
 						40,
 						425,
-						"↑ " + osucat::utils::IntegerSplit(previoustUserInfo.global_rank - data.user_info.global_rank)));
+						u8"↑ " + osucat::utils::IntegerSplit(previoustUserInfo.global_rank - data.user_info.global_rank)));
 				}
 				else {
 					string grntmp = osucat::utils::IntegerSplit(previoustUserInfo.global_rank - data.user_info.global_rank);
 					utils::string_replace(grntmp, "-", "");
 					grntmp[0] == ',' ? grntmp = grntmp.substr(1) : grntmp = grntmp;
-					dl.push_back(DrawableText(40, 425, "↓ " + grntmp));
+					dl.push_back(DrawableText(40, 425, u8"↓ " + grntmp));
 				}
 			}
 			else {
 				dl.push_back(DrawablePointSize(14));
-				dl.push_back(DrawableText(40, 425, "↑ -"));
+				dl.push_back(DrawableText(40, 425, u8"↑ -"));
 			}
 		}
 		dl.push_back(DrawableFont("./work/fonts/Exo2-Regular.otf"));
@@ -177,20 +177,20 @@ namespace osucat::imageMaker {
 			if (previoustUserInfo.pp != data.user_info.pp) {
 				dl.push_back(DrawablePointSize(14));
 				if (previoustUserInfo.pp - data.user_info.pp > 0.00) {
-					sprintf_s(temp, "↓ %.2f", previoustUserInfo.pp - data.user_info.pp);
+					sprintf_s(temp, u8"↓ %.2f", previoustUserInfo.pp - data.user_info.pp);
 					dl.push_back(DrawableText(246, 425, temp));
 				}
 				else {
 					sprintf_s(
 						temp,
-						"↑ %.2f",
+						u8"↑ %.2f",
 						(previoustUserInfo.pp - data.user_info.pp) - (previoustUserInfo.pp - data.user_info.pp) * 2);
 					dl.push_back(DrawableText(246, 425, temp));
 				}
 			}
 			else {
 				dl.push_back(DrawablePointSize(14));
-				dl.push_back(DrawableText(246, 425, "↑ -"));
+				dl.push_back(DrawableText(246, 425, u8"↑ -"));
 			}
 		}
 		dl.push_back(DrawableFont("./work/fonts/Exo2-Regular.otf"));
@@ -356,7 +356,7 @@ namespace osucat::imageMaker {
 
 		// days_brfore
 		if (previoustUserInfo.days_before > 0) {
-			sprintf_s(temp, 512, "对比自%d天前", previoustUserInfo.days_before);
+			sprintf_s(temp, 512, u8"对比自%d天前", previoustUserInfo.days_before);
 			dl.push_back(DrawableFont("./work/fonts/Alibaba-PuHuiTi-Regular.ttf"));
 			dl.push_back(DrawableText(300, 21, temp));
 		}

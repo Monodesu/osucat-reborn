@@ -140,37 +140,49 @@ namespace osucat {
 			}
 		}
 		static bool cmdParse(string msg, Target tar, string* params) {
-			if (_stricmp(msg.substr(0, 4).c_str(), "help") == 0) {
-				help(msg.substr(4), params);
-				return true;
+			try {
+				if (_stricmp(msg.substr(0, 4).c_str(), "help") == 0) {
+					help(msg.substr(4), params);
+					return true;
+				}
+				if (_stricmp(msg.substr(0, 5).c_str(), "about") == 0) {
+					about(params);
+					return true;
+				}
+				if (_stricmp(msg.substr(0, 7).c_str(), "contact") == 0) {
+					contact(msg.substr(7), tar, params);
+					return true;
+				}
+				if (_stricmp(msg.substr(0, 4).c_str(), "ping") == 0) {
+					ping(params);
+					return true;
+				}
+				if (_stricmp(msg.substr(0, 5).c_str(), "setid") == 0) {
+					setid(msg.substr(5), tar, params);
+					return true;
+				}
+				if (_stricmp(msg.substr(0, 5).c_str(), "unset") == 0) {
+					unsetid(msg.substr(5), tar, params);
+					return true;
+				}
+				if (_stricmp(msg.substr(0, 4).c_str(), "info") == 0) {
+					info(msg.substr(4), tar, params);
+					return true;
+				}
 			}
-			if (_stricmp(msg.substr(0, 5).c_str(), "about") == 0) {
-				about(params);
-				return true;
+			catch (osucat::database_exception& ex) {
+				cout << ex.Show() << endl;
+				cout << ex.Code() << endl;
 			}
-			if (_stricmp(msg.substr(0, 7).c_str(), "contact") == 0) {
-				contact(msg.substr(7), tar, params);
-				return true;
+			catch (osucat::NetWork_Exception& ex) {
+				cout << ex.Show() << endl;
+				cout << ex.Code() << endl;
 			}
-			if (_stricmp(msg.substr(0, 4).c_str(), "ping") == 0) {
-				ping(params);
-				return true;
-			}
-			if (_stricmp(msg.substr(0, 5).c_str(), "setid") == 0) {
-				setid(msg.substr(5), tar, params);
-				return true;
-			}
-			if (_stricmp(msg.substr(0, 5).c_str(), "unset") == 0) {
-				unsetid(msg.substr(5), tar, params);
-				return true;
-			}
-			if (_stricmp(msg.substr(0, 4).c_str(), "info") == 0) {
-				info(msg.substr(4), tar, params);
-				return true;
+			catch (std::exception& ex) {
+				cout << ex.what() << endl;
 			}
 			return false;
 		}
-		//done
 		static void help(string cmd, string* params) {
 			utils::trim(cmd);
 			utils::string_replace(cmd, " ", "");
@@ -245,7 +257,7 @@ namespace osucat {
 			}
 			qq = db.GetQQ(UI.user_id);
 			if (qq != 0) {
-				*params = 
+				*params =
 					u8"你想要绑定的账户已与qq号为 " + to_string(qq)
 					+ u8" 的用户绑定过了哦。如果你认为是他人错误绑定了你的账户，请联系麻麻~";
 				return;
@@ -281,7 +293,7 @@ namespace osucat {
 			if (api::GetUser(cmd, osu_api_v1::mode::mania, &UI) != 0) {
 				db.AddUserData(&UI, timeStr);
 			}
-			info("", tar , params);
+			info("", tar, params);
 		};
 		static void unsetid(string cmd, Target tar, string* params) {
 			utils::trim(cmd);
@@ -553,20 +565,26 @@ namespace osucat {
 						return;
 					}
 					previousUserInfo.days_before = days;
-					fileStr = "osucat/" + imageMaker::infoPic_v1(upd, previousUserInfo, true);
+					fileStr = "osucat\\" + imageMaker::infoPic_v1(upd, previousUserInfo, true);
 				}
 				else {
-					db.GetUserData(upd.user_info.user_id, 0, &previousUserInfo);
-					fileStr = "osucat/" + infoPic_v1(upd, previousUserInfo, true);
-					// infoPic_v2(upd, previousUserInfo, true);
+					try {
+						db.GetUserData(upd.user_info.user_id, 0, &previousUserInfo);
+						fileStr = "osucat\\" + infoPic_v1(upd, previousUserInfo, true);
+					}
+					catch (osucat::database_exception) {
+						fileStr = "osucat\\" + infoPic_v1(upd, upd.user_info, true);
+					}	
 				}
 			}
 			else {
-				fileStr = "osucat/" + infoPic_v1(upd, upd.user_info);
+				fileStr = "osucat\\" + infoPic_v1(upd, upd.user_info);
 			}
-			*params = u8"[CQ:image,file=osucat\\"+ fileStr + u8"]";
-			DeleteFileA(("osucat\\" + fileStr).c_str());
+			*params = u8"[CQ:image,file=" + fileStr + u8"]";
+			//不能立即删除 需要一个延时方案
+			//DeleteFileA((to_string(OC_ROOT_PATH) + "\\data\\images\\" + fileStr).c_str());
 		}
+		//Todo...
 	private:
 		/*
 		通过message_type来判断是群组消息还是好友消息

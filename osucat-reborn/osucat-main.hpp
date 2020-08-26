@@ -160,6 +160,14 @@ namespace osucat {
 					ppwith(msg.substr(4), tar, params);
 					return true;
 				}
+				if (_stricmp(msg.substr(0, 7).c_str(), "setmode") == 0) {
+					setmode(msg.substr(7), tar, params);
+					return true;
+				}
+				if (_stricmp(msg.substr(0, 5).c_str(), "rctpp") == 0) {
+					rctpp(msg.substr(5), tar, params);
+					return true;
+				}
 				// 拦截其他娱乐模块 //
 #pragma region 娱乐模块
 				Database db;

@@ -32,13 +32,14 @@ namespace osucat {
     };
 
     struct SenderInfo {
-        enum class Role {
-            OWNER,
-            ADMIN,
-            MEMBER,
-        };
-        Role member_role;
+        //enum class Role {
+        //    OWNER,
+        //    ADMIN,
+        //    MEMBER,
+        //};
+        //Role member_role;
         int age;
+        std::string member_role;
         std::string card; //群昵称
         std::string level;
         std::string nikename; //原有用户名

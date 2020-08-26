@@ -43,6 +43,7 @@ namespace osucat {
 						}
 					}
 					if (tar.message_type == Target::MessageType::GROUP) {
+						sdr.member_role = sj["role"].get<string>();
 						sprintf_s(msg, u8"[%s] [osucat]: 收到来自群 %lld 的 %lld 的消息：%s", utils::unixTime2Str(tar.time).c_str(), tar.group_id, tar.user_id, tar.message.c_str());
 						cout << msg << endl;
 						if (tar.message[0] == '!' || tar.message.find(u8"！") == 0) {
@@ -90,12 +91,21 @@ namespace osucat {
 				tar.message_type == Target::MessageType::PRIVATE ? activepushTar.user_id = tar.user_id : activepushTar.group_id = tar.group_id;
 				activepushTar.message = params;
 				activepush(activepushTar);
+				Database db;
+				db.Connect();
+				db.addcallcount();
 			}
 		}
 #pragma endregion
 #pragma region 指令解析
 		static bool cmdParse(string msg, Target tar, SenderInfo senderinfo, string* params) {
 			try {
+				if (_stricmp(msg.substr(0, 19).c_str(), u8"猫猫调用次数") == 0) {
+					Database db;
+					db.Connect();
+					*params = u8"猫猫从0.4版本开始，至今一共被调用了 " + to_string(db.Getcallcount()) + u8" 次。";
+					return true;
+				}
 				if (_stricmp(msg.substr(0, 6).c_str(), "recent") == 0) {
 					recent(msg.substr(6), tar, params);
 					return true;
@@ -139,6 +149,10 @@ namespace osucat {
 				if (_stricmp(msg.substr(0, 4).c_str(), "bpme") == 0) {
 					return false;
 				}
+				if (_stricmp(msg.substr(0, 4).c_str(), "bpht") == 0) {
+					bphead_tail(msg.substr(4), tar, params);
+					return true;
+				}
 				if (_stricmp(msg.substr(0, 2).c_str(), "bp") == 0) {
 					bp(msg.substr(2), tar, params);
 					return true;
@@ -151,7 +165,6 @@ namespace osucat {
 					update(msg.substr(6), tar, params);
 					return true;
 				}
-
 				if (_stricmp(msg.substr(0, 2).c_str(), "pp") == 0) {
 					pp(msg.substr(2), tar, params);
 					return true;
@@ -167,6 +180,58 @@ namespace osucat {
 				if (_stricmp(msg.substr(0, 5).c_str(), "rctpp") == 0) {
 					rctpp(msg.substr(5), tar, params);
 					return true;
+				}
+				if (_stricmp(msg.substr(0, 4).c_str(), "ppvs") == 0) {
+					ppvs(msg.substr(4), tar, params);
+					return true;
+				}
+				if (_stricmp(msg.substr(0, 9).c_str(), "badgelist") == 0) {
+					badgelist(msg.substr(9), tar, params);
+					return true;
+				}
+				if (_stricmp(msg.substr(0, 9).c_str(), "setbanner") == 0) {
+					setbanner_v1(msg.substr(9), tar, params);
+					return true;
+				}
+				if (_stricmp(msg.substr(0, 12).c_str(), "setinfopanel") == 0) {
+					setinfopanel_v1(msg.substr(12), tar, params);
+					return true;
+				}
+				if (_stricmp(msg.substr(0, 11).c_str(), "resetbanner") == 0) {
+					resetbanner_v1(msg.substr(11), tar, params);
+					return true;
+				}
+				if (_stricmp(msg.substr(0, 14).c_str(), "resetinfopanel") == 0) {
+					resetinfopanel_v1(msg.substr(14), tar, params);
+					return true;
+				}
+				if (_stricmp(msg.substr(0, 6).c_str(), "occost") == 0) {
+					occost(msg.substr(6), tar, params);
+					return true;
+				}
+				if (_stricmp(msg.substr(0, 7).c_str(), "bonuspp") == 0) {
+					bonuspp(msg.substr(7), tar, params);
+					return true;
+				}
+				if (_stricmp(msg.substr(0, 9).c_str(), "badgelist") == 0) {
+					badgelist(msg.substr(9), tar, params);
+					return true;
+				}
+				if (_stricmp(msg.substr(0, 8).c_str(), "setbadge") == 0) {
+					setbadge(msg.substr(8), tar, params);
+					return true;
+				}
+				if (_stricmp(msg.substr(0, 9).c_str(), "searchuid") == 0) {
+					searchuid(msg.substr(9), tar, params);
+					return true;
+				}
+				if (_stricmp(msg.substr(0, 6).c_str(), "switch") == 0) {
+					switchfunction(msg.substr(6), tar, senderinfo, params);
+					return true;
+				}
+				// admin commands //
+				if (tar.user_id == MONO) {
+
 				}
 				// 拦截其他娱乐模块 //
 #pragma region 娱乐模块
@@ -197,6 +262,7 @@ namespace osucat {
 			return false;
 		}
 #pragma endregion
+		//Todo switchfunction
 		static void help(string cmd, string* params) {
 			utils::trim(cmd);
 			utils::string_replace(cmd, " ", "");
@@ -284,11 +350,15 @@ namespace osucat {
 			sprintf_s(return_message,
 				512,
 				u8"用户 %s 已成功绑定到此qq上~\n正在初始化数据，时间可能较长，请耐心等待。",
-				UI.username.c_str());
-			*params = return_message;
+				UI.username);
+			Target activepushTar1;
+			activepushTar1.message_type = tar.message_type == Target::MessageType::PRIVATE ? Target::MessageType::PRIVATE : Target::MessageType::GROUP;
+			tar.message_type == Target::MessageType::PRIVATE ? activepushTar1.user_id = tar.user_id : activepushTar1.group_id = tar.group_id;
+			activepushTar1.message = return_message;
+			activepush(activepushTar1);
 			Target activepushTar;
 			activepushTar.message_type = Target::MessageType::PRIVATE;
-			activepushTar.user_id = 451577581;
+			activepushTar.user_id = MONO;
 			activepushTar.message = u8"有1位用户绑定了他的osu!id,\nqq: " + to_string(tar.user_id)
 				+ "\nosu!username: " + UI.username + "\nosu!uid: " + to_string(UI.user_id);
 			activepush(activepushTar);
@@ -606,7 +676,6 @@ namespace osucat {
 			utils::string_replace(cmd, "[CQ:", "");
 			Database db;
 			db.Connect();
-			db.addcallcount();
 			int temp;
 			float previousPP;
 			mode gamemode;
@@ -770,7 +839,6 @@ namespace osucat {
 		static void recent(string cmd, Target tar, string* params) {
 			Database db;
 			db.Connect();
-			db.addcallcount();
 			if (tar.message_type == Target::MessageType::GROUP) {
 				if (db.isGroupEnable(tar.group_id, 3) == 0) return;
 			}
@@ -1032,7 +1100,6 @@ namespace osucat {
 		static void bp(string cmd, Target tar, string* params) {
 			Database db;
 			db.Connect();
-			db.addcallcount();
 			if (tar.message_type == Target::MessageType::GROUP) {
 				if (db.isGroupEnable(tar.group_id, 1) == 0) return;
 			}
@@ -1374,7 +1441,6 @@ namespace osucat {
 			char beatmap_url[512];
 			ScorePanelData sp_data = { 0 };
 			db.Connect();
-			db.addcallcount();
 			int64_t uid = db.GetUserID(tar.user_id);
 			if (uid == 0) {
 				*params = 未绑定;
@@ -1479,7 +1545,6 @@ namespace osucat {
 		static void update(string cmd, Target tar, string* params) {
 			Database db;
 			db.Connect();
-			db.addcallcount();
 			int64_t uid = db.GetUserID(tar.user_id);
 			if (uid == 0) {
 				*params = 未绑定;
@@ -1527,7 +1592,6 @@ namespace osucat {
 			}
 			Database db;
 			db.Connect();
-			db.addcallcount();
 			db.UpdatePPRecord(tar.user_id, stoll(cmd));
 			oppai pp;
 			vector<float> out;
@@ -1598,7 +1662,6 @@ namespace osucat {
 			}
 			Database db;
 			db.Connect();
-			db.addcallcount();
 			int64_t bid = db.GetPPRecord(tar.user_id);
 			if (bid == EOF) {
 				*params = u8"你还没有查询过成绩，请先查询成绩后在来使用这条指令~";
@@ -1672,7 +1735,6 @@ namespace osucat {
 		static void rctpp(string cmd, Target tar, string* params) {
 			Database db;
 			db.Connect();
-			db.addcallcount();
 			if (tar.message_type == Target::MessageType::GROUP) {
 				if (db.isGroupEnable(tar.group_id, 2) == 0) return;
 			}
@@ -2084,7 +2146,6 @@ namespace osucat {
 			}
 			Database db;
 			db.Connect();
-			db.addcallcount();
 			if (db.SetUserMainMode(tar.user_id, stoi(cmd)) == 0) {
 				*params = u8"在执行操作时发生了错误..请稍后再试。";
 				return;
@@ -2107,6 +2168,877 @@ namespace osucat {
 				break;
 			}
 		}
+		static void bphead_tail(string cmd, Target tar, string* params) {
+			utils::trim(cmd);
+			cmd = utils::unescape(cmd);
+			utils::string_replace(cmd, u8"：", ":");
+			utils::string_replace(cmd, "[CQ:", "");
+			int temp;
+			mode gamemode;
+			user_info UI = { 0 };
+			vector<score_info> SI;
+			int64_t userid;
+			string username = "";
+			Database db;
+			db.Connect();
+			if (cmd.length() > 0) {
+				if (cmd[0] == ':') {
+					userid = db.GetUserID(tar.user_id);
+					if (userid == 0) {
+						*params = 未绑定;
+						return;
+					}
+					else {
+						try {
+							temp = stoi(cmd.substr(cmd.length() - 1));
+							if (temp < 4 && temp > -1) {
+								gamemode = (mode)temp;
+							}
+							else {
+								gamemode = (mode)db.GetUserDefaultGameMode(userid);
+							}
+						}
+						catch (std::exception) {
+							gamemode = (mode)db.GetUserDefaultGameMode(userid);
+						}
+					}
+				}
+				else if (cmd[0] != ':') {
+					if (cmd.find(':') != string::npos) {
+						if (cmd.find("at,qq=") != string::npos) {
+							userid = db.GetUserID(stoll(utils::GetMiddleText(cmd, "=", "]")));
+							if (userid == 0) {
+								*params = 他人未绑定;
+								return;
+							}
+						}
+						else {
+							try {
+								username = cmd.substr(0, cmd.find(':'));
+							}
+							catch (std::exception) {
+								username = "%^%^%^!*(^&";
+							}
+						}
+						try {
+							temp = stoi(cmd.substr(cmd.find(':') + 1));
+						}
+						catch (std::exception) {
+							temp = 0;
+						}
+						if (temp < 4 && temp > -1) {
+							gamemode = (mode)temp;
+						}
+						else {
+							gamemode = mode::std;
+						};
+					}
+					else {
+						if (cmd.find("at,qq=") != string::npos) {
+							userid = db.GetUserID(stoll(utils::GetMiddleText(cmd, "=", "]")));
+							if (userid == 0) {
+								*params = 他人未绑定;
+								return;
+							}
+						}
+						else {
+							username = cmd;
+						}
+						if (username.empty()) {
+							if (api::GetUser(userid, mode::std, &UI) == 0) {
+								*params = 用户已被bancho封禁;
+								return;
+							}
+							else {
+								gamemode = (mode)db.GetUserDefaultGameMode(UI.user_id);
+							}
+						}
+						else {
+							if (api::GetUser(cmd, mode::std, &UI) == 0) {
+								*params = 未从bancho检索到用户;
+								return;
+							}
+							else {
+								gamemode = (mode)db.GetUserDefaultGameMode(UI.user_id);
+							}
+						}
+					}
+				}
+			}
+			else {
+				userid = db.GetUserID(tar.user_id);
+				if (userid == 0) {
+					*params = 未绑定;
+					return;
+				}
+				else {
+					gamemode = (mode)db.GetUserDefaultGameMode(userid);
+				}
+			}
+			if (username.empty()) {
+				if (api::GetUser(userid, gamemode, &UI) == 0) {
+					*params = 用户已被bancho封禁;
+					return;
+				}
+				if (api::GetUserBest(userid, 100, gamemode, SI) == 0) {
+					*params = u8"多打一打这个模式再来使用此命令喔~\n✧*｡٩(ˊᗜˋ*)و✧*｡";
+					return;
+				}
+			}
+			else {
+				if (username.length() > 20) {
+					*params = 参数过长提示;
+					return;
+				}
+				if (api::GetUserBest(username, 100, gamemode, SI) == 0) {
+					*params = u8"多打一打这个模式再来使用此命令喔~\n✧*｡٩(ˊᗜˋ*)و✧*｡";
+					return;
+				}
+			}
+			if (SI.size() < 100) {
+				*params = u8"多打一打这个模式再来使用此命令喔~\n✧*｡٩(ˊᗜˋ*)و✧*｡";
+				return;
+			}
+			UI.mode = gamemode;
+			string modestr;
+			switch (UI.mode) {
+			case 0:
+				modestr = "Standard";
+				break;
+			case 1:
+				modestr = "Taiko";
+				break;
+			case 2:
+				modestr = "Ctb";
+				break;
+			case 3:
+				modestr = "Mania";
+				break;
+			default:
+				modestr = "Unknown";
+				break;
+			}
+			char message[1024];
+			double totalvalue = 0.0;
+			for (int i = 0; i < 100; ++i) {
+				totalvalue = totalvalue + SI[i].pp;
+			}
+			sprintf_s(message,
+				1024,
+				u8"%s - 模式 %s\n"
+				u8"你的bp1有 %.2f pp，\n"
+				u8"你的bp2有 %.2f pp，\n...\n"
+				u8"你的bp99有 %.2f pp，\n"
+				u8"你的bp100有 %.2f pp，\n"
+				u8"你bp1与bp100相差了有 %.2f pp，\n"
+				u8"你的bp榜上所有成绩的平均值是 %.2f pp。",
+				UI.username.c_str(),
+				modestr.c_str(),
+				SI[0].pp,
+				SI[1].pp,
+				SI[98].pp,
+				SI[99].pp,
+				SI[0].pp - SI[99].pp,
+				totalvalue / 100);
+			*params = message;
+		}
+		static void ppvs(string cmd, Target tar, string* params) {
+			utils::trim(cmd);
+			cmd = utils::unescape(cmd);
+			if (cmd.length() < 1) {
+				*params = u8"请提供要对比的玩家ID";
+				return;
+			}
+			if (cmd.length() > 20) {
+				*params = 参数过长提示;
+				return;
+			}
+			mode gamemode;
+			UserPanelData UI1 = { 0 };
+			UserPanelData UI2 = { 0 };
+			Database db;
+			db.Connect();
+			int64_t UserID = db.GetUserID(tar.user_id);
+			if (UserID == 0) {
+				*params = 未绑定;
+				return;
+			}
+			if (api::GetUser(UserID, mode::std, &UI1.user_info) == 0) {
+				*params = 用户已被bancho封禁;
+				return;
+			}
+			if (api::GetUser(cmd, mode::std, &UI2.user_info) == 0) {
+				*params = 未从bancho检索到用户;
+				return;
+			}
+			float u1pp = db.GetUserPreviousPP(UI1.user_info.user_id);
+			float u2pp = db.GetUserPreviousPP(UI2.user_info.user_id);
+			if (u1pp == UI1.user_info.pp) {
+				UI1.user_info.updatepplus = false;
+				db.GetUserPreviousPPlus(UI1.user_info.user_id, &UI1.pplus_info);
+			}
+			else {
+				UI1.user_info.updatepplus = true;
+			}
+			if (u2pp == UI2.user_info.pp) {
+				UI2.user_info.updatepplus = false;
+				db.GetUserPreviousPPlus(UI2.user_info.user_id, &UI2.pplus_info);
+			}
+			else {
+				UI2.user_info.updatepplus = true;
+			}
+			string fileStr = "osucat\\" + ppvsimg(UI1, UI2);
+			*params = u8"[CQ:image,file=" + fileStr + u8"]";
+			//DeleteFileA((cq::dir::root("data", "image") + fileStr).c_str());
+		}
+		static void badgelist(string cmd, Target tar, string* params) {
+			int64_t uid;
+			Database db;
+			db.Connect();
+			uid = db.GetUserID(tar.user_id);
+			if (uid == 0) {
+				*params = 未绑定;
+				return;
+			}
+			string message;
+			int i;
+			badgeSystem::main bsm;
+			badgeSystem::main::badge badgeStr;
+			vector<int> t = db.GetBadgeList(uid);
+			if (t.size() == 0) {
+				*params = u8"你还没有获得过奖章。";
+				return;
+			}
+			message = u8"你拥有 " + to_string(t.size()) + u8" 块勋章\n";
+			for (i = 0; i < t.size(); ++i) {
+				i == t.size() - 1 ? message += bsm.getBadgeStr(t[i]) : message += bsm.getBadgeStr(t[i]) + "\n";
+			}
+			*params = message;
+		}
+		static void occost(string cmd, Target tar, string* params) {
+			cmd = utils::unescape(cmd);
+			utils::trim(cmd);
+			utils::string_replace(cmd, u8"：", ":");
+			utils::string_replace(cmd, "[CQ:", "");
+			Database db;
+			db.Connect();
+			string username = "";
+			int64_t UserID;
+			double a, c, z, p;
+			UserPanelData UI = { 0 };
+			if (cmd.length() > 1) {
+				if (cmd.find("at,qq=") != string::npos) {
+					UserID = db.GetUserID(stoll(utils::GetMiddleText(cmd, "=", "]")));
+					if (UserID == 0) {
+						*params = 他人未绑定;
+						return;
+					}
+				}
+				else {
+					username = cmd;
+				}
+			}
+			else {
+				UserID = db.GetUserID(tar.user_id.value());
+				if (UserID == 0) {
+					*params = 未绑定;
+					return;
+				}
+			}
+			if (username.empty()) {
+				if (api::GetUser(UserID, mode::std, &UI.user_info) == 0) {
+					*params = 用户已被bancho封禁;
+					return;
+				}
+			}
+			else {
+				if (username.length() > 20) {
+					*params = 参数过长提示;
+					return;
+				}
+				if (api::GetUser(username, mode::std, &UI.user_info) == 0) {
+					*params = 未从bancho检索到用户;
+					return;
+				}
+			}
+			// 自PP+停止服务之后 均使用缓存读取内容
+			//p = db.GetUserPreviousPP(UI.user_info.user_id);
+			//if (UI.user_info.pp != p) {
+			//    vector<long> pp_plus;
+			//    try {
+			//        pp_plus = NetConnection::getUserPlusData(UI.user_info.user_id);
+			//        pplus_info pi;
+			//        pi.acc = pp_plus[0];
+			//        pi.flow = pp_plus[1];
+			//        pi.jump = pp_plus[2];
+			//        pi.pre = pp_plus[3];
+			//        pi.spd = pp_plus[4];
+			//        pi.sta = pp_plus[5];
+			//        db.UpdatePPlus(UI.user_info.user_id, UI.user_info.pp, pi);
+			//        p = UI.user_info.pp;
+			//    } catch (std::exception) {
+			//    }
+			//}
+			p = UI.user_info.pp;
+			db.GetUserPreviousPPlus(UI.user_info.user_id, &UI.pplus_info);
+			z = 1.92 * pow(UI.pplus_info.jump, 0.953) + 69.7 * pow(UI.pplus_info.flow, 0.596)
+				+ 0.588 * pow(UI.pplus_info.spd, 1.175) + 3.06 * pow(UI.pplus_info.sta, 0.993);
+			a = pow(UI.pplus_info.acc, 1.2768) * pow(p, 0.88213);
+			c = min(0.00930973 * pow(p / 1000, 2.64192) * pow(z / 4000, 1.48422), 7) + min(a / 7554280, 3);
+			char message[512];
+			sprintf_s(message, 512, u8"在猫猫杯S1中，%s 的cost为：%.2f", UI.user_info.username.c_str(), c);
+			*params = message;
+		}
+		static void searchuid(string cmd, Target tar, string* params) {
+			cmd = utils::unescape(cmd);
+			utils::trim(cmd);
+			utils::string_replace(cmd, u8"：", ":");
+			utils::string_replace(cmd, "[CQ:", "");
+			Database db;
+			db.Connect();
+			string username = "";
+			int64_t UserID;
+			double a, c, z, p;
+			UserPanelData UI = { 0 };
+			if (cmd.length() > 1) {
+				if (cmd.find("at,qq=") != string::npos) {
+					UserID = db.GetUserID(stoll(utils::GetMiddleText(cmd, "=", "]")));
+					if (UserID == 0) {
+						*params = 他人未绑定;
+						return;
+					}
+				}
+				else {
+					username = cmd;
+				}
+			}
+			else {
+				UserID = db.GetUserID(tar.user_id);
+				if (UserID == 0) {
+					*params = 未绑定;
+					return;
+				}
+			}
+			if (username.empty()) {
+				if (api::GetUser(UserID, mode::std, &UI.user_info) == 0) {
+					*params = 用户已被bancho封禁;
+					return;
+				}
+			}
+			else {
+				if (username.length() > 20) {
+					*params = 参数过长提示;
+					return;
+				}
+				if (api::GetUser(username, mode::std, &UI.user_info) == 0) {
+					*params = 未从bancho检索到用户;
+					return;
+				}
+			}
+			*params = UI.user_info.username + u8" 的osu!uid为 " + to_string(UI.user_info.user_id);
+		}
+		static void bonuspp(string cmd, Target tar, string* params) {
+			Database db;
+			db.Connect();
+			cmd = utils::unescape(cmd);
+			utils::trim(cmd);
+			utils::string_replace(cmd, u8"：", ":");
+			utils::string_replace(cmd, "[CQ:", "");
+			vector<score_info> bp;
+			user_info UI = { 0 };
+			int temp;
+			mode gamemode;
+			int64_t userid;
+			string username = "";
+			if (cmd.length() > 0) {
+				if (cmd[0] == ':') {
+					userid = db.GetUserID(tar.user_id);
+					if (userid == 0) {
+						*params = 未绑定;
+						return;
+					}
+					else {
+						try {
+							temp = stoi(cmd.substr(cmd.length() - 1));
+							if (temp < 4 && temp > -1) {
+								gamemode = (mode)temp;
+							}
+							else {
+								gamemode = (mode)db.GetUserDefaultGameMode(userid);
+							}
+						}
+						catch (std::exception) {
+							gamemode = (mode)db.GetUserDefaultGameMode(userid);
+						}
+					}
+				}
+				else if (cmd[0] != ':') {
+					if (cmd.find(':') != string::npos) {
+						if (cmd.find("at,qq=") != string::npos) {
+							userid = db.GetUserID(stoll(utils::GetMiddleText(cmd, "=", "]")));
+							if (userid == 0) {
+								*params = 他人未绑定;
+								return;
+							}
+						}
+						else {
+							try {
+								username = cmd.substr(0, cmd.find(':'));
+								if (username.length() < 1) username = "%^%^%^!*(^&";
+							}
+							catch (std::exception) {
+								username = "%^%^%^!*(^&";
+							}
+						}
+						try {
+							temp = stoi(cmd.substr(cmd.find(':') + 1));
+						}
+						catch (std::exception) {
+							temp = 0;
+						}
+						if (temp < 4 && temp > -1) {
+							gamemode = (mode)temp;
+						}
+						else {
+							gamemode = mode::std;
+						};
+					}
+					else {
+						if (cmd.find("at,qq=") != string::npos) {
+							userid = db.GetUserID(stoll(utils::GetMiddleText(cmd, "=", "]")));
+							if (userid == 0) {
+								*params = 他人未绑定;
+								return;
+							}
+						}
+						else {
+							username = cmd;
+						}
+						if (username.empty()) {
+							if (api::GetUser(userid, mode::std, &UI) == 0) {
+								*params = 用户已被bancho封禁;
+								return;
+							}
+							else {
+								gamemode = (mode)db.GetUserDefaultGameMode(UI.user_id);
+							}
+						}
+						else {
+							utils::trim(cmd);
+							if (api::GetUser(cmd, mode::std, &UI) == 0) {
+								*params = 未从bancho检索到用户;
+								return;
+							}
+							else {
+								gamemode = (mode)db.GetUserDefaultGameMode(UI.user_id);
+							}
+						}
+					}
+				}
+			}
+			else {
+				userid = db.GetUserID(tar.user_id);
+				if (userid == 0) {
+					*params = 未绑定;
+					return;
+				}
+				else {
+					gamemode = (mode)db.GetUserDefaultGameMode(userid);
+				}
+			}
+			if (username.empty()) {
+				if (api::GetUser(userid, gamemode, &UI) == 0) {
+					*params = 用户已被bancho封禁;
+					return;
+				}
+				if (api::GetUserBest(userid, 100, gamemode, bp) == 0) {
+					*params = u8"你在此模式上还没有bp呢。";
+					return;
+				}
+			}
+			else {
+				if (username.length() > 20) {
+					*params = 参数过长提示;
+					return;
+				}
+				utils::trim(username);
+				if (api::GetUser(username, gamemode, &UI) == 0) {
+					*params = 未从bancho检索到用户;
+					return;
+				}
+				if (api::GetUserBest(username, 100, gamemode, bp) == 0) {
+					*params = u8"他在此模式上还没有bp呢。";
+					return;
+				}
+			}
+			double extraPolatePP;
+			if (bp.size() < 100) {
+				extraPolatePP = 0.0;
+			}
+			double scorepp = 0.0, _bonuspp = 0.0, pp = 0.0, sumOxy = 0.0, sumOx2 = 0.0, avgX = 0.0, avgY = 0.0,
+				sumX = 0.0;
+			for (int i = 0; i < bp.size(); ++i) {
+				scorepp += bp[i].pp * pow(0.95, i);
+			}
+			vector<double> ys;
+			for (int i = 0; i < bp.size(); i++) {
+				ys.push_back(log10(bp[i].pp * pow(0.95, i)) / log10(100));
+			}
+#pragma region calculateLinearRegression
+			for (int n = 1; n <= ys.size(); n++) {
+				double weight = log1p(n + 1.0);
+				sumX += weight;
+				avgX += n * weight;
+				avgY += ys[n - 1] * weight;
+			}
+			avgX /= sumX;
+			avgY /= sumX;
+			for (int n = 1; n <= ys.size(); n++) {
+				sumOxy += (n - avgX) * (ys[n - 1] - avgY) * log1p(n + 1.0);
+				sumOx2 += pow(n - avgX, 2.0) * log1p(n + 1.0);
+			}
+			double Oxy = sumOxy / sumX;
+			double Ox2 = sumOx2 / sumX;
+#pragma endregion
+			double b[] = { avgY - (Oxy / Ox2) * avgX, Oxy / Ox2 };
+
+			for (double n = 100; n <= UI.playcount; n++) {
+				double val = pow(100.0, b[0] + b[1] * n);
+				if (val <= 0.0) {
+					break;
+				}
+				pp += val;
+			}
+			scorepp = scorepp + pp;
+			_bonuspp = UI.pp - scorepp;
+			int totalscores = UI.count_a + UI.count_s + UI.count_sh + UI.count_ss + UI.count_ssh;
+			bool max;
+			if (totalscores >= 25397 || _bonuspp >= 416.6667) {
+				max = true;
+			}
+			else
+				max = false;
+			int rankedscores =
+				max ? max(totalscores, 25397) : (int)round(log10(-(_bonuspp / 416.6667) + 1.0) / log10(0.9994));
+			if (_isnan(scorepp) || _isnan(_bonuspp)) {
+				scorepp = 0.0;
+				_bonuspp = 0.0;
+				rankedscores = 0;
+			}
+			string gamemodeStr;
+			switch (gamemode) {
+			case mode::std:
+				gamemodeStr = "osu!Standard";
+				break;
+			case mode::taiko:
+				gamemodeStr = "osu!Taiko";
+				break;
+			case mode::ctb:
+				gamemodeStr = "osu!Catch the Beat";
+				break;
+			case mode::mania:
+				gamemodeStr = "osu!Mania";
+				break;
+			default:
+				gamemodeStr = "error";
+				break;
+			};
+			char rtnmessage[1024];
+			sprintf_s(rtnmessage,
+				1024,
+				"%s  (%s)\n总PP：%.2f\n原始PP：%.2f\nBonus PP：%.2f\n共有 %d 个ranked谱面成绩记录在案",
+				UI.username.c_str(),
+				gamemodeStr.c_str(),
+				UI.pp,
+				scorepp,
+				_bonuspp,
+				rankedscores);
+			send_message(tar, rtnmessage);
+		}
+		static void setbadge(string cmd, Target tar, string* params) {
+			int64_t uid;
+			Database db;
+			db.Connect();
+			uid = db.GetUserID(tar.user_id);
+			if (uid == 0) {
+				*params = 未绑定;
+				return;
+			}
+			utils::trim(cmd);
+			if (!utils::isNum(cmd)) {
+				*params = u8"请提供ID";
+				return;
+			}
+			int badgeID;
+			try {
+				badgeID = stoi(cmd);
+			}
+			catch (std::exception) {
+				badgeID = 1025;
+			}
+			if (badgeID > 1024) {
+				*params = u8"提供的ID有误";
+				return;
+			}
+			badgeSystem::main bsm;
+			badgeSystem::main::badge badgeStr;
+			vector<int> t = db.GetBadgeList(uid);
+			if (t.size() < 1) {
+				*params = u8"你还没有获得任何奖章呢。";
+				return;
+			}
+			for (int i = 0; i < t.size(); ++i) {
+				if (badgeID == t[i]) {
+					db.setshownBadges(uid, badgeID);
+					*params = u8"你的主显奖章已设为 " + to_string(badgeID);
+					return;
+				}
+			}
+			*params = u8"你未拥有此奖章。";
+		}
+		static void setbanner_v1(string cmd, Target tar, string* params) {
+			if (cmd.find("[CQ:image,file=") == string::npos) {
+				*params = 自定义Banner帮助;
+				return;
+			}
+			Database db;
+			db.Connect();
+			int64_t UserID = db.GetUserID(tar.user_id);
+			if (UserID == 0) {
+				*params = 未绑定;
+				return;
+			}
+			int64_t QQ = db.GetQQ(UserID);
+			string picPath;
+			try {
+				picPath = utils::GetMiddleText(cmd, "[CQ:image,file=", "]");
+				picPath = picPath.substr(picPath.find(',') + 6);
+				picPath = get_image(picPath);
+			}
+			catch (ApiError) {
+				*params = 接收图片出错;
+				return;
+			}
+			if (!utils::fileExist(picPath)) {
+				*params = 接收图片出错;
+				return;
+			}
+			DrawableList dl;
+			Image cover(picPath);
+			Image coverRoundrect(Geometry(1200, 350), Color("none"));
+			cover.resize(Geometry(1200, 1000000));
+			cover.crop(Geometry(1200, 350));
+			dl.clear();
+			dl.push_back(DrawableFillColor("white"));
+			dl.push_back(DrawableRoundRectangle(0, 0, 1200, 350, 20, 20));
+			coverRoundrect.draw(dl);
+			coverRoundrect.composite(cover, 0, 0, InCompositeOp);
+			coverRoundrect.quality(100);
+			string filepath =
+				"osucat\\custom\\banner_verify" + to_string(UserID) + ".jpg";
+			coverRoundrect.write(filepath);
+			//baiduaip::imageBase64(filepath);
+
+
+			*params = 已上传待审核提示;
+			Target activepushTar;
+			activepushTar.message_type = Target::MessageType::PRIVATE;
+			activepushTar.user_id = MONO;
+			activepushTar.message = u8"有一个新的banner被上传，操作者UID：" + to_string(UserID) + u8"\n操作者QQ：" + to_string(QQ)
+				+ u8" ,请尽快审核哦。\r\nbanner内容：\r\n"
+				+ "[CQ:image,file=" + filepath + "]";
+			activepush(activepushTar);
+			/*send_private_message(
+				DANA,
+				"有一个新的banner被上传，操作者UID：" + to_string(UserID) + " ，操作者QQ：" + to_string(QQ)
+					+ " ,请尽快审核哦。\r\nbanner内容：\r\n"
+					+ MessageSegment::image("osucat/custom/banner_verify/" + to_string(UserID) + ".jpg"));*/
+		}
+		static void setinfopanel_v1(string cmd, Target tar, string* params) {
+			if (cmd.find("[CQ:image,file=") == string::npos) {
+				*params = 自定义InfoPanel帮助;
+				return;
+			}
+			Database db;
+			db.Connect();
+			db.addcallcount();
+			int64_t UserID = db.GetUserID(tar.user_id);
+			if (UserID == 0) {
+				*params = 未绑定;
+				return;
+			}
+			int64_t QQ = db.GetQQ(UserID);
+			string picPath;
+			try {
+				picPath = utils::GetMiddleText(cmd, "[CQ:image,file=", "]");
+				picPath = picPath.substr(picPath.find(',') + 6);
+				picPath = get_image(picPath);
+			}
+			catch (ApiError) {
+				*params = 接收图片出错;
+				return;
+			}
+			if (!utils::fileExist(picPath)) {
+				*params = 接收图片出错;
+				return;
+			}
+			DrawableList dl;
+			Image infoPanel(picPath);
+			if (infoPanel.size().height() != 857 || infoPanel.size().width() != 1200 || infoPanel.magick() != "PNG") {
+				*params = InfoPanel数据错误提示;
+				return;
+			}
+			if (!utils::copyFile(picPath,
+				cq::dir::root("data", "image", "osucat", "custom", "infopanel_verify")
+				+ to_string(UserID) + ".png")) {
+				*params = u8"发生了一个未知错误";
+				return;
+			}
+			*params = 已上传待审核提示;
+			Target activepushTar;
+			activepushTar.message_type = Target::MessageType::PRIVATE;
+			activepushTar.user_id = MONO;
+			activepushTar.message = u8"有一个新的InfoPanel被上传，操作者UID：" + to_string(UserID) + u8"\n操作者QQ：" + to_string(QQ)
+				+ u8" ,请尽快审核哦。\r\nInfoPanel内容：\r\n"
+				+ "[CQ:image,file=" + picPath + "]";
+			activepush(activepushTar);
+			/*send_private_message(
+				DANA,
+				"有一个新的InfoPanel被上传，操作者UID：" + to_string(UserID) + " ，操作者QQ：" + to_string(QQ)
+					+ " ,请尽快审核哦。\nbanner内容：\n"
+					+ MessageSegment::image("osucat/custom/infopanel_verify/" + to_string(UserID) + ".png"));*/
+		}
+		static void resetbanner_v1(string cmd, Target tar, string* params) {
+			Database db;
+			db.Connect();
+			string UID = to_string(db.GetUserID(tar.user_id));
+			string picPath = "./work/v1_cover/" + UID + ".jpg";
+			DeleteFileA(picPath.c_str());
+			*params = u8"已成功重置你的banner。";
+		}
+		static void resetinfopanel_v1(string cmd, Target tar, string* params) {
+			Database db;
+			db.Connect();
+			string UID = to_string(db.GetUserID(tar.user_id));
+			string picPath = "./work/v1_infopanel/" + UID + ".png";
+			DeleteFileA(picPath.c_str());
+			*params = u8"已成功重置你的info面板。";
+		}
+		static void switchfunction(string cmd, Target tar, SenderInfo sdr, string* params) {
+			if (tar.message_type != Target::MessageType::GROUP) {
+				*params = u8"此操作必须在群内完成。";
+				return;
+			}
+			if (sdr.member_role != "member") {
+				*params = u8"此操作需要管理员执行。";
+				return;
+			}
+			cmd = utils::unescape(cmd);
+			utils::trim(cmd);
+			utils::string_replace(cmd, u8"：", ":");
+			Database db;
+			db.Connect();
+			vector<string> temp = utils::string_split(cmd, ':');
+			string 参数不正确 =
+				u8"给定的参数不正确\n正确的参数例：{function}:{on/off}\n参数名：bp/rctpp/recent/entertainment",
+				功能已开启 = u8"这项功能已经是启用状态了", 功能已关闭 = u8"这项功能已经处于禁用状态了",
+				已提交 = u8"操作已成功提交。";
+			if (temp.size() != 2) {
+				*params = 参数不正确;
+				return;
+			}
+			if (temp[0] == "bp") {
+				if (temp[1] == "on") {
+					if (db.isGroupEnable(tar.group_id, 1) == 1) {
+						*params = 功能已开启;
+						return;
+					}
+					db.changeGroupSettings(tar.group_id, 1, true);
+					*params = 已提交;
+					return;
+				}
+				if (temp[1] == "off") {
+					if (db.isGroupEnable(tar.group_id, 1) == 0) {
+						*params = 功能已关闭;
+						return;
+					}
+					db.changeGroupSettings(tar.group_id, 1, false);
+					*params = 已提交;
+					return;
+				}
+				*params = 参数不正确;
+				return;
+			}
+			if (temp[0] == "rctpp") {
+				if (temp[1] == "on") {
+					if (db.isGroupEnable(tar.group_id, 2) == 1) {
+						*params = 功能已开启;
+						return;
+					}
+					db.changeGroupSettings(tar.group_id, 2, true);
+					*params = 已提交;
+					return;
+				}
+				if (temp[1] == "off") {
+					if (db.isGroupEnable(tar.group_id, 2) == 0) {
+						*params = 功能已关闭;
+						return;
+					}
+					db.changeGroupSettings(tar.group_id, 2, false);
+					*params = 已提交;
+					return;
+				}
+				*params = 参数不正确;
+				return;
+			}
+			if (temp[0] == "recent") {
+				if (temp[1] == "on") {
+					if (db.isGroupEnable(tar.group_id, 3) == 1) {
+						*params = 功能已开启;
+						return;
+					}
+					db.changeGroupSettings(tar.group_id, 3, true);
+					*params = 已提交;
+					return;
+				}
+				if (temp[1] == "off") {
+					if (db.isGroupEnable(tar.group_id, 3) == 0) {
+						*params = 功能已关闭;
+						return;
+					}
+					db.changeGroupSettings(tar.group_id, 3, false);
+					*params = 已提交;
+					return;
+				}
+				*params = 参数不正确;
+				return;
+			}
+			if (temp[0] == "entertainment") {
+				if (temp[1] == "on") {
+					if (db.isGroupEnable(tar.group_id, 4) == 1) {
+						*params = 功能已开启;
+						return;
+					}
+					db.changeGroupSettings(tar.group_id, 4, true);
+					*params = 已提交;
+					return;
+				}
+				if (temp[1] == "off") {
+					if (db.isGroupEnable(tar.group_id, 4) == 0) {
+						*params = 功能已关闭;
+						return;
+					}
+					db.changeGroupSettings(tar.group_id, 4, false);
+					*params = 已提交;
+					return;
+				}
+				*params = 参数不正确;
+				return;
+			}
+			*params = 参数不正确;
+			return;
+		}
+
 		//Todo...
 		/* 娱乐模块 */
 		static void memyselfact(string cmd, Target tar, SenderInfo senderinfo, string* params) {
@@ -2115,7 +3047,6 @@ namespace osucat {
 			*params = username + " " + cmd;
 			Database db;
 			db.Connect();
-			db.addcallcount();
 		}
 	private:
 		/*

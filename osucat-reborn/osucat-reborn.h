@@ -3,7 +3,9 @@
 
 #pragma once
 char OC_ROOT_PATH[512];
-constexpr auto DEBUGMODE = false;
+//constexpr auto DEBUGMODE = false;
+bool DEBUGMODE = false;
+bool ISACTIVE = false;
 
 #include <easywsclient/easywsclient.hpp>
 #include <json/json.hpp>

@@ -166,14 +166,6 @@ namespace osucat {
 					update(msg.substr(6), tar, params);
 					return true;
 				}
-				if (_stricmp(msg.substr(0, 2).c_str(), "pp") == 0) {
-					pp(msg.substr(2), tar, params);
-					return true;
-				}
-				if (_stricmp(msg.substr(0, 4).c_str(), "with") == 0) {
-					ppwith(msg.substr(4), tar, params);
-					return true;
-				}
 				if (_stricmp(msg.substr(0, 7).c_str(), "setmode") == 0) {
 					setmode(msg.substr(7), tar, params);
 					return true;
@@ -184,6 +176,14 @@ namespace osucat {
 				}
 				if (_stricmp(msg.substr(0, 4).c_str(), "ppvs") == 0) {
 					ppvs(msg.substr(4), tar, params);
+					return true;
+				}
+				if (_stricmp(msg.substr(0, 2).c_str(), "pp") == 0) {
+					pp(msg.substr(2), tar, params);
+					return true;
+				}
+				if (_stricmp(msg.substr(0, 4).c_str(), "with") == 0) {
+					ppwith(msg.substr(4), tar, params);
 					return true;
 				}
 				if (_stricmp(msg.substr(0, 9).c_str(), "badgelist") == 0) {
@@ -240,6 +240,26 @@ namespace osucat {
 						adoptinfopanel_v1(msg.substr(14), tar, params);
 						return true;
 					}
+					if (_stricmp(msg.substr(0, 9).c_str(), "cleartemp") == 0) {
+						cleartemp(msg.substr(9), tar, params);
+						return true;
+					}
+					if (_stricmp(msg.substr(0, 12).c_str(), "rejectbanner") == 0) {
+						rejectbanner_v1(msg.substr(12), tar, params);
+						return true;
+					}
+					if (_stricmp(msg.substr(0, 15).c_str(), "rejectinfopanel") == 0) {
+						rejectinfopanel_v1(msg.substr(15), tar, params);
+						return true;
+					}
+					if (_stricmp(msg.substr(0, 9).c_str(), "resetuser") == 0) {
+						resetuser(msg.substr(9), tar, params);
+						return true;
+					}
+					if (_stricmp(msg.substr(0, 8).c_str(), "addbadge") == 0) {
+						addbadge(msg.substr(8), tar, params);
+						return true;
+					}
 				}
 				// 拦截其他娱乐模块 //
 #pragma region 娱乐模块
@@ -257,15 +277,48 @@ namespace osucat {
 #pragma endregion
 			}
 			catch (osucat::database_exception& ex) {
-				cout << ex.Show() << endl;
-				cout << ex.Code() << endl;
+				*params = u8"访问数据库时出现了一个错误，请稍后重试...";
+				char reportMsg[1024];
+				sprintf_s(reportMsg,
+					"[%s]\n"
+					u8"Mysql出现错误\n"
+					u8"错误代码：%d\n"
+					u8"详细信息：%s\n",
+					utils::unixTime2Str(time(NULL)).c_str(),
+					ex.Code(),
+					ex.Info().c_str()
+				);
+				Target exceptionReport;
+				exceptionReport.message_type = Target::MessageType::PRIVATE;
+				exceptionReport.user_id = MONO;
+				exceptionReport.message = reportMsg;
+				activepush(exceptionReport);
+				return true;
 			}
 			catch (osucat::NetWork_Exception& ex) {
-				cout << ex.Show() << endl;
-				cout << ex.Code() << endl;
+				*params = u8"访问api时超时...请稍后重试...";
+				return true;
 			}
 			catch (std::exception& ex) {
-				cout << ex.what() << endl;
+				*params = u8"出现了一个未知错误，请稍后重试...";
+				char reportMsg[1024];
+				sprintf_s(reportMsg,
+					"[%s]\n"
+					u8"已捕获std::exception\n"
+					u8"操作者：%lld\n"
+					u8"触发指令：%s\n"
+					u8"详细信息：%s\n",
+					utils::unixTime2Str(time(NULL)).c_str(),
+					tar.user_id,
+					tar.message.c_str(),
+					ex.what()
+				);
+				Target exceptionReport;
+				exceptionReport.message_type = Target::MessageType::PRIVATE;
+				exceptionReport.user_id = MONO;
+				exceptionReport.message = reportMsg;
+				activepush(exceptionReport);
+				return true;
 			}
 			return false;
 		}
@@ -328,6 +381,7 @@ namespace osucat {
 			user_info UI = { 0 };
 			Database db;
 			db.Connect();
+			db.addcallcount();
 			userid = db.GetUserID(tar.user_id);
 			if (userid != 0) {
 				if (!api::GetUser(userid, mode::std, &UI) == 0) {
@@ -390,6 +444,7 @@ namespace osucat {
 			utils::trim(cmd);
 			Database db;
 			db.Connect();
+			db.addcallcount();
 			int64_t uid = db.GetUserID(tar.user_id);
 			string msg =
 				u8"你确定要解除绑定吗？解除绑定后会清除所有绑定记录以及每日数据更新记录！\n如果确定要解绑，请使用命令!"
@@ -434,6 +489,7 @@ namespace osucat {
 			utils::string_replace(cmd, "[CQ:", "");
 			Database db;
 			db.Connect();
+			db.addcallcount();
 			int temp, days = 0;
 			float previousPP;
 			mode gamemode;
@@ -683,6 +739,7 @@ namespace osucat {
 			utils::string_replace(cmd, "[CQ:", "");
 			Database db;
 			db.Connect();
+			db.addcallcount();
 			int temp;
 			float previousPP;
 			mode gamemode;
@@ -846,6 +903,7 @@ namespace osucat {
 		static void recent(string cmd, Target tar, string* params) {
 			Database db;
 			db.Connect();
+			db.addcallcount();
 			if (tar.message_type == Target::MessageType::GROUP) {
 				if (db.isGroupEnable(tar.group_id, 3) == 0) return;
 			}
@@ -1107,6 +1165,7 @@ namespace osucat {
 		static void bp(string cmd, Target tar, string* params) {
 			Database db;
 			db.Connect();
+			db.addcallcount();
 			if (tar.message_type == Target::MessageType::GROUP) {
 				if (db.isGroupEnable(tar.group_id, 1) == 0) return;
 			}
@@ -1448,6 +1507,7 @@ namespace osucat {
 			char beatmap_url[512];
 			ScorePanelData sp_data = { 0 };
 			db.Connect();
+			db.addcallcount();
 			int64_t uid = db.GetUserID(tar.user_id);
 			if (uid == 0) {
 				*params = 未绑定;
@@ -1552,6 +1612,7 @@ namespace osucat {
 		static void update(string cmd, Target tar, string* params) {
 			Database db;
 			db.Connect();
+			db.addcallcount();
 			int64_t uid = db.GetUserID(tar.user_id);
 			if (uid == 0) {
 				*params = 未绑定;
@@ -1599,6 +1660,7 @@ namespace osucat {
 			}
 			Database db;
 			db.Connect();
+			db.addcallcount();
 			db.UpdatePPRecord(tar.user_id, stoll(cmd));
 			oppai pp;
 			vector<float> out;
@@ -1669,6 +1731,7 @@ namespace osucat {
 			}
 			Database db;
 			db.Connect();
+			db.addcallcount();
 			int64_t bid = db.GetPPRecord(tar.user_id);
 			if (bid == EOF) {
 				*params = u8"你还没有查询过成绩，请先查询成绩后在来使用这条指令~";
@@ -1742,6 +1805,7 @@ namespace osucat {
 		static void rctpp(string cmd, Target tar, string* params) {
 			Database db;
 			db.Connect();
+			db.addcallcount();
 			if (tar.message_type == Target::MessageType::GROUP) {
 				if (db.isGroupEnable(tar.group_id, 2) == 0) return;
 			}
@@ -2153,6 +2217,7 @@ namespace osucat {
 			}
 			Database db;
 			db.Connect();
+			db.addcallcount();
 			if (db.SetUserMainMode(tar.user_id, stoi(cmd)) == 0) {
 				*params = u8"在执行操作时发生了错误..请稍后再试。";
 				return;
@@ -2188,6 +2253,7 @@ namespace osucat {
 			string username = "";
 			Database db;
 			db.Connect();
+			db.addcallcount();
 			if (cmd.length() > 0) {
 				if (cmd[0] == ':') {
 					userid = db.GetUserID(tar.user_id);
@@ -2365,6 +2431,7 @@ namespace osucat {
 			UserPanelData UI2 = { 0 };
 			Database db;
 			db.Connect();
+			db.addcallcount();
 			int64_t UserID = db.GetUserID(tar.user_id);
 			if (UserID == 0) {
 				*params = 未绑定;
@@ -2380,7 +2447,10 @@ namespace osucat {
 			}
 			float u1pp = db.GetUserPreviousPP(UI1.user_info.user_id);
 			float u2pp = db.GetUserPreviousPP(UI2.user_info.user_id);
-			if (u1pp == UI1.user_info.pp) {
+			UI1.user_info.updatepplus = false;
+			UI2.user_info.updatepplus = false;
+			//剥离对pp+的依赖
+			/*if (u1pp == UI1.user_info.pp) {
 				UI1.user_info.updatepplus = false;
 				db.GetUserPreviousPPlus(UI1.user_info.user_id, &UI1.pplus_info);
 			}
@@ -2393,7 +2463,7 @@ namespace osucat {
 			}
 			else {
 				UI2.user_info.updatepplus = true;
-			}
+			}*/
 			string fileStr = "osucat\\" + ppvsimg(UI1, UI2);
 			*params = u8"[CQ:image,file=" + fileStr + u8"]";
 			//DeleteFileA((cq::dir::root("data", "image") + fileStr).c_str());
@@ -2402,6 +2472,7 @@ namespace osucat {
 			int64_t uid;
 			Database db;
 			db.Connect();
+			db.addcallcount();
 			uid = db.GetUserID(tar.user_id);
 			if (uid == 0) {
 				*params = 未绑定;
@@ -2429,6 +2500,7 @@ namespace osucat {
 			utils::string_replace(cmd, "[CQ:", "");
 			Database db;
 			db.Connect();
+			db.addcallcount();
 			string username = "";
 			int64_t UserID;
 			double a, c, z, p;
@@ -2503,6 +2575,7 @@ namespace osucat {
 			utils::string_replace(cmd, "[CQ:", "");
 			Database db;
 			db.Connect();
+			db.addcallcount();
 			string username = "";
 			int64_t UserID;
 			double a, c, z, p;
@@ -2547,6 +2620,7 @@ namespace osucat {
 		static void bonuspp(string cmd, Target tar, string* params) {
 			Database db;
 			db.Connect();
+			db.addcallcount();
 			cmd = utils::unescape(cmd);
 			utils::trim(cmd);
 			utils::string_replace(cmd, u8"：", ":");
@@ -2766,6 +2840,7 @@ namespace osucat {
 			int64_t uid;
 			Database db;
 			db.Connect();
+			db.addcallcount();
 			uid = db.GetUserID(tar.user_id);
 			if (uid == 0) {
 				*params = 未绑定;
@@ -2810,6 +2885,7 @@ namespace osucat {
 			}
 			Database db;
 			db.Connect();
+			db.addcallcount();
 			int64_t UserID = db.GetUserID(tar.user_id);
 			if (UserID == 0) {
 				*params = 未绑定;
@@ -2856,6 +2932,7 @@ namespace osucat {
 			}
 			Database db;
 			db.Connect();
+			db.addcallcount();
 			int64_t UserID = db.GetUserID(tar.user_id);
 			if (UserID == 0) {
 				*params = 未绑定;
@@ -2895,6 +2972,7 @@ namespace osucat {
 		static void resetbanner_v1(string cmd, Target tar, string* params) {
 			Database db;
 			db.Connect();
+			db.addcallcount();
 			string UID = to_string(db.GetUserID(tar.user_id));
 			string picPath = "./work/v1_cover/" + UID + ".jpg";
 			DeleteFileA(picPath.c_str());
@@ -2903,6 +2981,7 @@ namespace osucat {
 		static void resetinfopanel_v1(string cmd, Target tar, string* params) {
 			Database db;
 			db.Connect();
+			db.addcallcount();
 			string UID = to_string(db.GetUserID(tar.user_id));
 			string picPath = "./work/v1_infopanel/" + UID + ".png";
 			DeleteFileA(picPath.c_str());
@@ -2922,6 +3001,7 @@ namespace osucat {
 			utils::string_replace(cmd, u8"：", ":");
 			Database db;
 			db.Connect();
+			db.addcallcount();
 			vector<string> temp = utils::string_split(cmd, ':');
 			string 参数不正确 =
 				u8"给定的参数不正确\n正确的参数例：{function}:{on/off}\n参数名：bp/rctpp/recent/entertainment",
@@ -3026,8 +3106,7 @@ namespace osucat {
 		static void adoptbanner_v1(string cmd, Target tar, string* params) {
 			string UserID = cmd;
 			utils::trim(UserID);
-			string picPath = ".\\data\\images\\osucat\\custom\\banner_verify\\"
-				+ UserID + ".jpg";
+			string picPath = ".\\data\\images\\osucat\\custom\\banner_verify\\" + UserID + ".jpg";
 			if (utils::fileExist(picPath) == true) {
 				if (utils::copyFile(
 					".\\data\\images\\osucat\\custom\\banner_verify\\" + UserID
@@ -3057,8 +3136,7 @@ namespace osucat {
 			string UserID = cmd;
 			utils::trim(UserID);
 			string picPath =
-				".\\data\\images\\osucat\\custom\\infopanel_verify\\" + UserID
-				+ ".png";
+				".\\data\\images\\osucat\\custom\\infopanel_verify\\" + UserID + ".png";
 			if (utils::fileExist(picPath) == true) {
 				if (utils::copyFile(
 					".\\data\\images\\osucat\\custom\\infopanel_verify\\"
@@ -3084,6 +3162,154 @@ namespace osucat {
 				*params = u8"此用户的内容不在待审核清单内。";
 			}
 		}
+		static void rejectbanner_v1(string cmd, Target tar, string* params) {
+			string UserID, Content;
+			if (cmd.find('#') != string::npos) {
+				string tmp = cmd;
+				utils::trim(tmp);
+				UserID = tmp.substr(0, tmp.find('#'));
+				Content = tmp.substr(tmp.find("#") + 1);
+				if (Content.length() < 1) {
+					Content = u8"未提供详情。";
+				}
+			}
+			else {
+				UserID = cmd;
+				utils::trim(UserID);
+				Content = u8"未提供详情。";
+			}
+			string picPath = ".\\data\\images\\osucat\\custom\\banner_verify\\" + UserID + ".jpg";
+			if (utils::fileExist(picPath) == true) {
+				DeleteFileA(picPath.c_str());
+				Database db;
+				db.Connect();
+				int64_t QQ = db.GetQQ(stoll(UserID));
+				Target activepushTar;
+				activepushTar.message_type = Target::MessageType::PRIVATE;
+				activepushTar.user_id = QQ;
+				activepushTar.message = u8"你上传的Banner已被管理员驳回，详情：" + Content;
+				activepush(activepushTar);
+				*params = "ID：" + UserID + u8" ，已成功通知用户Banner已被驳回。详情：" + Content;
+			}
+			else {
+				*params = u8"此用户的内容不在待审核清单内。";
+			}
+		}
+		static void rejectinfopanel_v1(string cmd, Target tar, string* params) {
+			string UserID, Content;
+			if (cmd.find('#') != string::npos) {
+				string tmp = cmd;
+				utils::trim(tmp);
+				UserID = tmp.substr(0, tmp.find('#'));
+				Content = tmp.substr(tmp.find("#") + 1);
+				if (Content.length() < 1) {
+					Content = u8"未提供详情。";
+				}
+			}
+			else {
+				UserID = cmd;
+				utils::trim(UserID);
+				Content = u8"未提供详情。";
+			}
+			string picPath = ".\\data\\images\\osucat\\custom\\infopanel_verify\\" + UserID + ".png";
+			if (utils::fileExist(picPath) == true) {
+				DeleteFileA(picPath.c_str());
+				Database db;
+				db.Connect();
+				int64_t QQ = db.GetQQ(stoll(UserID));
+				Target activepushTar;
+				activepushTar.message_type = Target::MessageType::PRIVATE;
+				activepushTar.user_id = QQ;
+				activepushTar.message = u8"你上传的InfoPanel已被管理员驳回，详情：" + Content;
+				activepush(activepushTar);
+				*params = "ID：" + UserID + u8" ，已成功通知用户InfoPanel已被驳回。详情：" + Content;
+			}
+			else {
+				*params = u8"此用户的内容不在待审核清单内。";
+			}
+		}
+		static void resetuser(string cmd, Target tar, string* params) {
+			string UserID, Content;
+			if (cmd.find('#') != string::npos) {
+				string tmp = cmd;
+				utils::trim(tmp);
+				UserID = tmp.substr(0, tmp.find('#'));
+				Content = tmp.substr(tmp.find("#") + 1);
+				if (Content.length() < 1) {
+					Content = "未提供详情。";
+				}
+			}
+			else {
+				UserID = cmd;
+				utils::trim(UserID);
+				Content = "未提供详情。";
+			}
+			Database db;
+			db.Connect();
+			db.addcallcount();
+			int64_t QQ = db.GetQQ(stoll(UserID));
+			if (!QQ == 0) {
+				try {
+					DeleteFileA(("./work/v1_cover/" + UserID + ".jpg").c_str());
+				}
+				catch (exception) {
+				}
+				try {
+					DeleteFileA(("./work/v1_infopanel/" + UserID + ".jpg").c_str());
+				}
+				catch (exception) {
+				}
+				Target activepushTar;
+				activepushTar.message_type = Target::MessageType::PRIVATE;
+				activepushTar.user_id = QQ;
+				activepushTar.message = u8"你的个人资料已被重置，详情：" + Content;
+				activepush(activepushTar);
+				*params = "ID：" + UserID + u8" ，已成功通知用户他的个人资料已被重置。详情：" + Content;
+			}
+			else {
+				*params = u8"找不到此用户。";
+			}
+		}
+		static void addbadge(string cmd, Target tar, string* params) {
+			string args = cmd;
+			utils::trim(args);
+			int64_t uid;
+			int badgeid;
+			try {
+				uid = stoll(args.substr(0, args.find(',')));
+			}
+			catch (std::exception) {
+				*params = u8"参数错误";
+				return;
+			}
+			try {
+				badgeid = stoi(args.substr(args.find(',') + 1));
+			}
+			catch (std::exception) {
+				*params = u8"参数错误";
+				return;
+			}
+			if (badgeid >= (int)badgeSystem::main::badge::SELF_MAXIUMINDEX) {
+				*params = u8"badge not found.";
+				return;
+			}
+			Database db;
+			db.Connect();
+			db.addcallcount();
+			string temp = "";
+			vector<int> tmp = db.GetBadgeList(uid);
+			if (tmp.size() > 0) {
+				for (size_t i = 0; i < tmp.size(); ++i) {
+					temp += to_string(tmp[i]) + ",";
+				}
+				temp += to_string(badgeid);
+			}
+			else {
+				temp = to_string(badgeid);
+			}
+			db.addbadge(uid, temp);
+			*params = u8"已成功提交。";
+		}
 		/* 娱乐模块 */
 		static void memyselfact(string cmd, Target tar, SenderInfo senderinfo, string* params) {
 			utils::trim(cmd);
@@ -3091,6 +3317,7 @@ namespace osucat {
 			*params = username + " " + cmd;
 			Database db;
 			db.Connect();
+			db.addcallcount();
 		}
 		/* 系统事件 */
 		static void cleartemp(string cmd, Target tar, string* params) {

@@ -9,7 +9,7 @@ namespace osucat {
 	class main {
 	public:
 #pragma region 消息处理
-		static void osucatMain(string message){
+		static void osucatMain(string message) {
 			if (_stricmp(message.substr(0, 6).c_str(), "{\"data") != 0) { //忽略回执消息
 				json j = json::parse(message);
 				/*
@@ -39,7 +39,7 @@ namespace osucat {
 							string str = tar.message;
 							str = tar.message[0] < 0 ? tar.message.substr(3) : tar.message.substr(1);
 							monitors(str, tar, sdr);
-							
+
 						}
 					}
 					if (tar.message_type == Target::MessageType::GROUP) {
@@ -169,10 +169,10 @@ namespace osucat {
 						return false;
 					}
 				}
-				if (_stricmp(msg.substr(0, 2).c_str(), "me") == 0) {
+				/*if (_stricmp(msg.substr(0, 2).c_str(), "me") == 0) {
 					memyselfact(msg.substr(2), tar, senderinfo, params);
 					return true;
-				}
+				}*/
 #pragma endregion
 			}
 			catch (osucat::database_exception& ex) {
@@ -327,10 +327,11 @@ namespace osucat {
 				if (cmd == "yes") {
 					*params = u8"正在执行操作...";
 					db.deleteuser(uid);
+					DeleteFileA(("/work/v1_cover/" + to_string(uid) + "jpg").c_str());
 					*params = u8"已成功解绑。";
 					Target activepushTar;
 					activepushTar.message_type = Target::MessageType::PRIVATE;
-					activepushTar.user_id = 451577581;
+					activepushTar.user_id = MONO;
 					activepushTar.message = u8"有1位用户解绑了他的osu!id,\nqq: " + to_string(tar.user_id)
 						+ "\nosu!uid: " + to_string(uid);
 					activepush(activepushTar);
@@ -1659,6 +1660,444 @@ namespace osucat {
 				out[0],
 				("https://osu.ppy.sh/b/" + to_string(bid)).c_str());
 			*params = message;
+		}
+		static void rctpp(string cmd, Target tar, string* params) {
+			Database db;
+			db.Connect();
+			db.addcallcount();
+			if (tar.message_type == Target::MessageType::GROUP) {
+				if (db.isGroupEnable(tar.group_id, 2) == 0) return;
+			}
+			cmd = utils::unescape(cmd);
+			utils::trim(cmd);
+			utils::string_replace(cmd, u8"：", ":");
+			utils::string_replace(cmd, "[CQ:", "");
+			ScorePanelData sp_data = { 0 };
+			int temp;
+			mode gamemode;
+			gamemode = mode::std;
+			string username = "";
+			string beatmap;
+			int64_t userid;
+			char beatmap_url[512];
+			if (cmd.length() > 0) {
+				if (cmd[0] == ':') {
+					userid = db.GetUserID(tar.user_id);
+					if (userid == 0) {
+						*params = 未绑定;
+						return;
+					}
+					else {
+						try {
+							if (utils::isNum(cmd.substr(cmd.length() - 1))) {
+								temp = stoi(cmd.substr(cmd.length() - 1));
+							}
+							else {
+								*params = 英文模式名提示;
+								return;
+							}
+						}
+						catch (std::exception) {
+							temp = 0;
+						}
+						if (temp < 4 && temp > -1) {
+							gamemode = (mode)temp;
+						}
+						else {
+							gamemode = (mode)db.GetUserDefaultGameMode(userid);
+						}
+					}
+				}
+				else if (cmd[0] != ':') {
+					if (cmd.find(':') != string::npos) {
+						if (cmd.find("at,qq=") != string::npos) {
+							userid = db.GetUserID(stoll(utils::GetMiddleText(cmd, "=", "]")));
+							if (userid == 0) {
+								*params = 他人未绑定;
+								return;
+							}
+						}
+						else {
+							try {
+								username = cmd.substr(0, cmd.find(':'));
+								if (username.length() < 1) username = "%^%^%^!*(^&";
+							}
+							catch (std::exception) {
+								username = "%^%^%^!*(^&";
+							}
+						}
+						try {
+							if (utils::isNum(cmd.substr(cmd.find(':') + 1))) {
+								temp = stoi(cmd.substr(cmd.find(':') + 1));
+							}
+							else {
+								*params = 英文模式名提示;
+								return;
+							}
+						}
+						catch (std::exception) {
+							temp = 0;
+						}
+						if (temp < 4 && temp > -1) {
+							gamemode = (mode)temp;
+						}
+						else {
+							gamemode = mode::std;
+						};
+					}
+					else {
+						if (cmd.find("at,qq=") != string::npos) {
+							userid = db.GetUserID(stoll(utils::GetMiddleText(cmd, "=", "]")));
+							if (userid == 0) {
+								*params = 他人未绑定;
+								return;
+							}
+						}
+						else {
+							username = cmd;
+						}
+						if (username.empty()) {
+							if (api::GetUser(userid, mode::std, &sp_data.user_info) == 0) {
+								*params = 用户已被bancho封禁;
+								return;
+							}
+							else {
+								gamemode = (mode)db.GetUserDefaultGameMode(sp_data.user_info.user_id);
+							}
+						}
+						else {
+							utils::trim(cmd);
+							if (api::GetUser(cmd, mode::std, &sp_data.user_info) == 0) {
+								*params = 未从bancho检索到用户;
+								return;
+							}
+							else {
+								gamemode = (mode)db.GetUserDefaultGameMode(sp_data.user_info.user_id);
+							}
+						}
+					}
+				}
+			}
+			else {
+				userid = db.GetUserID(tar.user_id);
+				if (userid == 0) {
+					*params = 未绑定;
+					return;
+				}
+				else {
+					gamemode = (mode)db.GetUserDefaultGameMode(userid);
+				}
+			}
+			if (username.empty()) {
+				if (api::GetUser(userid, gamemode, &sp_data.user_info) == 0) {
+					*params = u8"没有找到记录...";
+					return;
+				}
+				if (api::GetUserRecent(userid, gamemode, &sp_data.score_info) == 0) {
+					switch (gamemode) {
+					case mode::std:
+						*params = u8"你最近在模式Standard上没有游玩记录~";
+						return;
+					case mode::taiko:
+						*params = u8"你最近在模式Taiko上没有游玩记录~";
+						return;
+					case mode::ctb:
+						*params = u8"你最近在模式Catch the Beat上没有游玩记录~";
+						return;
+					case mode::mania:
+						*params = u8"你最近在模式Mania上没有游玩记录~";
+						return;
+					}
+				}
+			}
+			else {
+				if (username.length() > 20) {
+					"";
+					*params = 参数过长提示;
+					return;
+				}
+				utils::trim(username);
+				if (api::GetUser(username, gamemode, &sp_data.user_info) == 0) {
+					*params = u8"没这个人或者TA根本不玩这个模式！";
+					return;
+				}
+				if (api::GetUserRecent(username, gamemode, &sp_data.score_info) == 0) {
+					switch (gamemode) {
+					case mode::std:
+						*params = u8"TA最近在模式Standard上没有游玩记录~";
+						return;
+					case mode::taiko:
+						*params = u8"TA最近在模式Taiko上没有游玩记录~";
+						return;
+					case mode::ctb:
+						*params = u8"TA最近在模式Catch the Beat上没有游玩记录~";
+						return;
+					case mode::mania:
+						*params = u8"TA最近在模式Mania上没有游玩记录~";
+						return;
+					}
+				}
+			}
+			sp_data.mode = gamemode;
+			api::GetBeatmap(sp_data.score_info.beatmap_id, &sp_data.beatmap_info);
+			sprintf_s(beatmap_url, OSU_FILE_URL "%lld", sp_data.score_info.beatmap_id);
+			beatmap = NetConnection::HttpsGet(beatmap_url);
+			if (beatmap.empty()) {
+				*params = 获取谱面信息错误;
+				return;
+			}
+			int second, minute, maxsecond, maxminute;
+			if (sp_data.mode == mode::std) {
+				oppai pp;
+				pp.read_data(beatmap);
+				pp.mods((int)sp_data.score_info.mods);
+				// if fc
+				pp.accuracy_percent(-1);
+				pp.n300((int)sp_data.score_info.n300);
+				pp.n100((int)sp_data.score_info.n100);
+				pp.n50((int)sp_data.score_info.n50);
+				oppai_result t = pp.calc();
+				sp_data.fc = (int)t.data.total_pp.value();
+				// original
+				pp.end((int)sp_data.score_info.n300 + (int)sp_data.score_info.n100 + (int)sp_data.score_info.n50
+					+ (int)sp_data.score_info.nmiss);
+				pp.nmiss((int)sp_data.score_info.nmiss);
+				pp.combo((int)sp_data.score_info.combo);
+				sp_data.pp_info = pp.calc();
+				sp_data.pp_info.data.total_star = t.data.total_star;
+				// reset
+				pp.end(-1);
+				pp.n300(-1);
+				pp.n100(-1);
+				pp.n50(-1);
+				pp.nmiss(-1);
+				pp.combo(-1);
+				for (int i = 0; i < 5; ++i) {
+					pp.accuracy_percent((float)(i == 0 ? 95 : 96 + i));
+					sp_data.confirmed_acc[i] = (int)(pp.calc().data.total_pp.value());
+				}
+				if (sp_data.pp_info.code == 0) {
+					sp_data.pp_info.data.maxcombo = t.data.maxcombo;
+					sp_data.pp_info.data.maxlength = t.data.length;
+				}
+				second = sp_data.pp_info.data.length / 1000 % 60;
+				minute = sp_data.pp_info.data.length / 1000 / 60;
+				maxsecond = sp_data.pp_info.data.maxlength / 1000 % 60;
+				maxminute = sp_data.pp_info.data.maxlength / 1000 / 60;
+			}
+			else {
+				if (sp_data.mode == mode::mania) {
+					long n1, n2;
+					n1 = sp_data.score_info.n50 * 50.0 + sp_data.score_info.n100 * 100.0
+						+ sp_data.score_info.nkatu * 200.0
+						+ (sp_data.score_info.n300 + sp_data.score_info.ngeki) * 300.0;
+					n2 = 300
+						* (sp_data.score_info.nmiss + sp_data.score_info.n50 + sp_data.score_info.nkatu
+							+ sp_data.score_info.n100 + sp_data.score_info.n300 + sp_data.score_info.ngeki);
+					sp_data.pp_info.data.accuracy = (double)n1 / (double)n2 * 100.0;
+				}
+				if (sp_data.mode == mode::taiko) {
+					double n1, n2;
+					n1 = ((double)sp_data.score_info.n100 + (double)sp_data.score_info.nkatu) * 0.5
+						+ (double)sp_data.score_info.n300 + (double)sp_data.score_info.ngeki;
+					n2 = (double)sp_data.score_info.nmiss + (double)sp_data.score_info.n100
+						+ (double)sp_data.score_info.nkatu + (double)sp_data.score_info.n300
+						+ (double)sp_data.score_info.ngeki;
+					sp_data.pp_info.data.accuracy = (double)n1 / (double)n2 * 100.0;
+				}
+				if (sp_data.mode == mode::ctb) {
+					long n1, n2;
+					n1 = sp_data.score_info.n50 + sp_data.score_info.n100 + sp_data.score_info.n300;
+					n2 = sp_data.score_info.nkatu + sp_data.score_info.nmiss + sp_data.score_info.n50
+						+ sp_data.score_info.n100 + sp_data.score_info.n300;
+					sp_data.pp_info.data.maxcombo = sp_data.beatmap_info.maxcombo;
+					sp_data.pp_info.data.accuracy = (double)n1 / (double)n2 * 100.0;
+				}
+				second = 0;
+				minute = 0;
+				maxsecond = 0;
+				maxminute = 0;
+				sp_data.pp_info.data.titleUnicode = sp_data.beatmap_info.title;
+				sp_data.pp_info.data.artistUnicode = sp_data.beatmap_info.artist;
+				sp_data.pp_info.data.title = sp_data.beatmap_info.title;
+				sp_data.pp_info.data.artist = sp_data.beatmap_info.artist;
+				sp_data.pp_info.data.creator = sp_data.beatmap_info.creator;
+				sp_data.pp_info.data.total_star = sp_data.beatmap_info.stars;
+				sp_data.pp_info.data.bpm = sp_data.beatmap_info.bpm;
+				sp_data.pp_info.data.ar = sp_data.beatmap_info.ar;
+				sp_data.pp_info.data.od = sp_data.beatmap_info.od;
+				sp_data.pp_info.data.cs = sp_data.beatmap_info.cs;
+				sp_data.pp_info.data.hp = sp_data.beatmap_info.hp;
+				sp_data.pp_info.data.combo = sp_data.score_info.combo;
+			}
+			char message[5120];
+			string modeStr;
+			sp_data.mode == mode::std
+				? modeStr = "Standard"
+				: sp_data.mode == mode::taiko
+				? modeStr = "Taiko"
+				: sp_data.mode == mode::ctb
+				? modeStr = "CtB"
+				: sp_data.mode == mode::mania ? modeStr = "Mania" : modeStr = "Unknown";
+
+			if (sp_data.mode == mode::std) {
+				sprintf_s(message,
+					5120,
+					u8"%s's previous play - %s\n"
+					u8"%s - %s[%s]\n"
+					"mapped by %s\n"
+					"[ar%.1f | od%.1f | cs%.1f | hp%.1f | bpm%.2f]\n"
+					"Stars:%.2f* | objects:%d | %d:%02d / %d:%02d\n"
+					"300×%d | 100×%d | 50×%d | miss×%d\n"
+					"combo %dx/%dx | acc %.2f%% | %s | %s\n"
+					"%.0fpp | if fc %dpp\n\n"
+					"100%% : %dpp\n"
+					"99%% : %dpp\n"
+					"98%% : %dpp\n"
+					"95%% : %dpp\n%s",
+					sp_data.user_info.username.c_str(),
+					modeStr.c_str(),
+					sp_data.pp_info.data.artistUnicode.c_str(),
+					sp_data.pp_info.data.titleUnicode.c_str(),
+					sp_data.pp_info.data.map_version.c_str(),
+					sp_data.pp_info.data.creator.c_str(),
+					sp_data.pp_info.data.ar,
+					sp_data.pp_info.data.od,
+					sp_data.pp_info.data.cs,
+					sp_data.pp_info.data.hp,
+					sp_data.pp_info.data.bpm,
+					sp_data.pp_info.data.total_star,
+					sp_data.pp_info.data.n300,
+					minute,
+					second,
+					maxminute,
+					maxsecond,
+					sp_data.score_info.n300,
+					sp_data.score_info.n100,
+					sp_data.score_info.n50,
+					sp_data.score_info.nmiss,
+					sp_data.score_info.combo,
+					sp_data.beatmap_info.maxcombo,
+					sp_data.pp_info.data.accuracy,
+					sp_data.score_info.mods == 0 ? "No Mod"
+					: osu_api_v1::api::modParser(sp_data.score_info.mods).c_str(),
+					sp_data.score_info.rank.c_str(),
+					sp_data.pp_info.data.total_pp.has_value() ? sp_data.pp_info.data.total_pp.value() : 0.0,
+					sp_data.fc,
+					sp_data.confirmed_acc[4],
+					sp_data.confirmed_acc[3],
+					sp_data.confirmed_acc[2],
+					sp_data.confirmed_acc[0],
+					("https://osu.ppy.sh/b/" + to_string(sp_data.beatmap_info.beatmap_id)).c_str());
+			}
+			else {
+				if (sp_data.mode == mode::ctb) {
+					sprintf_s(
+						message,
+						5120,
+						u8"%s's previous play - %s\n"
+						u8"%s - %s[%s]\n"
+						"mapped by %s\n"
+						"[ar%.1f | od%.1f | cs%.1f | hp%.1f | bpm%.2f]\n"
+						"Stars:%.2f* | objects:%d | %d:%02d / %d:%02d\n"
+						"combo %dx/%dx | acc %.2f%% | %s | %s\n\n%s",
+						sp_data.user_info.username.c_str(),
+						modeStr.c_str(),
+						sp_data.pp_info.data.artistUnicode.length() > 3 ? sp_data.pp_info.data.artistUnicode.c_str()
+						: sp_data.pp_info.data.artist.c_str(),
+						sp_data.pp_info.data.titleUnicode.length() > 3 ? sp_data.pp_info.data.titleUnicode.c_str()
+						: sp_data.pp_info.data.title.c_str(),
+						sp_data.pp_info.data.map_version.c_str(),
+						sp_data.pp_info.data.creator.c_str(),
+						sp_data.pp_info.data.ar,
+						sp_data.pp_info.data.od,
+						sp_data.pp_info.data.cs,
+						sp_data.pp_info.data.hp,
+						sp_data.pp_info.data.bpm,
+						sp_data.pp_info.data.total_star,
+						sp_data.pp_info.data.n300,
+						minute,
+						second,
+						maxminute,
+						maxsecond,
+						sp_data.score_info.combo,
+						sp_data.beatmap_info.maxcombo,
+						sp_data.pp_info.data.accuracy,
+						sp_data.score_info.mods == 0 ? "No Mod"
+						: osu_api_v1::api::modParser(sp_data.score_info.mods).c_str(),
+						sp_data.score_info.rank.c_str(),
+						("https://osu.ppy.sh/b/" + to_string(sp_data.beatmap_info.beatmap_id)).c_str());
+				}
+				else {
+					sprintf_s(
+						message,
+						5120,
+						u8"%s's previous play - %s\n"
+						u8"%s - %s[%s]\n"
+						"mapped by %s\n"
+						"[ar%.1f | od%.1f | cs%.1f | hp%.1f | bpm%.2f]\n"
+						"Stars:%.2f* | objects:%d | %d:%02d / %d:%02d\n"
+						"combo %dx | acc %.2f%% | %s | %s\n\n%s",
+						sp_data.user_info.username.c_str(),
+						modeStr.c_str(),
+						sp_data.pp_info.data.artistUnicode.length() > 3 ? sp_data.pp_info.data.artistUnicode.c_str()
+						: sp_data.pp_info.data.artist.c_str(),
+						sp_data.pp_info.data.titleUnicode.length() > 3 ? sp_data.pp_info.data.titleUnicode.c_str()
+						: sp_data.pp_info.data.title.c_str(),
+						sp_data.pp_info.data.map_version.c_str(),
+						sp_data.pp_info.data.creator.c_str(),
+						sp_data.pp_info.data.ar,
+						sp_data.pp_info.data.od,
+						sp_data.pp_info.data.cs,
+						sp_data.pp_info.data.hp,
+						sp_data.pp_info.data.bpm,
+						sp_data.pp_info.data.total_star,
+						sp_data.pp_info.data.n300,
+						minute,
+						second,
+						maxminute,
+						maxsecond,
+						sp_data.score_info.combo,
+						sp_data.pp_info.data.accuracy,
+						sp_data.score_info.mods == 0 ? "No Mod"
+						: osu_api_v1::api::modParser(sp_data.score_info.mods).c_str(),
+						sp_data.score_info.rank.c_str(),
+						("https://osu.ppy.sh/b/" + to_string(sp_data.beatmap_info.beatmap_id)).c_str());
+				}
+			}
+			*params = message;
+			db.UpdatePPRecord(tar.user_id, sp_data.beatmap_info.beatmap_id);
+		}
+		static void setmode(string cmd, Target tar, string* params) {
+			utils::string_replace(cmd, " ", "");
+			if (!utils::isNum(cmd)) {
+				*params = 英文模式名提示;
+				return;
+			}
+			Database db;
+			db.Connect();
+			db.addcallcount();
+			if (db.SetUserMainMode(tar.user_id, stoi(cmd)) == 0) {
+				*params = u8"在执行操作时发生了错误..请稍后再试。";
+				return;
+			}
+			switch (stoi(cmd)) {
+			case 0:
+				*params = u8"你的主要游戏模式已设置为Standard.";
+				break;
+			case 1:
+				*params = u8"你的主要游戏模式已设置为Taiko.";
+				break;
+			case 2:
+				*params = u8"你的主要游戏模式已设置为Catch the Beat.";
+				break;
+			case 3:
+				*params = u8"你的主要游戏模式已设置为Mania.";
+				break;
+			default:
+				*params = u8"发生了未知错误";
+				break;
+			}
 		}
 		//Todo...
 		/* 娱乐模块 */

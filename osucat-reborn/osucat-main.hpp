@@ -33,7 +33,7 @@ namespace osucat {
 					tar.message = j["message"].get<string>();
 					char msg[32768];
 					if (tar.message_type == Target::MessageType::PRIVATE) {
-						sprintf_s(msg, u8"[%s] [osucat]: 收到来自好友 %lld 的消息：%s", utils::unixTime2Str(tar.time).c_str(), tar.user_id, tar.message.c_str());
+						sprintf_s(msg, u8"[%s] [osucat][↓]: 好友 %lld 的消息：%s", utils::unixTime2Str(tar.time).c_str(), tar.user_id, tar.message.c_str());
 						cout << msg << endl;
 						if (tar.message[0] == '!' || tar.message.find(u8"！") == 0) {
 							string str = tar.message;
@@ -44,7 +44,7 @@ namespace osucat {
 					}
 					if (tar.message_type == Target::MessageType::GROUP) {
 						sdr.member_role = sj["role"].get<string>();
-						sprintf_s(msg, u8"[%s] [osucat]: 收到来自群 %lld 的 %lld 的消息：%s", utils::unixTime2Str(tar.time).c_str(), tar.group_id, tar.user_id, tar.message.c_str());
+						sprintf_s(msg, u8"[%s] [osucat][↓]: 群 %lld 的 %lld 的消息：%s", utils::unixTime2Str(tar.time).c_str(), tar.group_id, tar.user_id, tar.message.c_str());
 						cout << msg << endl;
 						if (tar.message[0] == '!' || tar.message.find(u8"！") == 0) {
 							string str = tar.message;
@@ -65,7 +65,7 @@ namespace osucat {
 					if (j["request_type"].get<string>() == "friend") {
 						req.request_type = Request::RequestType::FRIEND;
 						char msg[4096];
-						sprintf_s(msg, u8"[%s] [osucat]: 收到来自用户 %lld 的好友请求：%s\n", utils::unixTime2Str(req.time).c_str(), req.user_id, req.message.c_str());
+						sprintf_s(msg, u8"[%s] [osucat][↓]: 来自用户 %lld 的好友请求：%s\n", utils::unixTime2Str(req.time).c_str(), req.user_id, req.message.c_str());
 						cout << msg << endl;
 						eventActivePush(req);
 					}
@@ -75,7 +75,7 @@ namespace osucat {
 						if (j["sub_type"].get<string>() == "invite") {
 							//只有受邀入群才会被处理
 							char msg[4096];
-							sprintf_s(msg, u8"[%s] [osucat]: 收到来自用户 %lld 的群组邀请请求：%s\n", utils::unixTime2Str(req.time).c_str(), req.user_id, req.message.c_str());
+							sprintf_s(msg, u8"[%s] [osucat][↓]: 来自用户 %lld 的群组邀请请求：%s\n", utils::unixTime2Str(req.time).c_str(), req.user_id, req.message.c_str());
 							cout << msg << endl;
 							eventActivePush(req);
 						}
@@ -91,9 +91,10 @@ namespace osucat {
 				tar.message_type == Target::MessageType::PRIVATE ? activepushTar.user_id = tar.user_id : activepushTar.group_id = tar.group_id;
 				activepushTar.message = params;
 				activepush(activepushTar);
-				Database db;
+				/*这里只是消息处理 不需要addcallcount*/
+				/*Database db;
 				db.Connect();
-				db.addcallcount();	// addcallcount上移
+				db.addcallcount();	// addcallcount上移*/
 			}
 		}
 #pragma endregion
@@ -231,7 +232,14 @@ namespace osucat {
 				}
 				// admin commands //
 				if (tar.user_id == MONO) {
-
+					if (_stricmp(msg.substr(0, 11).c_str(), "adoptbanner") == 0) {
+						adoptbanner_v1(msg.substr(11), tar, params);
+						return true;
+					}
+					if (_stricmp(msg.substr(0, 14).c_str(), "adoptinfopanel") == 0) {
+						adoptinfopanel_v1(msg.substr(14), tar, params);
+						return true;
+					}
 				}
 				// 拦截其他娱乐模块 //
 #pragma region 娱乐模块
@@ -262,7 +270,6 @@ namespace osucat {
 			return false;
 		}
 #pragma endregion
-		//Todo switchfunction
 		static void help(string cmd, string* params) {
 			utils::trim(cmd);
 			utils::string_replace(cmd, " ", "");
@@ -351,11 +358,11 @@ namespace osucat {
 				512,
 				u8"用户 %s 已成功绑定到此qq上~\n正在初始化数据，时间可能较长，请耐心等待。",
 				UI.username);
-			Target activepushTar1;
-			activepushTar1.message_type = tar.message_type == Target::MessageType::PRIVATE ? Target::MessageType::PRIVATE : Target::MessageType::GROUP;
-			tar.message_type == Target::MessageType::PRIVATE ? activepushTar1.user_id = tar.user_id : activepushTar1.group_id = tar.group_id;
-			activepushTar1.message = return_message;
-			activepush(activepushTar1);
+			Target userreturnMsg;
+			userreturnMsg.message_type = tar.message_type == Target::MessageType::PRIVATE ? Target::MessageType::PRIVATE : Target::MessageType::GROUP;
+			tar.message_type == Target::MessageType::PRIVATE ? userreturnMsg.user_id = tar.user_id : userreturnMsg.group_id = tar.group_id;
+			userreturnMsg.message = return_message;
+			activepush(userreturnMsg);
 			Target activepushTar;
 			activepushTar.message_type = Target::MessageType::PRIVATE;
 			activepushTar.user_id = MONO;
@@ -2439,7 +2446,7 @@ namespace osucat {
 				}
 			}
 			else {
-				UserID = db.GetUserID(tar.user_id.value());
+				UserID = db.GetUserID(tar.user_id);
 				if (UserID == 0) {
 					*params = 未绑定;
 					return;
@@ -2652,7 +2659,7 @@ namespace osucat {
 					return;
 				}
 				if (api::GetUserBest(userid, 100, gamemode, bp) == 0) {
-					*params = u8"你在此模式上还没有bp呢。";
+					*params = u8"你在此模式上还没有成绩呢。";
 					return;
 				}
 			}
@@ -2667,7 +2674,7 @@ namespace osucat {
 					return;
 				}
 				if (api::GetUserBest(username, 100, gamemode, bp) == 0) {
-					*params = u8"他在此模式上还没有bp呢。";
+					*params = u8"他在此模式上还没有成绩呢。";
 					return;
 				}
 			}
@@ -2746,14 +2753,14 @@ namespace osucat {
 			char rtnmessage[1024];
 			sprintf_s(rtnmessage,
 				1024,
-				"%s  (%s)\n总PP：%.2f\n原始PP：%.2f\nBonus PP：%.2f\n共有 %d 个ranked谱面成绩记录在案",
+				u8"%s  (%s)\n总PP：%.2f\n原始PP：%.2f\nBonus PP：%.2f\n共计算出 %d 个被记录的ranked谱面成绩。",
 				UI.username.c_str(),
 				gamemodeStr.c_str(),
 				UI.pp,
 				scorepp,
 				_bonuspp,
 				rankedscores);
-			send_message(tar, rtnmessage);
+			*params = rtnmessage;
 		}
 		static void setbadge(string cmd, Target tar, string* params) {
 			int64_t uid;
@@ -2810,15 +2817,10 @@ namespace osucat {
 			}
 			int64_t QQ = db.GetQQ(UserID);
 			string picPath;
-			try {
-				picPath = utils::GetMiddleText(cmd, "[CQ:image,file=", "]");
-				picPath = picPath.substr(picPath.find(',') + 6);
-				picPath = get_image(picPath);
-			}
-			catch (ApiError) {
-				*params = 接收图片出错;
-				return;
-			}
+			picPath = utils::GetMiddleText(cmd, "[CQ:image,file=", "]");
+			picPath = picPath.substr(picPath.find(',') + 6);
+			PictureInfo picInfo = getImage(picPath);
+			picPath = picInfo.filename;
 			if (!utils::fileExist(picPath)) {
 				*params = 接收图片出错;
 				return;
@@ -2835,11 +2837,9 @@ namespace osucat {
 			coverRoundrect.composite(cover, 0, 0, InCompositeOp);
 			coverRoundrect.quality(100);
 			string filepath =
-				"osucat\\custom\\banner_verify" + to_string(UserID) + ".jpg";
+				".\\data\\images\\osucat\\custom\\banner_verify\\" + to_string(UserID) + ".jpg";
 			coverRoundrect.write(filepath);
 			//baiduaip::imageBase64(filepath);
-
-
 			*params = 已上传待审核提示;
 			Target activepushTar;
 			activepushTar.message_type = Target::MessageType::PRIVATE;
@@ -2868,15 +2868,10 @@ namespace osucat {
 			}
 			int64_t QQ = db.GetQQ(UserID);
 			string picPath;
-			try {
-				picPath = utils::GetMiddleText(cmd, "[CQ:image,file=", "]");
-				picPath = picPath.substr(picPath.find(',') + 6);
-				picPath = get_image(picPath);
-			}
-			catch (ApiError) {
-				*params = 接收图片出错;
-				return;
-			}
+			picPath = utils::GetMiddleText(cmd, "[CQ:image,file=", "]");
+			picPath = picPath.substr(picPath.find(',') + 6);
+			PictureInfo picInfo = getImage(picPath);
+			picPath = picInfo.filename;
 			if (!utils::fileExist(picPath)) {
 				*params = 接收图片出错;
 				return;
@@ -2888,7 +2883,7 @@ namespace osucat {
 				return;
 			}
 			if (!utils::copyFile(picPath,
-				cq::dir::root("data", "image", "osucat", "custom", "infopanel_verify")
+				".\\data\\images\\osucat\\custom\\infopanel_verify\\"
 				+ to_string(UserID) + ".png")) {
 				*params = u8"发生了一个未知错误";
 				return;
@@ -3037,8 +3032,72 @@ namespace osucat {
 			*params = 参数不正确;
 			return;
 		}
+		/* 管理指令*/
+		static void adoptbanner_v1(string cmd, Target tar, string* params) {
+			string UserID = cmd;
+			utils::trim(UserID);
+			string picPath = ".\\data\\images\\osucat\\custom\\banner_verify\\"
+				+ UserID + ".jpg";
+			if (utils::fileExist(picPath) == true) {
+				if (utils::copyFile(
+					".\\data\\images\\osucat\\custom\\banner_verify\\" + UserID
+					+ ".jpg",
+					"./work/v1_cover/" + UserID + ".jpg")
+					== true) {
+					DeleteFileA(picPath.c_str());
+					Database db;
+					db.Connect();
+					int64_t QQ = db.GetQQ(stoll(UserID));
+					Target userMsg;
+					userMsg.message_type = Target::MessageType::PRIVATE;
+					userMsg.user_id = QQ;
+					userMsg.message = u8"你上传的Banner通过审核啦，可以使用info指令查看~";
+					activepush(userMsg);
+					*params = u8"ID：" + UserID + u8" ，已成功通知用户Banner已审核成功。";
+				}
+				else {
+					*params = u8"在移动文件时发生了一个错误。";
+				}
+			}
+			else {
+				*params = u8"此用户的内容不在待审核清单内。";
+			}
+		}
+		static void adoptinfopanel_v1(string cmd, Target tar, string* params) {
+			string UserID = cmd;
+			utils::trim(UserID);
+			string picPath =
+				".\\data\\images\\osucat\\custom\\infopanel_verify\\" + UserID
+				+ ".png";
+			if (utils::fileExist(picPath) == true) {
+				if (utils::copyFile(
+					".\\data\\images\\osucat\\custom\\infopanel_verify\\"
+					+ UserID + ".png",
+					"./work/v1_infopanel/" + UserID + ".png")
+					== true) {
+					DeleteFileA(picPath.c_str());
+					Database db;
+					db.Connect();
+					int64_t QQ = db.GetQQ(stoll(UserID));
+					Target userMsg;
+					userMsg.message_type = Target::MessageType::PRIVATE;
+					userMsg.user_id = QQ;
+					userMsg.message = u8"你上传的Info面板通过审核啦，可以使用info指令查看~";
+					activepush(userMsg);
+					*params = u8"ID：" + UserID + u8" ，已成功通知用户InfoPanel已审核成功。";
+				}
+				else {
+					*params = u8"在移动文件时发生了一个错误。";
+				}
+			}
+			else {
+				*params = u8"此用户的内容不在待审核清单内。";
+			}
+		}
 
-		//Todo...
+
+
+
 		/* 娱乐模块 */
 		static void memyselfact(string cmd, Target tar, SenderInfo senderinfo, string* params) {
 			utils::trim(cmd);
@@ -3046,6 +3105,25 @@ namespace osucat {
 			*params = username + " " + cmd;
 			Database db;
 			db.Connect();
+		}
+		/* 系统事件 */
+		static void cleartemp(string cmd, Target tar, string* params) {
+			utils::trim(cmd);
+			if (cmd.length() < 3) {
+				*params = "请提供参数。";
+				return;
+			}
+			if (_stricmp(cmd.substr(0, 3).c_str(), "all") == 0) {
+				system("del .\\work\\avatar\\*.png");
+				*params = "已成功提交。";
+				return;
+			}
+			if (_stricmp(cmd.substr(0, 6).c_str(), "avatar") == 0) {
+				system("del .\\work\\avatar\\*.png");
+				*params = "已成功提交。";
+				return;
+			}
+			*params = "参数错误。";
 		}
 	private:
 		/*
@@ -3063,6 +3141,13 @@ namespace osucat {
 				catch (osucat::NetWork_Exception& ex) {
 					cout << ex.Show() << endl;
 				}
+				char msg[4096];
+				sprintf_s(msg,
+					u8"[%s] [osucat][↑]: 发送至好友 %lld 的消息：%s",
+					utils::unixTime2Str(time(NULL)).c_str(),
+					tar.user_id,
+					tar.message);
+				cout << msg << endl;
 			}
 			if (tar.message_type == Target::MessageType::GROUP) {
 				json jp;
@@ -3074,6 +3159,13 @@ namespace osucat {
 				catch (osucat::NetWork_Exception& ex) {
 					cout << ex.Show() << endl;
 				}
+				char msg[4096];
+				sprintf_s(msg,
+					u8"[%s] [osucat][↑]: 发送至群 %lld 的消息：%s",
+					utils::unixTime2Str(time(NULL)).c_str(),
+					tar.group_id,
+					tar.message);
+				cout << msg << endl;
 			}
 		}
 		static void eventActivePush(Request req) {
@@ -3087,6 +3179,12 @@ namespace osucat {
 				catch (osucat::NetWork_Exception& ex) {
 					cout << ex.Show() << endl;
 				}
+				char msg[4096];
+				sprintf_s(msg,
+					u8"[%s] [osucat][↑]: 已通过来自 %lld 的好友请求。",
+					utils::unixTime2Str(time(NULL)).c_str(),
+					req.user_id);
+				cout << msg << endl;
 			}
 			if (req.request_type == Request::RequestType::GROUP) {
 				json jp;
@@ -3099,7 +3197,41 @@ namespace osucat {
 				catch (osucat::NetWork_Exception& ex) {
 					cout << ex.Show() << endl;
 				}
+				char msg[4096];
+				sprintf_s(msg,
+					u8"[%s] [osucat][↑]: 已通过来自好友 %lld 的群 %lld 邀请请求。",
+					utils::unixTime2Str(time(NULL)).c_str(),
+					req.user_id,
+					req.group_id);
+				cout << msg << endl;
 			}
+		}
+		static PictureInfo getImage(string file_name) {
+			json jp;
+			jp["file"] = file_name;
+			PictureInfo rtn;
+			rtn.size = 0;
+			rtn.filename = "";
+			rtn.url = "";
+			try {
+				string data = NetConnection::HttpPost("http://127.0.0.1:5700/get_image", jp);
+				json j = json::parse(data);
+				rtn.size = j["size"].get<int32_t>();
+				rtn.filename = j["size"].get<string>();
+				rtn.url = j["size"].get<string>();
+			}
+			catch (osucat::NetWork_Exception& ex) {
+				cout << ex.Show() << endl;
+			}
+			char msg[4096];
+			sprintf_s(msg,
+				u8"[%s] [osucat][↓]: 接收图片 %s | 大小: %ld | URL: %s",
+				utils::unixTime2Str(time(NULL)).c_str(),
+				rtn.filename.c_str(),
+				rtn.size,
+				rtn.url.c_str());
+			cout << msg << endl;
+			return rtn;
 		}
 	};
 }

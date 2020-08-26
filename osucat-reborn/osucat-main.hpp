@@ -3353,7 +3353,7 @@ namespace osucat {
 			activepush(activepushTar);
 			activepushTar.message_type = Target::MessageType::PRIVATE;
 			activepushTar.user_id = MONO;
-			activepushTar.message = u8"管理员 " + to_string(tar.user_id) + u8"手动发起了每日更新 正在启动更新";
+			activepushTar.message = u8"管理员 " + to_string(tar.user_id) + u8" 手动发起了每日更新 正在启动更新";
 			activepush(activepushTar);
 			sprintf_s(dugtmp, u8"[%s] [osucat][updater]：启动更新", utils::unixTime2Str(time(NULL)).c_str());
 			cout << dugtmp << endl;
@@ -3574,6 +3574,7 @@ namespace osucat {
 				utils::unixTime2Str(time(NULL)).c_str(),
 				id,
 				userid);
+			cout << dugtmp << endl;
 		}
 #pragma endregion
 #pragma region 交互

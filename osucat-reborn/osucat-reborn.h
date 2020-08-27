@@ -43,4 +43,5 @@ bool ISACTIVE = false;
 #include "oppai-cpp/oppai.hpp"
 #include "imageMaker.hpp"
 #include "osucat-main.hpp"
+
 // TODO: 在此处引用程序需要的其他标头。

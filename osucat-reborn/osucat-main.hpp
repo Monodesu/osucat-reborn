@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "message.h"
+#include "osucat-addons.hpp"
 
 using json = nlohmann::json;
 using namespace std;
@@ -267,14 +268,13 @@ namespace osucat {
 						return true;
 					}
 				}
-				// 拦截其他娱乐模块 //
 #pragma region 娱乐模块
 				Database db;
 				db.Connect();
-				if (tar.message_type == Target::MessageType::GROUP) {
-					if (db.isGroupEnable(tar.group_id, 4) == 0) {
-						return false;
-					}
+				if (tar.message_type == Target::MessageType::GROUP)if (db.isGroupEnable(tar.group_id, 4) == 0) return false; //拦截娱乐模块
+				if (msg.find("[CQ:image") == string::npos) { //过滤图片
+					if (addons::entertainment::cmdParse(msg, tar, senderinfo, params))return true;
+					return false;
 				}
 				/*if (_stricmp(msg.substr(0, 2).c_str(), "me") == 0) {
 					memyselfact(msg.substr(2), tar, senderinfo, params);
@@ -3570,7 +3570,7 @@ namespace osucat {
 				}
 			}
 			char dugtmp[256];
-			sprintf_s(dugtmp, u8"[%s] [osucat][updater]：(No.%d) 用户 %lld 的数据已成功更新。",
+			sprintf_s(dugtmp, u8"[%s] [osucat][updater]：(No.%d) 已成功更新用户 %lld 的数据。",
 				utils::unixTime2Str(time(NULL)).c_str(),
 				id,
 				userid);

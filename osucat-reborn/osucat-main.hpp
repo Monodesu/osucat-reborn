@@ -104,7 +104,7 @@ namespace osucat {
 #pragma region 指令解析
 		static bool cmdParse(string msg, Target tar, SenderInfo senderinfo, string* params) {
 			try {
-				if (_stricmp(msg.substr(0, 19).c_str(), u8"猫猫调用次数") == 0) {
+				if (_stricmp(msg.substr(0, 18).c_str(), u8"猫猫调用次数") == 0) {
 					Database db;
 					db.Connect();
 					*params = u8"猫猫从0.4版本开始，至今一共被调用了 " + to_string(db.Getcallcount()) + u8" 次。";
@@ -140,6 +140,10 @@ namespace osucat {
 				}
 				if (_stricmp(msg.substr(0, 5).c_str(), "unset") == 0) {
 					unsetid(msg.substr(5), tar, params);
+					return true;
+				}
+				if (_stricmp(msg.substr(0, 6).c_str(), u8"因佛") == 0) {
+					info(msg.substr(6), tar, params);
 					return true;
 				}
 				if (_stricmp(msg.substr(0, 4).c_str(), "info") == 0) {

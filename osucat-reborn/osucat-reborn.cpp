@@ -14,10 +14,10 @@ int main()
 	consoleWelcome.push_back("-----------------------------------------------------------------------------------");
 	consoleWelcome.push_back("                                                                                   ");
 	consoleWelcome.push_back(R"(     _____         ___             ___         ___           _____                )");
-	consoleWelcome.push_back(R"(    /  /::\       /  /\           /__/\       /  /\         /  /::\        ___    )"); 
-	consoleWelcome.push_back(R"(   /  /:/\:\     /  /:/ __        \  \:\     /  /:/        /  /:  :\      /  /\   )"); 
-	consoleWelcome.push_back(R"(  /  /:/  \:\   /  /:/ /::\   ___  \  \:\   /  /:/  ___   /  /:/~/::\    /  /:/   )"); 
-	consoleWelcome.push_back(R"( /__/:/ \__\:\ /__/:/ /:/\:\ /__/\  \__\:\ /__/:/  /  /\ /__/:/ /:/\:\  /  /::\   )"); 
+	consoleWelcome.push_back(R"(    /  /::\       /  /\           /__/\       /  /\         /  /::\        ___    )");
+	consoleWelcome.push_back(R"(   /  /:/\:\     /  /:/ __        \  \:\     /  /:/        /  /:  :\      /  /\   )");
+	consoleWelcome.push_back(R"(  /  /:/  \:\   /  /:/ /::\   ___  \  \:\   /  /:/  ___   /  /:/~/::\    /  /:/   )");
+	consoleWelcome.push_back(R"( /__/:/ \__\:\ /__/:/ /:/\:\ /__/\  \__\:\ /__/:/  /  /\ /__/:/ /:/\:\  /  /::\   )");
 	consoleWelcome.push_back(R"( \  \:\ /  /:/ \  \:\/:/~/:/ \  \:\ /  /:/ \  \:\ /  /:/ \  \:\/:/__\/ /__/:/\:\  )");
 	consoleWelcome.push_back(R"(  \  \:\  /:/   \  \::/ /:/   \  \:\  /:/   \  \:\  /:/   \  \::/      \__\/  \:\ )");
 	consoleWelcome.push_back(R"(   \  \:\/:/     \__\/ /:/     \  \:\/:/     \  \:\/:/     \  \:\           \  \:\)");
@@ -26,7 +26,7 @@ int main()
 	consoleWelcome.push_back("                                                                                   ");
 	consoleWelcome.push_back("-----------------------------------------------------------------------------------");
 	consoleWelcome.push_back("Initializing...");
-	for (int i = 0; i < consoleWelcome.size() ;++i) {
+	for (int i = 0; i < consoleWelcome.size(); ++i) {
 		cout << consoleWelcome[i].c_str() << endl;
 	}
 	GetCurrentDirectory(512, OC_ROOT_PATH);
@@ -34,7 +34,93 @@ int main()
 	Magick::InitializeMagick(OC_ROOT_PATH);
 	cout << "Done!" << endl;
 	cout << "Current Directory Path: \"" << OC_ROOT_PATH << "\"" << endl;
-	if (utils::fileExist("./.active")) {
+#pragma region DetecedFolder
+	if (!utils::isDirExist(".\\data")) {
+		cout << "Folder 'data' does not exist, created." << endl;
+		CreateDirectoryA(".\\data", NULL);
+	}
+	if (!utils::isDirExist(".\\data\\cache")) {
+		cout << "Folder 'data\\cache' does not exist, created." << endl;
+		CreateDirectoryA(".\\data\\cache", NULL);
+	}
+	if (!utils::isDirExist(".\\data\\images")) {
+		cout << "Folder 'data\\images' does not exist, created." << endl;
+		CreateDirectoryA(".\\data\\images", NULL);
+	}
+	if (!utils::isDirExist(".\\data\\images\\osucat")) {
+		cout << "Folder 'data\\images\\osucat' does not exist, created." << endl;
+		CreateDirectoryA(".\\data\\images\\osucat", NULL);
+	}
+	if (!utils::isDirExist(".\\data\\images\\osucat\\help")) {
+		cout << "Folder 'data\\images\\osucat\\help' does not exist, created." << endl;
+		CreateDirectoryA(".\\data\\images\\osucat\\help", NULL);
+	}
+	if (!utils::isDirExist(".\\data\\images\\osucat\\custom")) {
+		cout << "Folder 'data\\images\\osucat\\custom' does not exist, created." << endl;
+		CreateDirectoryA(".\\data\\images\\osucat\\custom", NULL);
+	}
+	if (!utils::isDirExist(".\\data\\images\\osucat\\custom\\banner_verify")) {
+		cout << "Folder 'data\\images\\osucat\\banner_verify' does not exist, created." << endl;
+		CreateDirectoryA(".\\data\\images\\osucat\\custom\\banner_verify", NULL);
+	}
+	if (!utils::isDirExist(".\\data\\images\\osucat\\custom\\infopanel_verify")) {
+		cout << "Folder 'data\\images\\osucat\\infopanel_verify' does not exist, created." << endl;
+		CreateDirectoryA(".\\data\\images\\osucat\\custom\\infopanel_verify", NULL);
+	}
+	if (!utils::isDirExist(".\\work")) {
+		cout << "Folder 'work' does not exist, created." << endl;
+		CreateDirectoryA(".\\work", NULL);
+	}
+	if (!utils::isDirExist(".\\work\\avatar")) {
+		cout << "Folder 'work\\avatar' does not exist, created." << endl;
+		CreateDirectoryA(".\\work\\avatar", NULL);
+	}
+	if (!utils::isDirExist(".\\work\\background")) {
+		cout << "Folder 'work\\background' does not exist, created." << endl;
+		CreateDirectoryA(".\\work\\background", NULL);
+	}
+	if (!utils::isDirExist(".\\work\\badges")) {
+		cout << "Folder 'work\\badges' does not exist, created." << endl;
+		CreateDirectoryA(".\\work\\badges", NULL);
+	}
+	if (!utils::isDirExist(".\\work\\flags")) {
+		cout << "Folder 'work\\flags' does not exist, created." << endl;
+		CreateDirectoryA(".\\work\\flags", NULL);
+	}
+	if (!utils::isDirExist(".\\work\\fonts")) {
+		cout << "Folder 'fonts' does not exist, created." << endl;
+		CreateDirectoryA(".\\work\\fonts", NULL);
+	}
+	if (!utils::isDirExist(".\\work\\icons")) {
+		cout << "Folder 'work\\icon' does not exist, created." << endl;
+		CreateDirectoryA(".\\work\\icons", NULL);
+	}
+	if (!utils::isDirExist(".\\work\\mode_icon")) {
+		cout << "Folder 'work\\mode_icon' does not exist, created." << endl;
+		CreateDirectoryA(".\\work\\mode_icon", NULL);
+	}
+	if (!utils::isDirExist(".\\work\\mods")) {
+		cout << "Folder 'work\\mods' does not exist, created." << endl;
+		CreateDirectoryA(".\\work\\mods", NULL);
+	}
+	if (!utils::isDirExist(".\\work\\ranking")) {
+		cout << "Folder 'work\\ranking' does not exist, created." << endl;
+		CreateDirectoryA(".\\work\\ranking", NULL);
+	}
+	if (!utils::isDirExist(".\\work\\v1_cover")) {
+		cout << "Folder 'work\\v1_cover' does not exist, created." << endl;
+		CreateDirectoryA(".\\work\\v1_cover", NULL);
+	}
+	if (!utils::isDirExist(".\\work\\v1_infopanel")) {
+		cout << "Folder 'work\\v1_infopanel' does not exist, created." << endl;
+		CreateDirectoryA(".\\work\\v1_infopanel", NULL);
+	}
+	if (!utils::isDirExist(".\\work\\v2_background")) {
+		cout << "Folder 'work\\v2_background' does not exist, created." << endl;
+		CreateDirectoryA(".\\work\\v2_background", NULL);
+	}
+#pragma endregion
+	if (utils::fileExist(".\\.active")) {
 		ISACTIVE = true;
 		cout << u8"osucat is activated!" << endl;;
 	}
@@ -43,7 +129,7 @@ int main()
 		cout << u8"\nosucat is not activated,\nthe program is about to exit..." << endl;;
 	}
 	if (ISACTIVE) {
-		utils::fileExist("./.debug") ? DEBUGMODE = true : DEBUGMODE = false; //判断是否启用了debug模式
+		utils::fileExist(".\\.debug") ? DEBUGMODE = true : DEBUGMODE = false; //判断是否启用了debug模式
 		if (DEBUGMODE) cout << u8"Debug mode is enabled...\n" << endl;
 		cout << u8"Creating daily update thread..." << endl;
 		osucat::main::_CreateDUThread();

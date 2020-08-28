@@ -223,7 +223,7 @@ public:
             osu_pp_country_rank,
             osu_pp_rank,
             info->mode,
-            timeStr);
+            timeStr.c_str());
         this->Insert(buffer);
     }
 

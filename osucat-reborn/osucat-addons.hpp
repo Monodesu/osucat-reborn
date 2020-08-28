@@ -151,9 +151,9 @@ namespace osucat::addons {
 				return;
 			}
 			utils::trim(cmd);
-			utils::string_replace(cmd, u8"我", "{@@}");
+			utils::string_replace(cmd, u8"我", u8"{@@}");
 			utils::string_replace(cmd, u8"你", u8"我");
-			utils::string_replace(cmd, "{@@}", u8"你");
+			utils::string_replace(cmd, u8"{@@}", u8"你");
 			smatch res;
 			regex re(u8"^(.*?)[还還]是+(.*?)$");
 			if (regex_match(cmd, res, re)) {

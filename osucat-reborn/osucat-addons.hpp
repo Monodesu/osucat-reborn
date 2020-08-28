@@ -131,18 +131,17 @@ namespace osucat::addons {
 		static void nbnhhsh(string cmd, string* params) {
 			utils::trim(cmd);
 			json jp;
-			jp["text"] = "awsl";
+			jp["text"] = cmd;
 			try {
 				string tmp = NetConnection::HttpsPost("https://lab.magiconch.com/api/nbnhhsh/guess", jp).substr(1);
+				tmp = tmp.substr(0, tmp.length() - 1);
 				json j = json::parse(tmp)["trans"];
 				//vector<string> a;
-				tmp = tmp.substr(0, tmp.length() - 1);
-				json j = json::parse(NetConnection::HttpsPost("https://lab.magiconch.com/api/nbnhhsh/guess", jp));
 				for (int i = 0; i < j.size(); ++i) {
 					tmp = j[i].get<string>();
-					//do something here
+					*params += tmp;
 					//a.push_back(tmp);
-				}		
+				}
 			}
 			catch (osucat::NetWork_Exception) {
 				*params = u8"访问api时超时...请稍后再试...";

@@ -80,7 +80,7 @@ namespace osucat::addons {
 				*params = NetConnection::HttpsGet("https://wyy.xxis.me");
 			}
 			catch (osucat::NetWork_Exception) {
-				*params = u8"访问api时超时...请稍后再试...";
+				*params = u8"上号失败，我很抱歉。您不pay被抑郁...";
 			}
 		}
 		static void sleep(string* params) {

@@ -3,7 +3,6 @@
 
 #pragma once
 char OC_ROOT_PATH[512];
-//constexpr auto DEBUGMODE = false;
 bool DEBUGMODE = false;
 bool ISACTIVE = false;
 

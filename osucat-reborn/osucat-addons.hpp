@@ -211,7 +211,6 @@ namespace osucat::addons {
 				tmp2 = tmp2.substr(0, tmp2.length() - 1);
 				try {
 					json j = json::parse(tmp2)["trans"];
-					*params = cmd;
 					for (int ii = 1, i = 0; i < j.size(); ++i) {
 						tmp2 = "\n[" + to_string(ii) + "] " + j[i].get<string>();
 						if (!forbiddenWordsLibrary(j[i].get<string>())) {
@@ -222,26 +221,26 @@ namespace osucat::addons {
 							break;
 						}
 					}
-					char trntmp[8192];
-					//sprintf printf一类的 必须跟c_str不然乱码
-					sprintf_s(trntmp,
-						u8"\"%s\"的返回结果如下：%s",
-						cmd.c_str(),
-						tmp1.c_str());
-
-					*params = trntmp;
+					if (tmp1 != "") {
+						char trntmp[8192];
+						//sprintf printf一类的 必须跟c_str不然乱码
+						sprintf_s(trntmp,
+							u8"\"%s\"的返回结果如下：%s",
+							cmd.c_str(),
+							tmp1.c_str());
+						*params = trntmp;
+					}
+					else {
+						*params = u8"该词尚未收录";
+					}
 				}
 				catch (json::exception) {
-					*params = u8"请输入参数";
+					*params = u8"参数错误";
 					return;
 				}
 			}
 			catch (osucat::NetWork_Exception) {
 				*params = u8"访问api时超时...请稍后再试...";
-				return;
-			}
-			if (*params == cmd + u8"\n") {
-				*params = u8"该词尚未收录";
 				return;
 			}
 		}

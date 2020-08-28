@@ -77,7 +77,7 @@ namespace osucat::addons {
 		}
 		static void wyy(string* params) {
 			try {
-				*params = NetConnection::HttpsGet("https://wyy.xxis.me");
+				*params = NetConnection::HttpsGet("https://wyy.moebot.im");
 			}
 			catch (osucat::NetWork_Exception) {
 				*params = u8"上号失败，我很抱歉。您不pay被抑郁...";

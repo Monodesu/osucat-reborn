@@ -233,10 +233,11 @@ public:
         time_t now = time(NULL);
         char timeStr[30] = { 0 };
         json result;
+        tm* tm_time = localtime(&now);
+        strftime(timeStr, sizeof(timeStr), "%Y-%m-%d 04:00:00", tm_time);
         if (days == 0) {
             try {
-                tm* tm_time = localtime(&now);
-                strftime(timeStr, sizeof(timeStr), "%Y-%m-%d 04:00:00", tm_time);
+                
                 sprintf_s(query,
                     1024,
                     "select * from info_record where uid=%lld and gamemode=%d and lastupdate=\"%s\"",
@@ -247,8 +248,6 @@ public:
             }
             catch (osucat::database_exception& e) {
                 now = now - 86400;
-                tm* tm_time = localtime(&now);
-                strftime(timeStr, sizeof(timeStr), "%Y-%m-%d 04:00:00", tm_time);
                 sprintf_s(query,
                     1024,
                     "select * from info_record where uid=%lld and gamemode=%d and lastupdate=\"%s\"",

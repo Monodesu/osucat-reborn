@@ -34,6 +34,17 @@ int main()
 	Magick::InitializeMagick(OC_ROOT_PATH);
 	cout << "Done!" << endl;
 	cout << "Current Directory Path: \"" << OC_ROOT_PATH << "\"" << endl;
+	string p;
+	osucat::addons::entertainment::randEvents(u8"要不要吃饭", &p);
+	cout << p << endl;
+	osucat::addons::entertainment::randEvents(u8"他要不要上班", &p);
+	cout << p << endl;
+	osucat::addons::entertainment::randEvents(u8"晚上要不要开黑", &p);
+	cout << p << endl;
+	osucat::addons::entertainment::randEvents(u8"A不A", &p);
+	cout << p << endl;
+	osucat::addons::entertainment::randEvents(u8"JB不JB", &p);
+	cout << p << endl;
 #pragma region DetecedFolder
 	if (!utils::isDirExist(".\\data")) {
 		cout << "Folder 'data' does not exist, created." << endl;

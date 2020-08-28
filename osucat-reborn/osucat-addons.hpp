@@ -28,6 +28,10 @@ namespace osucat::addons {
 			}
 			if (msg.find(u8"还是") != string::npos || msg.find(u8"不") != string::npos || msg.find(u8"没") != string::npos) {
 				randEvents(msg, params);
+        return true;
+      }
+			if (_stricmp(msg.substr(0, 6).c_str(), u8"上号") == 0) {
+				wyy(params);
 				return true;
 			}
 			return false;
@@ -239,6 +243,14 @@ namespace osucat::addons {
 			if (*params == cmd + u8"\n") {
 				*params = u8"该词尚未收录";
 				return;
+			}
+		}
+		static void wyy(string* params) {
+			try {
+				*params = NetConnection::HttpsGet("https://wyy.moebot.im/");
+			}
+			catch (osucat::NetWork_Exception) {
+				*params = u8"抑郁太多对身体不好...";
 			}
 		}
 	private:

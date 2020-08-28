@@ -22,6 +22,10 @@ namespace osucat::addons {
 				marketingGenerator(msg.substr(18), params);
 				return true;
 			}
+			if (_stricmp(msg.substr(0, 7).c_str(), "nbnhhsh") == 0) {
+				nbnhhsh(msg.substr(7), params);
+				return true;
+			}
 			return false;
 		}
 		static void roll(string cmd, Target tar, string* params) {
@@ -74,16 +78,16 @@ namespace osucat::addons {
 		static void sleep(string* params) {
 			switch (utils::randomNum(1, 4)) {
 			case 1:
-				*params = u8"[CQ:record,file=others\\你怎么睡得着的.mp3]";
+				*params = u8"[CQ:record,file=osucat\\你怎么睡得着的.mp3]";
 				break;
 			case 2:
-				*params = u8"[CQ:record,file=others\\睡不着啊 硬邦邦.mp3]";
+				*params = u8"[CQ:record,file=osucat\\睡不着啊 硬邦邦.mp3]";
 				break;
 			case 3:
-				*params = u8"[CQ:record,file=others\\丁丁-睡不着啊.mp3]";
+				*params = u8"[CQ:record,file=osucat\\丁丁-睡不着啊.mp3]";
 				break;
 			case 4:
-				*params = u8"[CQ:record,file=others\\小乐乐-睡觉啦不要聊天啦.mp3]";
+				*params = u8"[CQ:record,file=osucat\\小乐乐-睡觉啦不要聊天啦.mp3]";
 				break;
 			default:
 				break;
@@ -128,23 +132,74 @@ namespace osucat::addons {
 				事件.c_str());
 			*params = message;
 		}
+		static void randEvents(string cmd, string* params) {
+			regex re(u8"^(.*?)[还還]是+(.*?)$");
+			smatch res;
+			utils::string_replace(cmd, "我", "{@@}");
+			utils::string_replace(cmd, "你", "我");
+			utils::string_replace(cmd, "{@@}", "你");
+			if (regex_match(cmd, res, re)) {
+				*params = u8"当然是" + res.str(utils::randomNum(1, 2)) + u8"喽~";
+				return;
+			}
+			regex re(u8"[我你他，。,.][不没][你我他，。,.]");
+			if (!regex_match(cmd, res, re)) {
+				regex re(u8"^.*?([没不])+.*?$");
+				if (regex_match(cmd, res, re)) {
+					string type = res.str(1);
+				}
+			}
+		}
 		static void nbnhhsh(string cmd, string* params) {
+			cmd = utils::unescape(cmd);
+			if (forbiddenWordsLibrary(cmd) == true) {
+				*params = u8"不想理你...";
+				return;
+			}
+			if (cmd.length() > 199) {
+				*params = u8"太长了！";
+				return;
+			}
 			utils::trim(cmd);
 			json jp;
 			jp["text"] = cmd;
 			try {
-				string tmp = NetConnection::HttpsPost("https://lab.magiconch.com/api/nbnhhsh/guess", jp).substr(1);
-				tmp = tmp.substr(0, tmp.length() - 1);
-				json j = json::parse(tmp)["trans"];
-				//vector<string> a;
-				for (int i = 0; i < j.size(); ++i) {
-					tmp = j[i].get<string>();
-					*params += tmp;
-					//a.push_back(tmp);
+				string tmp1, tmp2 = NetConnection::HttpsPost("https://lab.magiconch.com/api/nbnhhsh/guess", jp).substr(1);
+				tmp2 = tmp2.substr(0, tmp2.length() - 1);
+				try {
+					json j = json::parse(tmp2)["trans"];
+					*params = cmd;
+					for (int ii = 1, i = 0; i < j.size(); ++i) {
+						tmp2 = "\n[" + to_string(ii) + "] " + j[i].get<string>();
+						if (!forbiddenWordsLibrary(j[i].get<string>())) {
+							tmp1 += tmp2;
+							++ii;
+						}
+						if (ii > 10) {
+							break;
+						}
+					}
+					char trntmp[8192];
+					//sprintf printf一类的 必须跟c_str不然乱码
+					sprintf_s(trntmp,
+						u8"\"%s\"的返回结果如下：%s",
+						cmd.c_str(),
+						tmp1.c_str());
+
+					*params = trntmp;
+				}
+				catch (json::exception) {
+					*params = u8"请输入参数";
+					return;
 				}
 			}
 			catch (osucat::NetWork_Exception) {
 				*params = u8"访问api时超时...请稍后再试...";
+				return;
+			}
+			if (*params == cmd + u8"\n") {
+				*params = u8"该词尚未收录";
+				return;
 			}
 		}
 	private:

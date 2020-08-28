@@ -14,10 +14,10 @@ namespace osucat::addons {
 				chp(params);
 				return true;
 			}
-			if (_stricmp(msg.substr(0, 5).c_str(), "sleep") == 0) {
+			/*if (_stricmp(msg.substr(0, 5).c_str(), "sleep") == 0) {
 				sleep(params);
 				return true;
-			}
+			}*/
 			if (_stricmp(msg.substr(0, 18).c_str(), u8"营销号生成器") == 0) {
 				marketingGenerator(msg.substr(18), params);
 				return true;

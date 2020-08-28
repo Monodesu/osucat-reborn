@@ -26,6 +26,10 @@ namespace osucat::addons {
 				nbnhhsh(msg.substr(7), params);
 				return true;
 			}
+			if (_stricmp(msg.substr(0, 6).c_str(), u8"上号") == 0) {
+				wyy(params);
+				return true;
+			}
 			return false;
 		}
 		static void roll(string cmd, Target tar, string* params) {
@@ -200,6 +204,14 @@ namespace osucat::addons {
 			if (*params == cmd + u8"\n") {
 				*params = u8"该词尚未收录";
 				return;
+			}
+		}
+		static void wyy(string* params) {
+			try {
+				*params = NetConnection::HttpsGet("https://wyy.moebot.im/");
+			}
+			catch (osucat::NetWork_Exception) {
+				*params = u8"抑郁太多对身体不好...";
 			}
 		}
 	private:

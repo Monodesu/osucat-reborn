@@ -14,6 +14,14 @@ namespace osucat::addons {
 				chp(params);
 				return true;
 			}
+			if (_stricmp(msg.substr(0, 5).c_str(), "sleep") == 0) {
+				sleep(params);
+				return true;
+			}
+			if (_stricmp(msg.substr(0, 18).c_str(), u8"营销号生成器") == 0) {
+				marketingGenerator(msg.substr(18), params);
+				return true;
+			}
 			return false;
 		}
 		static void roll(string cmd, Target tar, string* params) {
@@ -58,6 +66,83 @@ namespace osucat::addons {
 		static void chp(string* params) {
 			try {
 				*params = NetConnection::HttpsGet("https://chp.shadiao.app/api.php");
+			}
+			catch (osucat::NetWork_Exception) {
+				*params = u8"访问api时超时...请稍后再试...";
+			}
+		}
+		static void sleep(string* params) {
+			switch (utils::randomNum(1, 4)) {
+			case 1:
+				*params = u8"[CQ:record,file=others\\你怎么睡得着的.mp3]";
+				break;
+			case 2:
+				*params = u8"[CQ:record,file=others\\睡不着啊 硬邦邦.mp3]";
+				break;
+			case 3:
+				*params = u8"[CQ:record,file=others\\丁丁-睡不着啊.mp3]";
+				break;
+			case 4:
+				*params = u8"[CQ:record,file=others\\小乐乐-睡觉啦不要聊天啦.mp3]";
+				break;
+			default:
+				break;
+			}
+		}
+		static void marketingGenerator(string cmd, string* params) {
+			cmd = utils::unescape(cmd);
+			if (forbiddenWordsLibrary(cmd) == true) {
+				*params = u8"不想理你...";
+				return;
+			}
+			if (cmd.length() > 400) {
+				*params = u8"太长了！";
+				return;
+			}
+			utils::trim(cmd);
+			std::vector<std::string> temp = utils::string_split(cmd, '#');
+			if (temp.size() != 3) {
+				*params = u8"参数有误，生成失败。\n参数格式为 主体#事件#事件的另一种说法";
+				return;
+			}
+			std::string 主体 = temp[0], 事件 = temp[1], 事件的另一种说法 = temp[2];
+			char message[3072];
+			sprintf_s(message,
+				3072,
+				u8"%s%s是怎么回事呢？%s相信大家都很熟悉，但是%s%s"
+				u8"是怎么回事呢，下面就让小编带大家一起了解下吧。"
+				u8"%s%s，其实就是%s，大家可能会很惊讶%s怎么"
+				u8"%s呢？但事实就是这样，小编也感到非常惊讶。"
+				u8"这就是关于%s%s的事情了，大家有什么想法呢，欢迎在评论区和小编一起讨论哦~",
+				主体.c_str(),
+				事件.c_str(),
+				主体.c_str(),
+				主体.c_str(),
+				事件.c_str(),
+				主体.c_str(),
+				事件.c_str(),
+				事件的另一种说法.c_str(),
+				主体.c_str(),
+				事件.c_str(),
+				主体.c_str(),
+				事件.c_str());
+			*params = message;
+		}
+		static void nbnhhsh(string cmd, string* params) {
+			utils::trim(cmd);
+			json jp;
+			jp["text"] = "awsl";
+			try {
+				string tmp = NetConnection::HttpsPost("https://lab.magiconch.com/api/nbnhhsh/guess", jp).substr(1);
+				json j = json::parse(tmp)["trans"];
+				//vector<string> a;
+				tmp = tmp.substr(0, tmp.length() - 1);
+				json j = json::parse(NetConnection::HttpsPost("https://lab.magiconch.com/api/nbnhhsh/guess", jp));
+				for (int i = 0; i < j.size(); ++i) {
+					tmp = j[i].get<string>();
+					//do something here
+					//a.push_back(tmp);
+				}		
 			}
 			catch (osucat::NetWork_Exception) {
 				*params = u8"访问api时超时...请稍后再试...";

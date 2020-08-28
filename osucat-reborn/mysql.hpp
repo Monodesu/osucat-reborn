@@ -4,13 +4,22 @@
 
 #include <mysql.h>
 
-#define SQL_USER "root"
-#define SQL_HOST "127.0.0.1"
 //#define SQL_HOST "osucat.desu.life"
 
-#define SQL_PWD "ASDasdASD32111!"
+//记得还原再pull request
+//#define SQL_USER "root"
+//#define SQL_HOST "127.0.0.1"
+//#define SQL_PWD "ASDasdASD32111!"
+//#define SQL_DATABASE "osucat"
+//#define SQL_PORT 32148
+
+#define SQL_USER "osucat"
+#define SQL_HOST "139.196.8.242"
+#define SQL_PWD "wPGAHft4M2W8Y88i"
 #define SQL_DATABASE "osucat"
-#define SQL_PORT 32148
+#define SQL_PORT 3306
+
+
 
 using json = nlohmann::json;
 using namespace osucat;

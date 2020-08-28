@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #pragma once
 #ifndef OSUCAT_HEXAGRAM_HPP
 #define OSUCAT_HEXAGRAM_HPP
@@ -27,27 +27,27 @@ namespace Hexagram {
 
     struct HexagramInfo {
         int64_t size;
-        int8_t node_count; //ÉèÖÃÓĞ¼¸¸ö±ßĞèÒª»æÖÆ
-        int32_t nodeMaxValue; //ÉèÖÃ»æÖÆÊı¾İµÄ×î´óÖµ
-        std::string abilityLineColor; //ÉèÖÃÂÖÀªÏßµÄÑÕÉ«
-        std::string abilityFillColor; //ÉèÖÃÌî³äÑÕÉ«
-        int32_t sideLength; //Í¼Æ¬µÄ±ß³¤=¶à±ßĞÎÍâ½ÓÔ²Ö±¾¶
-        int32_t StrokeWidth; //Á¬½ÓÏß³ß´ç v1Ãæ°åÄ¬ÈÏ3
-        float nodesize; //×ø±êµã´óĞ¡ v1Ãæ°åÄ¬ÈÏ2.5f
+        int8_t node_count; //è®¾ç½®æœ‰å‡ ä¸ªè¾¹éœ€è¦ç»˜åˆ¶
+        int32_t nodeMaxValue; //è®¾ç½®ç»˜åˆ¶æ•°æ®çš„æœ€å¤§å€¼
+        std::string abilityLineColor; //è®¾ç½®è½®å»“çº¿çš„é¢œè‰²
+        std::string abilityFillColor; //è®¾ç½®å¡«å……é¢œè‰²
+        int32_t sideLength; //å›¾ç‰‡çš„è¾¹é•¿=å¤šè¾¹å½¢å¤–æ¥åœ†ç›´å¾„
+        int32_t StrokeWidth; //è¿æ¥çº¿å°ºå¯¸ v1é¢æ¿é»˜è®¤3
+        float nodesize; //åæ ‡ç‚¹å¤§å° v1é¢æ¿é»˜è®¤2.5f
         int mode;
     };
 
-    // ¼«×ø±ê×ª»»Ö±½Ç×ø±ê
+    // æåæ ‡è½¬æ¢ç›´è§’åæ ‡
     static void r82xy(const r8& _r8, xy& _xy) {
         _xy.x = _r8.r * sin(_r8._8 * M_PI / 180);
         _xy.y = _r8.r * cos(_r8._8 * M_PI / 180);
     }
 
-    // ppd          pp_plus_data, ×¢ÒâÒªÓëÏÂÃæµÄmultiºÍexp²ÎÊıÊıÁ¿ÏàÍ¬ÇÒ¶ÔÆë
-    // multi, exp   ¼ÓÈ¨Öµ y = multi * x ^ exp
-    // pImage       Ö¸ÏòInfoPanelÍ¼Æ¬µÄÖ¸Õë£¬ÓÃ&InfoPanelÀ´±íÊ¾Ö¸Õë
-    // x(y)_offset  pp+Í¼Æ¬Ïà¶ÔÓÚInfoPanelÍ¼Æ¬µÄ×ø±êÆ«ÒÆÁ¿
-    // hi           pp+Í¼Æ¬µÄÒ»Ğ©ÉèÖÃ²ÎÊı, hi.node_countÒªµÈÓÚppdµÄÊıÁ¿
+    // ppd          pp_plus_data, æ³¨æ„è¦ä¸ä¸‹é¢çš„multiå’Œexpå‚æ•°æ•°é‡ç›¸åŒä¸”å¯¹é½
+    // multi, exp   åŠ æƒå€¼ y = multi * x ^ exp
+    // pImage       æŒ‡å‘InfoPanelå›¾ç‰‡çš„æŒ‡é’ˆï¼Œç”¨&InfoPanelæ¥è¡¨ç¤ºæŒ‡é’ˆ
+    // x(y)_offset  pp+å›¾ç‰‡ç›¸å¯¹äºInfoPanelå›¾ç‰‡çš„åæ ‡åç§»é‡
+    // hi           pp+å›¾ç‰‡çš„ä¸€äº›è®¾ç½®å‚æ•°, hi.node_countè¦ç­‰äºppdçš„æ•°é‡
     static void draw_v1(const std::vector<long>& ppd, const std::vector<double>& multi,
         const std::vector<double>& exp, Magick::Image* pImage, double x_offset,
         double y_offset, const HexagramInfo& hi) {
@@ -76,7 +76,7 @@ namespace Hexagram {
         Magick::DrawableList drawables;
         drawables.push_back(Magick::DrawableFillColor(hi.abilityFillColor));
         drawables.push_back(Magick::DrawableStrokeColor(hi.abilityLineColor));
-        drawables.push_back(Magick::DrawableStrokeWidth(hi.StrokeWidth)); //Á¬½ÓÏß³ß´ç
+        drawables.push_back(Magick::DrawableStrokeWidth(hi.StrokeWidth)); //è¿æ¥çº¿å°ºå¯¸
         drawables.push_back(Magick::DrawablePolygon(point_list));
         im.draw(drawables);
         drawables.clear();
@@ -85,7 +85,7 @@ namespace Hexagram {
             drawables.push_back(Magick::DrawableCircle(point_list[i].x(),
                 point_list[i].y(),
                 point_list[i].x() + hi.nodesize,
-                point_list[i].y())); //×ø±êµã´óĞ¡ÕâÀï¸Ä
+                point_list[i].y())); //åæ ‡ç‚¹å¤§å°è¿™é‡Œæ”¹
         }
         im.draw(drawables);
 

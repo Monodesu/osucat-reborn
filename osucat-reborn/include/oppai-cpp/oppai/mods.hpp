@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #ifndef SAYOBOT_MODS_HPP
 #define SAYOBOT_MODS_HPP
 
@@ -48,7 +48,7 @@ namespace osu {
 namespace osucat {
     class Mod {
     public:
-        // modÊı×Ö½âÎö
+        // modæ•°å­—è§£æ
         Mod(int32_t mod_num) {
             for (int i = 0; i < 31; ++i) {
                 bool flag = mod_num & 0x1;
@@ -69,19 +69,19 @@ namespace osucat {
                 mod_num >>= 1;
             }
         }
-        // mod×Ö·û´®½âÎö
+        // modå­—ç¬¦ä¸²è§£æ
         Mod(std::string _mod_str) {
             std::transform(_mod_str.begin(), _mod_str.end(), _mod_str.begin(), ::toupper);
 
-            // È¥³ımod×Ö´®ÖĞA-Z 0-9ÒÔÍâµÄ×Ö·û
+            // å»é™¤modå­—ä¸²ä¸­A-Z 0-9ä»¥å¤–çš„å­—ç¬¦
             for (auto it = _mod_str.begin(); it != _mod_str.end(); ++it) {
                 if ((*it < 'A' || *it > 'Z') && (*it < '0' || *it > '9')) {
                     _mod_str.erase(it);
                 }
             }
 
-            // mod×Ö´®¸öÊı²»ÊÇ2µÄ±¶Êı
-            // ÒÆ³ı×îºóÒ»¸ö×Ö·û
+            // modå­—ä¸²ä¸ªæ•°ä¸æ˜¯2çš„å€æ•°
+            // ç§»é™¤æœ€åä¸€ä¸ªå­—ç¬¦
             if (_mod_str.size() % 2) {
                 _mod_str.erase(_mod_str.size() - 1);
             }
@@ -103,8 +103,8 @@ namespace osucat {
                 }
             }
         }
-        // »ñÈ¡mod×Ö·û´®£¬ÒÑ±»ÅÅĞò
-        // inpentÎªmodÓëmodÖ®¼äµÄ·Ö¸ô×Ö·û´®
+        // è·å–modå­—ç¬¦ä¸²ï¼Œå·²è¢«æ’åº
+        // inpentä¸ºmodä¸modä¹‹é—´çš„åˆ†éš”å­—ç¬¦ä¸²
         std::string GetModString(const std::string& inpent = "") {
             std::string ret = "";
             int32_t mod_num = GetModNumber();
@@ -125,7 +125,7 @@ namespace osucat {
             }
             return ret.substr(0, ret.size() - inpent.size());
         }
-        // »ñÈ¡modÊı×Ö
+        // è·å–modæ•°å­—
         int32_t GetModNumber() {
             int32_t ret = 0;
             for (auto it : enabled_mods) {
@@ -133,7 +133,7 @@ namespace osucat {
             }
             return ret;
         }
-        // ¼ì²émodÊÇ·ñºÏ·¨
+        // æ£€æŸ¥modæ˜¯å¦åˆæ³•
         bool isVaild() {
             bool flag = true;
             int32_t mod_num = GetModNumber();

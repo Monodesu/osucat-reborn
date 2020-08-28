@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include <stdint.h>
 #include <string>
 
@@ -27,7 +27,7 @@ namespace osucat {
 		int64_t group_id;
 		int64_t user_id;
 		std::string flag;
-		std::string message;//¸½¼ÓĞÅÏ¢
+		std::string message;//é™„åŠ ä¿¡æ¯
 
 	};
 
@@ -40,17 +40,17 @@ namespace osucat {
 		//Role member_role;
 		int age;
 		std::string member_role;
-		std::string card; //ÈºêÇ³Æ
+		std::string card; //ç¾¤æ˜µç§°
 		std::string level;
-		std::string nikename; //Ô­ÓĞÓÃ»§Ãû
-		std::string title; //Í·ÏÎ
+		std::string nikename; //åŸæœ‰ç”¨æˆ·å
+		std::string title; //å¤´è¡”
 		std::string sex;
 	};
 
 	struct PictureInfo {
-		int32_t size; //Í¼Æ¬´óĞ¡
-		std::string filename; //Ô­Ê¼ÎÄ¼şÃû
-		std::string url; //Í¼Æ¬ÏÂÔØµØÖ·
-		std::string format; //Í¼Æ¬¸ñÊ½ .jpg .png .bmp .gif
+		int32_t size; //å›¾ç‰‡å¤§å°
+		std::string filename; //åŸå§‹æ–‡ä»¶å
+		std::string url; //å›¾ç‰‡ä¸‹è½½åœ°å€
+		std::string format; //å›¾ç‰‡æ ¼å¼ .jpg .png .bmp .gif
 	};
 }

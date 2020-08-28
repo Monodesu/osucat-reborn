@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #ifndef OC_EXCEPTION
 #define OC_EXCEPTION
 
@@ -19,7 +19,7 @@ namespace osucat {
             return this->info;
         }
 
-        // Êä³öº¯Êý£¬Äã¾ö¶¨ÏÔÊ¾´íÎóµÄ¸ñÊ½
+        // è¾“å‡ºå‡½æ•°ï¼Œä½ å†³å®šæ˜¾ç¤ºé”™è¯¯çš„æ ¼å¼
         virtual std::string Show() {
             time_t tt = time(NULL);
             tm _tm = { 0 };
@@ -28,7 +28,7 @@ namespace osucat {
             strftime(time_str, 128, "%Y-%m-%d %H:%M:%S", &_tm);
 
             char result[1024];
-            // [Ê±¼ä] ´íÎó´úÂë info£º´íÎóÏûÏ¢
+            // [æ—¶é—´] é”™è¯¯ä»£ç  infoï¼šé”™è¯¯æ¶ˆæ¯
             sprintf_s(result, 1024, "[%s] %d - %s", time_str, this->code, this->info.c_str());
             return result;
         }
@@ -37,9 +37,9 @@ namespace osucat {
         std::string info;
         // error code
         int32_t code;
-        // ´¥·¢Õâ¸öexceptionµÄtarget
+        // è§¦å‘è¿™ä¸ªexceptionçš„target
         //cq::Target target;
-        // target·¢ËÍµÄÏûÏ¢
+        // targetå‘é€çš„æ¶ˆæ¯
         std::string message;
     };
     class NetWork_Exception : public exception {
@@ -50,24 +50,24 @@ namespace osucat {
             char buffer[512];
             sprintf_s(buffer,
                 512,
-                "ÍøÂç³öÏÖ´íÎó£¬´íÎó´úÂë£º%d£¬´íÎóÐÅÏ¢£º%s",
+                "ç½‘ç»œå‡ºçŽ°é”™è¯¯ï¼Œé”™è¯¯ä»£ç ï¼š%dï¼Œé”™è¯¯ä¿¡æ¯ï¼š%s",
                 this->Code(),
                 this->Info().c_str());
             return buffer;
         }
     };
-    // ÕâÀï×ÓÀàÒþÊ½¼Ì³ÐÁË¸¸ÀàµÄinfoºÍcode
+    // è¿™é‡Œå­ç±»éšå¼ç»§æ‰¿äº†çˆ¶ç±»çš„infoå’Œcode
     class database_exception : public exception {
     public:
         database_exception(const std::string& info, int code) : exception(info, code) {
         }
 
-        // ÖØÔØ£¨Ìæ»»£©»ùÀàµÄShowº¯Êý
+        // é‡è½½ï¼ˆæ›¿æ¢ï¼‰åŸºç±»çš„Showå‡½æ•°
         std::string Show() {
             char buffer[512];
             sprintf_s(buffer,
                 512,
-                "MySQL³öÏÖ´íÎó£¬´íÎó´úÂë£º%d£¬´íÎóÐÅÏ¢£º%s",
+                "MySQLå‡ºçŽ°é”™è¯¯ï¼Œé”™è¯¯ä»£ç ï¼š%dï¼Œé”™è¯¯ä¿¡æ¯ï¼š%s",
                 this->Code(),
                 this->Info().c_str());
             return buffer;

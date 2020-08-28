@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 
 #include <random>
 #include "Hexagram.hpp"
@@ -32,10 +32,10 @@ namespace osucat {
 	string infoPic_v1(const UserPanelData& data, const user_info& previoustUserInfo, bool isBonded = false) {
 		char path_temp[512];
 		char temp[1024];
-		Image Info(Geometry(1200, 857), "none"); //³õÊ¼»¯Í¼Ïñ
+		Image Info(Geometry(1200, 857), "none"); //åˆå§‹åŒ–å›¾åƒ
 		Image imtemp(Geometry(1200, 350), Color("none"));
-		DrawableList dl; //³õÊ¼»¯¶ÓÁĞ
-		Info.density(Point(300, 300)); //Í¼Ïñ·Ö±æÂÊ
+		DrawableList dl; //åˆå§‹åŒ–é˜Ÿåˆ—
+		Info.density(Point(300, 300)); //å›¾åƒåˆ†è¾¨ç‡
 		TypeMetric metric;
 
 		bool isCoverExist = osucat::utils::fileExist("./work/v1_cover/" + to_string(data.user_info.user_id) + ".jpg");
@@ -61,7 +61,7 @@ namespace osucat {
 			coverRoundrect.composite(cover, 0, 0, InCompositeOp);
 			coverRoundrect.quality(100);
 			coverRoundrect.write("./work/v1_cover/" + to_string(data.user_info.user_id) + ".jpg");
-			//logging::info_success(BOT_NAME, "ÓÃ»§Banner±£´æÍê³É");
+			//logging::info_success(BOT_NAME, "ç”¨æˆ·Bannerä¿å­˜å®Œæˆ");
 		}
 		Image Cover("./work/v1_cover/" + to_string(data.user_info.user_id) + ".jpg");
 		Info.composite(Cover, 0, 0, OverCompositeOp);
@@ -84,7 +84,7 @@ namespace osucat {
 			NetConnection::DownloadFile(temp, name);
 			Image avatar(name);
 			avatar.write("./work/avatar/" + to_string(data.user_info.user_id) + ".png");
-			//logging::info_success(BOT_NAME, "ÓÃ»§Avatar±£´æÍê³É");
+			//logging::info_success(BOT_NAME, "ç”¨æˆ·Avatarä¿å­˜å®Œæˆ");
 		}
 		try {
 			Image avttemp(Geometry(190, 190), Color("none"));
@@ -136,7 +136,7 @@ namespace osucat {
 			else {
 				string crtemp = "#" + osucat::utils::IntegerSplit(data.user_info.country_rank) + "("
 					+ to_string(previoustUserInfo.country_rank - data.user_info.country_rank) + ")";
-				// utils::string_replace(crtemp, "-", "¡ı");
+				// utils::string_replace(crtemp, "-", "â†“");
 				dl.push_back(DrawableText(335, 248, crtemp));
 			}
 		}
@@ -154,18 +154,18 @@ namespace osucat {
 					dl.push_back(DrawableText(
 						40,
 						425,
-						u8"¡ü " + osucat::utils::IntegerSplit(previoustUserInfo.global_rank - data.user_info.global_rank)));
+						u8"â†‘ " + osucat::utils::IntegerSplit(previoustUserInfo.global_rank - data.user_info.global_rank)));
 				}
 				else {
 					string grntmp = osucat::utils::IntegerSplit(previoustUserInfo.global_rank - data.user_info.global_rank);
 					utils::string_replace(grntmp, "-", "");
 					grntmp[0] == ',' ? grntmp = grntmp.substr(1) : grntmp = grntmp;
-					dl.push_back(DrawableText(40, 425, u8"¡ı " + grntmp));
+					dl.push_back(DrawableText(40, 425, u8"â†“ " + grntmp));
 				}
 			}
 			else {
 				dl.push_back(DrawablePointSize(14));
-				dl.push_back(DrawableText(40, 425, u8"¡ü -"));
+				dl.push_back(DrawableText(40, 425, u8"â†‘ -"));
 			}
 		}
 		dl.push_back(DrawableFont("./work/fonts/Exo2-Regular.otf"));
@@ -177,20 +177,20 @@ namespace osucat {
 			if (previoustUserInfo.pp != data.user_info.pp) {
 				dl.push_back(DrawablePointSize(14));
 				if (previoustUserInfo.pp - data.user_info.pp > 0.00) {
-					sprintf_s(temp, u8"¡ı %.2f", previoustUserInfo.pp - data.user_info.pp);
+					sprintf_s(temp, u8"â†“ %.2f", previoustUserInfo.pp - data.user_info.pp);
 					dl.push_back(DrawableText(246, 425, temp));
 				}
 				else {
 					sprintf_s(
 						temp,
-						u8"¡ü %.2f",
+						u8"â†‘ %.2f",
 						(previoustUserInfo.pp - data.user_info.pp) - (previoustUserInfo.pp - data.user_info.pp) * 2);
 					dl.push_back(DrawableText(246, 425, temp));
 				}
 			}
 			else {
 				dl.push_back(DrawablePointSize(14));
-				dl.push_back(DrawableText(246, 425, u8"¡ü -"));
+				dl.push_back(DrawableText(246, 425, u8"â†‘ -"));
 			}
 		}
 		dl.push_back(DrawableFont("./work/fonts/Exo2-Regular.otf"));
@@ -264,18 +264,18 @@ namespace osucat {
 		sprintf_s(temp, "%d%%", (int)(stof(temp) * 100));
 		dl.push_back(DrawableText(136, -40, temp));
 		Info.draw(dl);
-		// progress bar ´Ë´¦Ë³Ğò²»ÄÜ¸Ä£¬²»Òª¶¯ÕâÀï¡£
+		// progress bar æ­¤å¤„é¡ºåºä¸èƒ½æ”¹ï¼Œä¸è¦åŠ¨è¿™é‡Œã€‚
 		Image levelRoundrect(Geometry(4 * stoi(temp) + 4, 12), Color("none"));
 		dl.clear();
 		dl.push_back(DrawableFillColor("#FF66AB"));
 		dl.push_back(DrawableRoundRectangle(0, 0, 4 * stoi(temp), 7, 3, 3));
 		levelRoundrect.draw(dl);
 		Info.composite(levelRoundrect, 662, 370, OverCompositeOp);
-		//¶àÄ£Ê½modeÍ¼±ê»æÖÆ
+		//å¤šæ¨¡å¼modeå›¾æ ‡ç»˜åˆ¶
 		if (data.user_info.mode == 0) {
-			// »ñÈ¡pp+ĞÅÏ¢
+			// è·å–pp+ä¿¡æ¯
 			vector<long> pp_plus;
-			// °şÀë¶Ôpp+µÄÒÀÀµ
+			// å‰¥ç¦»å¯¹pp+çš„ä¾èµ–
 			//if (data.user_info.updatepplus == true) {
 			//    try {
 			//        pp_plus = NetConnection::getUserPlusData(data.user_info.user_id);
@@ -305,7 +305,7 @@ namespace osucat {
 			pp_plus.push_back(data.pplus_info.spd);
 			pp_plus.push_back(data.pplus_info.sta);
 			/*}*/
-			// pp+ / ÁùÃ¢ĞÇÍ¼
+			// pp+ / å…­èŠ’æ˜Ÿå›¾
 			Hexagram::HexagramInfo hi;
 			hi.abilityFillColor = "rgba(253, 148, 62, 0.5)";
 			hi.abilityLineColor = "#fd943e";
@@ -317,7 +317,7 @@ namespace osucat {
 			hi.StrokeWidth = 2;
 			hi.nodesize = 2.5f;
 			// acc ,flow, jump, pre, speed, sta
-			const vector<int> _x_offset = { 372, 330, 122, 52, 128, 317 }; // pp+Êı¾İµÄxÖá×ø±ê
+			const vector<int> _x_offset = { 372, 330, 122, 52, 128, 317 }; // pp+æ•°æ®çš„xè½´åæ ‡
 			int pptemp = 0;
 			dl.clear();
 			dl.push_back(DrawableGravity(GravityType::NorthWestGravity));
@@ -356,7 +356,7 @@ namespace osucat {
 
 		// days_brfore
 		if (previoustUserInfo.days_before > 0) {
-			sprintf_s(temp, 512, u8"¶Ô±È×Ô%dÌìÇ°", previoustUserInfo.days_before);
+			sprintf_s(temp, 512, u8"å¯¹æ¯”è‡ª%då¤©å‰", previoustUserInfo.days_before);
 			dl.push_back(DrawableFont("./work/fonts/Alibaba-PuHuiTi-Regular.ttf"));
 			dl.push_back(DrawableText(300, 21, temp));
 		}
@@ -382,7 +382,7 @@ namespace osucat {
 		char path_temp[512];
 		char temp[1024];
 		Image Info(Geometry(2400, 1714), "none");
-		DrawableList dl; //³õÊ¼»¯¶ÓÁĞ
+		DrawableList dl; //åˆå§‹åŒ–é˜Ÿåˆ—
 		Info.density(Point(300, 300));
 		TypeMetric metric;
 		// background
@@ -496,7 +496,7 @@ namespace osucat {
 
 		// Hexagram
 		vector<long> pp_plus;
-		// °şÀë¶Ôpp+µÄÒÀÀµ
+		// å‰¥ç¦»å¯¹pp+çš„ä¾èµ–
 		/*if (data.user_info.updatepplus == true) {
 			try {
 				pp_plus = NetConnection::getUserPlusData(data.user_info.user_id);
@@ -539,7 +539,7 @@ namespace osucat {
 		hi.StrokeWidth = 8;
 		hi.nodesize = 12;
 		// acc ,flow, jump, pre, speed, sta
-		const vector<int> _x_offset = { 812, 678, 220, 85, 220, 676 }; // pp+Êı¾İµÄxÖá×ø±ê
+		const vector<int> _x_offset = { 812, 678, 220, 85, 220, 676 }; // pp+æ•°æ®çš„xè½´åæ ‡
 		int pptemp = 0;
 		dl.clear();
 		dl.push_back(DrawableGravity(GravityType::NorthWestGravity));
@@ -584,12 +584,12 @@ namespace osucat {
 	}
 
 	string scorePic(const ScorePanelData& data) {
-		Image score(Geometry(1950 - 2, 1088), "none"); //³õÊ¼»¯Í¼Ïñ
-		DrawableList dl; //³õÊ¼»¯¶ÓÁĞ
-		score.density(Point(300, 300)); //Í¼Ïñ·Ö±æÂÊ
+		Image score(Geometry(1950 - 2, 1088), "none"); //åˆå§‹åŒ–å›¾åƒ
+		DrawableList dl; //åˆå§‹åŒ–é˜Ÿåˆ—
+		score.density(Point(300, 300)); //å›¾åƒåˆ†è¾¨ç‡
 		TypeMetric metric;
 
-		//»ñÈ¡±³¾°Í¼ÎÄ¼şÃû
+		//è·å–èƒŒæ™¯å›¾æ–‡ä»¶å
 		char ctemp[512];
 		string sub = to_string(data.beatmap_info.beatmapset_id);
 		// https://unicom.sayobot.cn:25225/beatmaps/%lld/%s/files/
@@ -655,7 +655,7 @@ namespace osucat {
 					dl.push_back(DrawableFillColor("white"));
 					dl.push_back(DrawableRoundRectangle(0, 0, 433.0, 296.0, 20.0, 20.0));
 					roundrect.draw(dl);
-					//ĞŞ¸ÄÍ¼Æ¬´óĞ¡ÒÔÊÊÅä×óÉÏ½ÇĞ¡Í¼
+					//ä¿®æ”¹å›¾ç‰‡å¤§å°ä»¥é€‚é…å·¦ä¸Šè§’å°å›¾
 					if ((double)smallbg.size().width() / smallbg.size().height() > (433.0 / 296.0)) {
 						smallbg.resize(Geometry(296 / smallbg.size().height() * smallbg.size().width(), 296));
 						smallbg.crop(Geometry(433, 296, (smallbg.size().width() - 433) / 2, 0));
@@ -665,7 +665,7 @@ namespace osucat {
 						smallbg.crop(Geometry(433, 296, 0, (smallbg.size().height() - 296) / 2));
 					}
 					roundrect.composite(smallbg, 0, 0, InCompositeOp);
-					//ĞŞ¸ÄÖ÷Í¼´óĞ¡
+					//ä¿®æ”¹ä¸»å›¾å¤§å°
 					if ((double)bg.size().width() / bg.size().height() > (1952.0 / 1088.0)) {
 						bg.resize(Geometry(1088.0 / bg.size().height() * bg.size().width(), 1088.0));
 						bg.crop(Geometry(1952.0, 1088.0, (bg.size().width() - 1952.0) / 2, 0));
@@ -689,14 +689,14 @@ namespace osucat {
 				}
 			}
 			else {
-				//Áô¿Õ»òÕß·ÅÖÃÄ¬ÈÏÍ¼Æ¬
+				//ç•™ç©ºæˆ–è€…æ”¾ç½®é»˜è®¤å›¾ç‰‡
 				score.composite(Image("./work/default-score-v2.png"), 0, 0, OverCompositeOp);
 			}
 
 			// score
 			score.font("./work/fonts/Torus Regular.otf");
 			score.fillColor("white");
-			dl.clear(); //Çå¿Õ¶ÓÁĞ
+			dl.clear(); //æ¸…ç©ºé˜Ÿåˆ—
 			score.fontPointsize(40);
 			dl.push_back(DrawableTextAlignment(AlignType::CenterAlign));
 			dl.push_back(DrawableText(975, 743, osucat::utils::IntegerSplit(data.score_info.score)));
@@ -1174,7 +1174,7 @@ namespace osucat {
 			return file;
 		}
 		else {
-			throw osucat::NetWork_Exception::exception("·ÃÎÊsayoapiÊ±·¢ÉúÁË´íÎó¡£", GetLastError());
+			throw osucat::NetWork_Exception::exception("è®¿é—®sayoapiæ—¶å‘ç”Ÿäº†é”™è¯¯ã€‚", GetLastError());
 		}
 	} // namespace ImageMaker
 
@@ -1182,7 +1182,7 @@ namespace osucat {
 		char path_temp[512];
 		char temp[1024];
 		Image ppvspanel(R"(.\work\ppvs.png)");
-		DrawableList dl; //³õÊ¼»¯¶ÓÁĞ
+		DrawableList dl; //åˆå§‹åŒ–é˜Ÿåˆ—
 		TypeMetric metric;
 
 #pragma region hexagram
@@ -1261,7 +1261,7 @@ namespace osucat {
 			pp_plus2.push_back(0);
 			pp_plus2.push_back(0);
 		}
-		// pp+ / ÁùÃ¢ĞÇÍ¼
+		// pp+ / å…­èŠ’æ˜Ÿå›¾
 		Hexagram::HexagramInfo hi2;
 		hi2.abilityLineColor = "#29ABE2";
 		hi2.node_count = 6;
@@ -1287,7 +1287,7 @@ namespace osucat {
 			Hexagram::draw_v1(pp_plus, multi, exp, &ppvspanel, 0, -120, hi);
 		}
 
-		const vector<int> _y_offset = { 1052, 1136, 1220, 1304, 1389, 1471 }; // pp+Êı¾İµÄyÖá×ø±ê
+		const vector<int> _y_offset = { 1052, 1136, 1220, 1304, 1389, 1471 }; // pp+æ•°æ®çš„yè½´åæ ‡
 		int pptemp = 0;
 		dl.clear();
 		dl.push_back(DrawableGravity(GravityType::UndefinedGravity));

@@ -1,4 +1,4 @@
-#ifndef oppai_hpp
+﻿#ifndef oppai_hpp
 #define oppai_hpp
 
 #define OPPAI_IMPLEMENTATION

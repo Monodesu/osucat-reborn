@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #ifndef MYSQL_HPP
 #define MYSQL_HPP
 
@@ -6,7 +6,7 @@
 
 //#define SQL_HOST "osucat.desu.life"
 
-//¼ÇµÃ»¹Ô­ÔÙpull request
+//è®°å¾—è¿˜åŸå†pull request
 //#define SQL_USER "root"
 //#define SQL_HOST "127.0.0.1"
 //#define SQL_PWD "ASDasdASD32111!"
@@ -27,15 +27,15 @@ using namespace osucat;
 class Database {
 public:
     /*
-     * Êı¾İ¿â¶ÔÏó
+     * æ•°æ®åº“å¯¹è±¡
      */
     Database() {
         mysql_init(&this->conn);
     }
 
     /*
-     * Á¬½Óµ½Êı¾İ¿â
-     * ÔÚÊ¹ÓÃÍê±Ïºó±ØĞëµ÷ÓÃClose()º¯Êı
+     * è¿æ¥åˆ°æ•°æ®åº“
+     * åœ¨ä½¿ç”¨å®Œæ¯•åå¿…é¡»è°ƒç”¨Close()å‡½æ•°
      */
     void Connect() {
         if (mysql_real_connect(&this->conn, SQL_HOST, SQL_USER, SQL_PWD, SQL_DATABASE, SQL_PORT, NULL, 0) == NULL) {
@@ -62,8 +62,8 @@ public:
 
 #pragma region SqlNative
     /*
-     * Ö´ĞĞUpdateÓï¾ä
-     * ¿ÉÄÜÅ×³öµÄ´íÎó: std::exception
+     * æ‰§è¡ŒUpdateè¯­å¥
+     * å¯èƒ½æŠ›å‡ºçš„é”™è¯¯: std::exception
      */
     void Update(const std::string& updateSql) {
         std::string query = updateSql;
@@ -82,8 +82,8 @@ public:
     }
 
     /*
-     * Ö´ĞĞInsertÓï¾ä
-     * ¿ÉÄÜÅ×³öµÄ´íÎó: std::exception
+     * æ‰§è¡ŒInsertè¯­å¥
+     * å¯èƒ½æŠ›å‡ºçš„é”™è¯¯: std::exception
      */
     void Insert(const std::string& insertSql) {
         std::string query = insertSql;
@@ -101,8 +101,8 @@ public:
     }
 
     /*
-     * Ö´ĞĞDeleteÓï¾ä
-     * ¿ÉÄÜÅ×³öµÄ´íÎó: std::exception
+     * æ‰§è¡ŒDeleteè¯­å¥
+     * å¯èƒ½æŠ›å‡ºçš„é”™è¯¯: std::exception
      */
     void Delete(const std::string& deleteSql) {
         std::string query = deleteSql;
@@ -121,11 +121,11 @@ public:
     }
 
     /*
-     * Ö´ĞĞSelectÓï¾ä
-     * ·µ»ØÖµ: json_objectÊı×é
-     * Ã¿Ò»¸öobjectµÄkeyÎª×Ö¶Î£¬valueÎªÖµµÄ×Ö·û´®±íÊ¾
-     * Ò»¸öobjectÎªÒ»ĞĞ·ûºÏÌõ¼şµÄÊı¾İ
-     * ¿ÉÄÜÅ×³öµÄ´íÎó: std::exception, std::exception
+     * æ‰§è¡ŒSelectè¯­å¥
+     * è¿”å›å€¼: json_objectæ•°ç»„
+     * æ¯ä¸€ä¸ªobjectçš„keyä¸ºå­—æ®µï¼Œvalueä¸ºå€¼çš„å­—ç¬¦ä¸²è¡¨ç¤º
+     * ä¸€ä¸ªobjectä¸ºä¸€è¡Œç¬¦åˆæ¡ä»¶çš„æ•°æ®
+     * å¯èƒ½æŠ›å‡ºçš„é”™è¯¯: std::exception, std::exception
      */
     json Select(const std::string& selectSql) {
         std::string query = selectSql;
@@ -185,7 +185,7 @@ public:
             this->Insert(query);
         }
         catch (osucat::database_exception) {
-            //ºöÂÔ
+            //å¿½ç•¥
         }
     }
 
@@ -560,7 +560,7 @@ public:
             this->Update(query);
         }
         catch (osucat::database_exception) {
-            cout << "ĞŞ¸ÄÈº×éÉè¶¨Ê§°Ü" << endl;
+            cout << "ä¿®æ”¹ç¾¤ç»„è®¾å®šå¤±è´¥" << endl;
         }
     }
 
@@ -570,7 +570,7 @@ public:
             this->Insert(query);
         }
         catch (osucat::database_exception) {
-            cout << "³õÊ¼»¯Èº×éÉè¶¨Ê§°Ü" << endl;
+            cout << "åˆå§‹åŒ–ç¾¤ç»„è®¾å®šå¤±è´¥" << endl;
         }
     }
 
@@ -630,7 +630,7 @@ public:
     void Close() {
         if (this->conn.net.vio != NULL) mysql_close(&this->conn);
     }
-    // Îö¹¹º¯Êı»áÅĞ¶ÏÊı¾İ¿âÊÇ·ñ¹Ø±Õ£¬Èç¹ûÃ»ÓĞ¹Ø±Õ¾Í¹Ø±ÕÊı¾İ¿âÁ¬½Ó
+    // ææ„å‡½æ•°ä¼šåˆ¤æ–­æ•°æ®åº“æ˜¯å¦å…³é—­ï¼Œå¦‚æœæ²¡æœ‰å…³é—­å°±å…³é—­æ•°æ®åº“è¿æ¥
     ~Database() {
         Close();
     }

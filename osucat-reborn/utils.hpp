@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 
 #include <algorithm> 
 #include <cctype>
@@ -98,7 +98,7 @@ namespace osucat::utils {
 		minute = duration / 60;
 		second = duration % 60;
 		char buffer[512];
-		sprintf_s(buffer, 512, u8"%lldĞ¡Ê±%lld·ÖÖÓ%lldÃë", hour, minute, second);
+		sprintf_s(buffer, 512, u8"%lldå°æ—¶%lldåˆ†é’Ÿ%lldç§’", hour, minute, second);
 		return buffer;
 	}
 	static std::string timeStampToDate(time_t rawtime) {
@@ -1154,7 +1154,7 @@ namespace osucat::utils {
 		}
 		return countryName;
 	};
-	//ÈİÆ÷vectorÖĞÔªËØµÄÈ¥ÖØ
+	//å®¹å™¨vectorä¸­å…ƒç´ çš„å»é‡
 	static std::vector<int> unique_element_in_vector(std::vector<int> v) {
 		std::vector<int>::iterator vector_iterator;
 		sort(v.begin(), v.end());
@@ -1164,23 +1164,23 @@ namespace osucat::utils {
 		}
 		return v;
 	}
-	//Á½¸övectorÇó½»¼¯
+	//ä¸¤ä¸ªvectoræ±‚äº¤é›†
 	static std::vector<int> vectors_intersection(std::vector<int> v1, std::vector<int> v2) {
 		std::vector<int> v;
 		sort(v1.begin(), v1.end());
 		sort(v2.begin(), v2.end());
-		set_intersection(v1.begin(), v1.end(), v2.begin(), v2.end(), back_inserter(v)); //Çó½»¼¯
+		set_intersection(v1.begin(), v1.end(), v2.begin(), v2.end(), back_inserter(v)); //æ±‚äº¤é›†
 		return v;
 	}
-	//Á½¸övectorÇó²¢¼¯
+	//ä¸¤ä¸ªvectoræ±‚å¹¶é›†
 	static std::vector<int> vectors_set_union(std::vector<int> v1, std::vector<int> v2) {
 		std::vector<int> v;
 		sort(v1.begin(), v1.end());
 		sort(v2.begin(), v2.end());
-		set_union(v1.begin(), v1.end(), v2.begin(), v2.end(), back_inserter(v)); //Çó½»¼¯
+		set_union(v1.begin(), v1.end(), v2.begin(), v2.end(), back_inserter(v)); //æ±‚äº¤é›†
 		return v;
 	}
-	//ÅĞ¶ÏvectorµÄÄ³Ò»ÔªËØÊÇ·ñ´æÔÚ
+	//åˆ¤æ–­vectorçš„æŸä¸€å…ƒç´ æ˜¯å¦å­˜åœ¨
 	static bool is_element_in_vector(std::vector<std::string> v, std::string element) {
 		std::vector<std::string>::iterator it;
 		it = std::find(v.begin(), v.end(), element);
@@ -1211,8 +1211,8 @@ namespace osucat::utils {
 		tm_.tm_sec = second;
 		tm_.tm_isdst = 0;
 
-		time_t t_ = mktime(&tm_); //ÒÑ¾­¼õÁË8¸öÊ±Çø
-		*ttm = tm_; //ÃëÊ±¼ä
+		time_t t_ = mktime(&tm_); //å·²ç»å‡äº†8ä¸ªæ—¶åŒº
+		*ttm = tm_; //ç§’æ—¶é—´
 	}
 	static inline std::string escape(const std::string& str, const bool escape_comma = true) {
 
@@ -1223,7 +1223,7 @@ namespace osucat::utils {
 		if (escape_comma) string_replace(res, ",", "&#44;");
 		return res;
 	}
-	// ¶Ô×Ö·û´®×ö CQ ÂëÈ¥×ªÒå
+	// å¯¹å­—ç¬¦ä¸²åš CQ ç å»è½¬ä¹‰
 	static inline std::string unescape(const std::string& str) {
 		std::string res = str;
 		string_replace(res, "&#44;", ",");
@@ -1232,7 +1232,7 @@ namespace osucat::utils {
 		string_replace(res, "&amp;", "&");
 		return res;
 	}
-	//Õâ¹¦ÄÜÓĞÈ±Ïİ
+	//è¿™åŠŸèƒ½æœ‰ç¼ºé™·
 	static std::string GetMiddleText(std::string regularStr, std::string frontStr, std::string behindStr) {
 		std::string str;
 		try {

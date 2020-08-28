@@ -14,6 +14,10 @@ namespace osucat::addons {
 				chp(params);
 				return true;
 			}
+			if (_stricmp(msg.substr(0, 3).c_str(), "wyy") == 0) {
+				wyy(params);
+				return true;
+			}
 			if (_stricmp(msg.substr(0, 5).c_str(), "sleep") == 0) {
 				sleep(params);
 				return true;
@@ -66,6 +70,14 @@ namespace osucat::addons {
 		static void chp(string* params) {
 			try {
 				*params = NetConnection::HttpsGet("https://chp.shadiao.app/api.php");
+			}
+			catch (osucat::NetWork_Exception) {
+				*params = u8"访问api时超时...请稍后再试...";
+			}
+		}
+		static void wyy(string* params) {
+			try {
+				*params = NetConnection::HttpsGet("https://wyy.xxis.me");
 			}
 			catch (osucat::NetWork_Exception) {
 				*params = u8"访问api时超时...请稍后再试...";

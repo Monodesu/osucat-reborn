@@ -3342,8 +3342,8 @@ namespace osucat {
 		}
 		static bool randRepeater() {
 			//概率复读 五百分之一
-			srand((unsigned)GetTickCount());
-			if (1 == rand() % 500) {
+			srand((unsigned)GetTickCount64());
+			if (1 == rand() % 250) {
 				return true;
 			}
 			return false;

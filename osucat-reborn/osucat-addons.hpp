@@ -155,6 +155,11 @@ namespace osucat::addons {
 				utils::string_replace(cmd, u8"我", u8"{@@}");
 				utils::string_replace(cmd, u8"你", u8"我");
 				utils::string_replace(cmd, u8"{@@}", u8"你");
+				if (cmd.substr(cmd.length() - 3, 3) == u8"？" || cmd.substr(cmd.length() - 1, 1) == "?")
+					cmd = cmd.substr(cmd.length() - 3, 3) == u8"？" ? cmd.substr(0, cmd.length() - 3)
+					: cmd.substr(0, cmd.length() - 1);
+				if (cmd.substr(cmd.length() - 3, 3) == "吗" || cmd.substr(cmd.length() - 3, 3) == "呢")
+					cmd = cmd.substr(0, cmd.length() - 3);
 				if (cmd.find(u8"还是") != string::npos) {
 					string str1, str2;
 					str1 = cmd.substr(0, cmd.find(u8"还是"));
@@ -164,10 +169,10 @@ namespace osucat::addons {
 					if (str1.empty() || str2.empty()) return;
 					switch (utils::randomNum(1, 2)) {
 					case 1:
-						*params = u8"当然是" + str1 + u8"喽~";
+						*params = str1;
 						break;
 					case 2:
-						*params = u8"当然是" + str2 + u8"喽~";
+						*params = str2;
 						break;
 					}
 					return;

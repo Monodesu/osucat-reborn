@@ -56,6 +56,9 @@ namespace osucat {
 							str = tar.message[0] < 0 ? tar.message.substr(3) : tar.message.substr(1);
 							monitors(str, tar, sdr);
 						}
+						else {
+							monitors(tar.message, tar, sdr, 1);
+						}
 					}
 				}
 				/*
@@ -88,15 +91,30 @@ namespace osucat {
 				}
 			}
 		}
-		static void monitors(string msg, Target tar, SenderInfo senderinfo) {
-			string params = { 0 };
-			if (cmdParse(msg, tar, senderinfo, &params)) {
-				Target activepushTar;
-				activepushTar.message_type = tar.message_type == Target::MessageType::PRIVATE ? Target::MessageType::PRIVATE : Target::MessageType::GROUP;
-				tar.message_type == Target::MessageType::PRIVATE ? activepushTar.user_id = tar.user_id : activepushTar.group_id = tar.group_id;
-				activepushTar.message = params;
-				activepush(activepushTar);
+		static void monitors(string msg, Target tar, SenderInfo senderinfo, int monitorType = 0) {
+			if (monitorType == 0) {
+				string params = { 0 };
+				if (cmdParse(msg, tar, senderinfo, &params)) {
+					Target activepushTar;
+					activepushTar.message_type = tar.message_type == Target::MessageType::PRIVATE ? Target::MessageType::PRIVATE : Target::MessageType::GROUP;
+					tar.message_type == Target::MessageType::PRIVATE ? activepushTar.user_id = tar.user_id : activepushTar.group_id = tar.group_id;
+					activepushTar.message = params;
+					activepush(activepushTar);
+				}
+				return;
 			}
+			if (monitorType == 1) {
+				string params = { 0 };
+				if (funStuff(msg, tar, senderinfo, &params)) {
+					Target activepushTar;
+					activepushTar.message_type = tar.message_type == Target::MessageType::PRIVATE ? Target::MessageType::PRIVATE : Target::MessageType::GROUP;
+					tar.message_type == Target::MessageType::PRIVATE ? activepushTar.user_id = tar.user_id : activepushTar.group_id = tar.group_id;
+					activepushTar.message = params;
+					activepush(activepushTar);
+				}				return;
+			}
+
+
 		}
 #pragma endregion
 	private:
@@ -3319,7 +3337,19 @@ namespace osucat {
 			db.addbadge(uid, temp);
 			*params = u8"已成功提交。";
 		}
-		/* 娱乐指令 */
+		/* 娱乐功能 */
+		static bool funStuff(string cmd, Target tar, SenderInfo senderinfo, string* params) {
+			if (randRepeater()) { *params = cmd; return true; }//复读机
+			return false;
+		}
+		static bool randRepeater() {
+			//概率复读
+			srand((unsigned)GetTickCount());
+			if (1 == rand() % 100) {
+				return true;
+			}
+			return false;
+		}
 		static void memyselfact(string cmd, Target tar, SenderInfo senderinfo, string* params) {
 			utils::trim(cmd);
 			string username = senderinfo.card == "" ? senderinfo.nikename : senderinfo.card;
@@ -3581,7 +3611,7 @@ namespace osucat {
 		}
 		static void _DelayDelTmpFile(string filename, int delayTime = 15) {
 			//delayTime单位：秒
-			thread DFH(bind(&DelFileHandler, delayTime));
+			thread DFH(bind(&DelFileHandler, filename, delayTime));
 			DFH.detach();
 		}
 		static void DelFileHandler(string filename, int delayTime = 0) {

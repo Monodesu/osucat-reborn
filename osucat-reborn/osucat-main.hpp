@@ -739,8 +739,7 @@ namespace osucat {
 				fileStr = "osucat\\" + infoPic_v1(upd, upd.user_info);
 			}
 			*params = u8"[CQ:image,file=" + fileStr + u8"]";
-			//不能立即删除 需要一个延时方案
-			//DeleteFileA((to_string(OC_ROOT_PATH) + "\\data\\images\\" + fileStr).c_str());
+			_DelayDelTmpFile(to_string(OC_ROOT_PATH) + "\\data\\images\\" + fileStr);
 		}
 		static void textinfo(string cmd, Target tar, string* params) {
 			cmd = utils::unescape(cmd);
@@ -1170,7 +1169,7 @@ namespace osucat {
 			string fileStr = "osucat\\" + scorePic(sp_data);
 			*params = u8"[CQ:image,file=" + fileStr + u8"]";
 			db.UpdatePPRecord(tar.user_id, sp_data.score_info.beatmap_id);
-			//DeleteFileA((cq::dir::root("data", "image") + fileStr).c_str());
+			_DelayDelTmpFile(to_string(OC_ROOT_PATH) + "\\data\\images\\" + fileStr);
 		}
 		static void bp(string cmd, Target tar, string* params) {
 			Database db;
@@ -1503,7 +1502,7 @@ namespace osucat {
 			string fileStr = "osucat\\" + scorePic(sp_data);
 			*params = u8"[CQ:image,file=" + fileStr + u8"]";
 			db.UpdatePPRecord(tar.user_id, sp_data.score_info.beatmap_id);
-			//DeleteFileA((dir::root("data", "image") + fileStr).c_str());
+			_DelayDelTmpFile(to_string(OC_ROOT_PATH) + "\\data\\images\\" + fileStr);
 		}
 		static void score(string cmd, Target tar, string* params) {
 			utils::string_replace(cmd, " ", "");
@@ -1617,7 +1616,7 @@ namespace osucat {
 			string fileStr = "osucat\\" + scorePic(sp_data);
 			*params = u8"[CQ:image,file=" + fileStr + u8"]";
 			db.UpdatePPRecord(tar.user_id, sp_data.beatmap_info.beatmap_id);
-			//DeleteFileA((cq::dir::root("data", "image") + fileStr).c_str());
+			_DelayDelTmpFile(to_string(OC_ROOT_PATH) + "\\data\\images\\" + fileStr);
 		}
 		static void update(string cmd, Target tar, string* params) {
 			Database db;
@@ -2476,7 +2475,7 @@ namespace osucat {
 			}*/
 			string fileStr = "osucat\\" + ppvsimg(UI1, UI2);
 			*params = u8"[CQ:image,file=" + fileStr + u8"]";
-			//DeleteFileA((cq::dir::root("data", "image") + fileStr).c_str());
+			_DelayDelTmpFile(to_string(OC_ROOT_PATH) + "\\data\\images\\" + fileStr);
 		}
 		static void badgelist(string cmd, Target tar, string* params) {
 			int64_t uid;
@@ -3579,6 +3578,18 @@ namespace osucat {
 				id,
 				userid);
 			cout << dugtmp << endl;
+		}
+		static void _DelayDelTmpFile(string filename, int delayTime = 15) {
+			//delayTime单位：秒
+			thread DFH(bind(&DelFileHandler, delayTime));
+			DFH.detach();
+		}
+		static void DelFileHandler(string filename, int delayTime = 0) {
+			/*
+			可以设置delayTime来决定在几秒后删除
+			*/
+			if (delayTime > 0)Sleep(delayTime * 1000);
+			DeleteFileA(filename.c_str());
 		}
 #pragma endregion
 #pragma region 交互

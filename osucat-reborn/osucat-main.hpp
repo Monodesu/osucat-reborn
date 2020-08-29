@@ -384,7 +384,7 @@ namespace osucat {
 			*params = u8"[CQ:at,qq=" + to_string(tar.user_id) + u8"] 你想传达的话已成功传达给麻麻了哦。";
 			Target activepushTar;
 			activepushTar.message_type = Target::MessageType::PRIVATE;
-			activepushTar.user_id = 451577581;
+			activepushTar.user_id = MONO;
 			activepushTar.message = u8"收到来自用户 " + to_string(tar.user_id) + u8" 的消息：" + cmd;
 			activepush(activepushTar);
 		}

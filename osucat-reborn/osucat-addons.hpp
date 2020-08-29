@@ -26,10 +26,10 @@ namespace osucat::addons {
 				nbnhhsh(msg.substr(7), params);
 				return true;
 			}
-			//if (msg.find(u8"还是") != string::npos || msg.find(u8"不") != string::npos || msg.find(u8"没") != string::npos) {
-			//	randEvents(msg, params);
-			//	return true;
-			//}
+			if (msg.find(u8"还是") != string::npos || msg.find(u8"不") != string::npos || msg.find(u8"没") != string::npos) {
+				randEvents(msg, params);
+				return true;
+			}
 			if (_stricmp(msg.substr(0, 6).c_str(), u8"上号") == 0) {
 				wyy(params);
 				return true;
@@ -155,10 +155,21 @@ namespace osucat::addons {
 				utils::string_replace(cmd, u8"我", u8"{@@}");
 				utils::string_replace(cmd, u8"你", u8"我");
 				utils::string_replace(cmd, u8"{@@}", u8"你");
-				smatch res;
-				regex re(u8"^(.*?)[还還]是+(.*?)$");
-				if (regex_match(cmd, res, re)) {
-					*params = u8"当然是" + res.str(utils::randomNum(1, 2)) + u8"喽~";
+				if (cmd.find(u8"还是") != string::npos) {
+					string str1, str2;
+					str1 = cmd.substr(0, cmd.find(u8"还是"));
+					str2 = cmd.substr(cmd.find(u8"还是") + 6);
+					cout << str1 + " " << endl;
+					cout << str2 + " " << endl;
+					if (str1.empty() || str2.empty()) return;
+					switch (utils::randomNum(1, 2)) {
+					case 1:
+						*params = u8"当然是" + str1 + u8"喽~";
+						break;
+					case 2:
+						*params = u8"当然是" + str2 + u8"喽~";
+						break;
+					}
 					return;
 				}
 				if (cmd.find(u8"不") != string::npos) {

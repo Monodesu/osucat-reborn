@@ -133,7 +133,7 @@ int main()
 		}
 		else {
 			sprintf_s(SQL_USER, "root");
-			sprintf_s(SQL_HOST, "139.0.8.242");
+			sprintf_s(SQL_HOST, "127.0.0.1");
 			sprintf_s(SQL_PWD, "ASDasdASD32111!");
 			sprintf_s(SQL_DATABASE, "osucat");
 			SQL_PORT = 32148;

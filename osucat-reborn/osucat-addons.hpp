@@ -26,10 +26,10 @@ namespace osucat::addons {
 				nbnhhsh(msg.substr(7), params);
 				return true;
 			}
-			if (msg.find(u8"还是") != string::npos || msg.find(u8"不") != string::npos || msg.find(u8"没") != string::npos) {
-				randEvents(msg, params);
-				return true;
-			}
+			//if (msg.find(u8"还是") != string::npos || msg.find(u8"不") != string::npos || msg.find(u8"没") != string::npos) {
+			//	randEvents(msg, params);
+			//	return true;
+			//}
 			if (_stricmp(msg.substr(0, 6).c_str(), u8"上号") == 0) {
 				wyy(params);
 				return true;
@@ -141,56 +141,61 @@ namespace osucat::addons {
 			*params = message;
 		}
 		static void randEvents(string cmd, string* params) {
-			cmd = utils::unescape(cmd);
-			if (forbiddenWordsLibrary(cmd) == true) {
-				*params = u8"不想理你...";
-				return;
-			}
-			if (cmd.length() > 199) {
-				*params = u8"你想干嘛...";
-				return;
-			}
-			utils::trim(cmd);
-			utils::string_replace(cmd, u8"我", u8"{@@}");
-			utils::string_replace(cmd, u8"你", u8"我");
-			utils::string_replace(cmd, u8"{@@}", u8"你");
-			smatch res;
-			regex re(u8"^(.*?)[还還]是+(.*?)$");
-			if (regex_match(cmd, res, re)) {
-				*params = u8"当然是" + res.str(utils::randomNum(1, 2)) + u8"喽~";
-				return;
-			}
-			if (cmd.find(u8"不") != string::npos) {
-				if ((cmd[cmd.find(u8"不") - 1] & 0x80) != 0) {
-					//是汉字
-					if (cmd.substr(cmd.find(u8"不") - 3, 3) == cmd.substr(cmd.find(u8"不") + 3, 3)) {
-						//do something here
-						string str1 = cmd.substr(0, cmd.find(u8"不") - 3), str2 = cmd.substr(cmd.find(u8"不") + 3);
-						switch (utils::randomNum(1, 2)) {
-						case 1:
-							*params = str1 + str2;
-							break;
-						case 2:
-							*params = str1 + u8"不" + str2;
-							break;
+			try {
+				cmd = utils::unescape(cmd);
+				if (forbiddenWordsLibrary(cmd) == true) {
+					*params = u8"不想理你...";
+					return;
+				}
+				if (cmd.length() > 199) {
+					*params = u8"你想干嘛...";
+					return;
+				}
+				utils::trim(cmd);
+				utils::string_replace(cmd, u8"我", u8"{@@}");
+				utils::string_replace(cmd, u8"你", u8"我");
+				utils::string_replace(cmd, u8"{@@}", u8"你");
+				smatch res;
+				regex re(u8"^(.*?)[还還]是+(.*?)$");
+				if (regex_match(cmd, res, re)) {
+					*params = u8"当然是" + res.str(utils::randomNum(1, 2)) + u8"喽~";
+					return;
+				}
+				if (cmd.find(u8"不") != string::npos) {
+					if ((cmd[cmd.find(u8"不") - 1] & 0x80) != 0) {
+						//是汉字
+						if (cmd.substr(cmd.find(u8"不") - 3, 3) == cmd.substr(cmd.find(u8"不") + 3, 3)) {
+							//do something here
+							string str1 = cmd.substr(0, cmd.find(u8"不") - 3), str2 = cmd.substr(cmd.find(u8"不") + 3);
+							switch (utils::randomNum(1, 2)) {
+							case 1:
+								*params = str1 + str2;
+								break;
+							case 2:
+								*params = str1 + u8"不" + str2;
+								break;
+							}
+						}
+					}
+					else {
+						//不是汉字
+						if (cmd.substr(0, cmd.find(u8"不")) == cmd.substr(cmd.find(u8"不") + 3)) {
+							//do something here
+							string str1 = cmd.substr(0, cmd.find(u8"不")), str2 = cmd.substr(cmd.find(u8"不") + 3);
+							switch (utils::randomNum(1, 2)) {
+							case 1:
+								*params = str2;
+								break;
+							case 2:
+								*params = u8"不" + str2;
+								break;
+							}
 						}
 					}
 				}
-				else {
-					//不是汉字
-					if (cmd.substr(0, cmd.find(u8"不")) == cmd.substr(cmd.find(u8"不") + 3)) {
-						//do something here
-						string str1 = cmd.substr(0, cmd.find(u8"不")), str2 = cmd.substr(cmd.find(u8"不") + 3);
-						switch (utils::randomNum(1, 2)) {
-						case 1:
-							*params = str2;
-							break;
-						case 2:
-							*params = u8"不" + str2;
-							break;
-						}
-					}
-				}
+			}
+			catch (std::exception& ex) {
+				cout << ex.what() << endl;
 			}
 		}
 		static void nbnhhsh(string cmd, string* params) {

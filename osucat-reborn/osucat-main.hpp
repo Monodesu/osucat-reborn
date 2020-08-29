@@ -113,8 +113,6 @@ namespace osucat {
 					activepush(activepushTar);
 				}				return;
 			}
-
-
 		}
 #pragma endregion
 	private:

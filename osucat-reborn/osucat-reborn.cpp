@@ -123,6 +123,21 @@ int main()
 	if (utils::fileExist(".\\.active")) {
 		ISACTIVE = true;
 		cout << u8"osucat is activated!" << endl;;
+		if (utils::fileExist(".\\.remotesql")) {
+			cout << u8"\n/*** osucat now using remote sql server ***/\n" << endl;
+			sprintf_s(SQL_USER, "osucat");
+			sprintf_s(SQL_HOST, "139.196.8.242");
+			sprintf_s(SQL_PWD, "wPGAHft4M2W8Y88i");
+			sprintf_s(SQL_DATABASE, "osucat");
+			SQL_PORT = 3306;
+		}
+		else {
+			sprintf_s(SQL_USER, "root");
+			sprintf_s(SQL_HOST, "139.0.8.242");
+			sprintf_s(SQL_PWD, "ASDasdASD32111!");
+			sprintf_s(SQL_DATABASE, "osucat");
+			SQL_PORT = 32148;
+		}
 	}
 	else {
 		ISACTIVE = false;

@@ -6,6 +6,7 @@ namespace osucat::addons {
 	class entertainment {
 	public:
 		static bool cmdParse(string msg, Target tar, SenderInfo senderinfo, string* params) {
+			try {
 			if (_stricmp(msg.substr(0, 4).c_str(), "roll") == 0) {
 				roll(msg.substr(4), tar, params);
 				return true;
@@ -32,6 +33,51 @@ namespace osucat::addons {
 			}
 			if (_stricmp(msg.substr(0, 6).c_str(), u8"上号") == 0) {
 				wyy(params);
+				return true;
+			}
+			}
+			catch (osucat::database_exception& ex) {
+				*params = u8"访问数据库时出现了一个错误，请稍后重试...";
+				char reportMsg[1024];
+				sprintf_s(reportMsg,
+					"[%s]\n"
+					u8"Mysql出现错误\n"
+					u8"错误代码：%d\n"
+					u8"详细信息：%s\n",
+					utils::unixTime2Str(time(NULL)).c_str(),
+					ex.Code(),
+					ex.Info().c_str()
+				);
+				Target exceptionReport;
+				exceptionReport.message_type = Target::MessageType::PRIVATE;
+				exceptionReport.user_id = MONO;
+				exceptionReport.message = reportMsg;
+				activepush(exceptionReport);
+				return true;
+			}
+			catch (osucat::NetWork_Exception& ex) {
+				*params = u8"访问api时超时...请稍后重试...";
+				return true;
+			}
+			catch (std::exception& ex) {
+				*params = u8"addons模块出现了一个未知错误，请稍后重试...";
+				char reportMsg[1024];
+				sprintf_s(reportMsg,
+					"[%s]\n"
+					u8"已捕获std::exception\n"
+					u8"操作者：%lld\n"
+					u8"触发指令：%s\n"
+					u8"详细信息：%s\n",
+					utils::unixTime2Str(time(NULL)).c_str(),
+					tar.user_id,
+					tar.message.c_str(),
+					ex.what()
+				);
+				Target exceptionReport;
+				exceptionReport.message_type = Target::MessageType::PRIVATE;
+				exceptionReport.user_id = MONO;
+				exceptionReport.message = reportMsg;
+				activepush(exceptionReport);
 				return true;
 			}
 			return false;

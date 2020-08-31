@@ -3,38 +3,57 @@
 #define OSUCAT_ADDONS_HPP
 
 namespace osucat::addons {
+	struct driftingBottle
+	{
+		string msg;
+		Target tar;
+		SenderInfo senderinfo;
+		time_t sendTime;
+	};
+	static vector<driftingBottle> VdriftingBottle;
 	class entertainment {
 	public:
 		static bool cmdParse(string msg, Target tar, SenderInfo senderinfo, string* params) {
 			try {
-			if (_stricmp(msg.substr(0, 4).c_str(), "roll") == 0) {
-				roll(msg.substr(4), tar, params);
-				return true;
-			}
-			if (_stricmp(msg.substr(0, 3).c_str(), "chp") == 0) {
-				chp(params);
-				return true;
-			}
-			/*if (_stricmp(msg.substr(0, 5).c_str(), "sleep") == 0) {
-				sleep(params);
-				return true;
-			}*/
-			if (_stricmp(msg.substr(0, 18).c_str(), u8"营销号生成器") == 0) {
-				marketingGenerator(msg.substr(18), params);
-				return true;
-			}
-			if (_stricmp(msg.substr(0, 7).c_str(), "nbnhhsh") == 0) {
-				nbnhhsh(msg.substr(7), params);
-				return true;
-			}
-			if (msg.find(u8"还是") != string::npos || msg.find(u8"不") != string::npos || msg.find(u8"没") != string::npos) {
-				randEvents(msg, params);
-				return true;
-			}
-			if (_stricmp(msg.substr(0, 6).c_str(), u8"上号") == 0) {
-				wyy(params);
-				return true;
-			}
+				if (_stricmp(msg.substr(0, 12).c_str(), u8"扔漂流瓶") == 0) {
+					driftingBottleVoid(true, msg.substr(12), tar, senderinfo, params);
+					return true;
+				}
+				if (_stricmp(msg.substr(0, 12).c_str(), u8"捡漂流瓶") == 0) {
+					driftingBottleVoid(false, msg.substr(12), tar, senderinfo, params);
+					return true;
+				}
+				if (_stricmp(msg.substr(0, 4).c_str(), "roll") == 0) {
+					roll(msg.substr(4), tar, params);
+					return true;
+				}
+				if (_stricmp(msg.substr(0, 3).c_str(), "chp") == 0) {
+					chp(params);
+					return true;
+				}
+				/*if (_stricmp(msg.substr(0, 5).c_str(), "sleep") == 0) {
+					sleep(params);
+					return true;
+				}*/
+				if (_stricmp(msg.substr(0, 18).c_str(), u8"营销号生成器") == 0) {
+					marketingGenerator(msg.substr(18), params);
+					return true;
+				}
+				if (_stricmp(msg.substr(0, 7).c_str(), "nbnhhsh") == 0) {
+					nbnhhsh(msg.substr(7), params);
+					return true;
+				}
+				if (msg.find(u8"还是") != string::npos || msg.find(u8"不") != string::npos || msg.find(u8"没") != string::npos) {
+					randEvents(msg, params);
+					return true;
+				}
+				if (_stricmp(msg.substr(0, 6).c_str(), u8"上号") == 0) {
+					wyy(params);
+					return true;
+				}
+
+
+
 			}
 			catch (osucat::database_exception& ex) {
 				*params = u8"访问数据库时出现了一个错误，请稍后重试...";
@@ -317,6 +336,47 @@ namespace osucat::addons {
 			}
 			catch (osucat::NetWork_Exception) {
 				*params = u8"抑郁太多对身体不好...";
+			}
+		}
+		static void driftingBottleVoid(bool ThrowOrPick, string cmd, Target tar, SenderInfo senderinfo, string* params) {
+			if (ThrowOrPick) {
+				cmd = utils::unescape(cmd);
+				utils::trim(cmd);
+				if (forbiddenWordsLibrary(cmd) == true) {
+					*params = u8"不想理你...";
+					return;
+				}
+				if (cmd.length() == 0) {
+					*params = u8"不如写点什么再扔...?";
+					return;
+				}
+				if (cmd.length() > 15000) {
+					*params = u8"太长了！";
+					return;
+				}
+				driftingBottle DB;
+				DB.msg = cmd;
+				DB.tar = tar;
+				DB.senderinfo = senderinfo;
+				DB.sendTime = time(NULL);
+				VdriftingBottle.push_back(DB);
+				*params = u8"你的漂流瓶已经漂往远方....";
+				return;
+			}
+			if (VdriftingBottle.size() != 0) {
+				int tempi = utils::randomNum(0, VdriftingBottle.size() - 1);
+				driftingBottle DB = VdriftingBottle[tempi];
+				VdriftingBottle.erase(VdriftingBottle.begin() + tempi);
+				char tempm[16384];
+				sprintf_s(tempm,
+					u8"这是来自 %s(%lld) 的漂流瓶....\n"
+					u8"发于 %s\n"
+					u8"内容是....\n%s",
+					DB.senderinfo.nikename.c_str(), DB.tar.user_id, utils::unixTime2StrChinese(DB.sendTime).c_str(), DB.msg.c_str());
+				*params = tempm;
+			}
+			else {
+				*params = u8"还没有人丢过漂流瓶呢...";
 			}
 		}
 	private:

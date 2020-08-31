@@ -176,6 +176,5 @@ int main()
 		WSACleanup();
 		cout << u8"WebSocket connection closed." << endl;
 	}
-	std::system("pause");
 	return 0;
 }

@@ -383,7 +383,7 @@ namespace osucat::addons {
 					u8"的内容为....%s的消息已经被 %s(%lld) 捡起来了....", 
 					utils::unixTime2StrChinese(DB.sendTime).c_str(),
 					DB.msg.c_str(),
-					DB.senderinfo.nikename.c_str(), DB.tar.user_id);
+					senderinfo.nikename.c_str(), tar.user_id);
 				tar.message = tempmm;
 				activepush(tar);
 			}

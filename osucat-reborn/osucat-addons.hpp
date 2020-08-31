@@ -374,6 +374,18 @@ namespace osucat::addons {
 					u8"内容是....\n%s",
 					DB.senderinfo.nikename.c_str(), DB.tar.user_id, utils::unixTime2StrChinese(DB.sendTime).c_str(), DB.msg.c_str());
 				*params = tempm;
+				Target tar;
+				tar.user_id = DB.tar.user_id;
+				tar.message_type = Target::MessageType::PRIVATE;
+				char tempmm[8192];
+				sprintf_s(tempmm,
+					u8"你发于 %s\n"
+					u8"的内容为....%s的消息已经被 %s(%lld) 捡起来了....", 
+					utils::unixTime2StrChinese(DB.sendTime).c_str(),
+					DB.msg.c_str(),
+					DB.senderinfo.nikename.c_str(), DB.tar.user_id);
+				tar.message = tempmm;
+				activepush(tar);
 			}
 			else {
 				*params = u8"还没有人丢过漂流瓶呢...";

@@ -3,35 +3,100 @@
 #define OSUCAT_ADDONS_HPP
 
 namespace osucat::addons {
+	struct driftingBottle
+	{
+		string msg;
+		Target tar;
+		SenderInfo senderinfo;
+		time_t sendTime;
+	};
+	static vector<driftingBottle> VdriftingBottle;
 	class entertainment {
 	public:
 		static bool cmdParse(string msg, Target tar, SenderInfo senderinfo, string* params) {
-			if (_stricmp(msg.substr(0, 4).c_str(), "roll") == 0) {
-				roll(msg.substr(4), tar, params);
+			try {
+				if (_stricmp(msg.substr(0, 12).c_str(), u8"扔漂流瓶") == 0) {
+					driftingBottleVoid(true, msg.substr(12), tar, senderinfo, params);
+					return true;
+				}
+				if (_stricmp(msg.substr(0, 12).c_str(), u8"捡漂流瓶") == 0) {
+					driftingBottleVoid(false, msg.substr(12), tar, senderinfo, params);
+					return true;
+				}
+				if (_stricmp(msg.substr(0, 4).c_str(), "roll") == 0) {
+					roll(msg.substr(4), tar, params);
+					return true;
+				}
+				if (_stricmp(msg.substr(0, 3).c_str(), "chp") == 0) {
+					chp(params);
+					return true;
+				}
+				/*if (_stricmp(msg.substr(0, 5).c_str(), "sleep") == 0) {
+					sleep(params);
+					return true;
+				}*/
+				if (_stricmp(msg.substr(0, 18).c_str(), u8"营销号生成器") == 0) {
+					marketingGenerator(msg.substr(18), params);
+					return true;
+				}
+				if (_stricmp(msg.substr(0, 7).c_str(), "nbnhhsh") == 0) {
+					nbnhhsh(msg.substr(7), params);
+					return true;
+				}
+				if (msg.find(u8"还是") != string::npos || msg.find(u8"不") != string::npos || msg.find(u8"没") != string::npos) {
+					randEvents(msg, params);
+					return true;
+				}
+				if (_stricmp(msg.substr(0, 6).c_str(), u8"上号") == 0) {
+					wyy(params);
+					return true;
+				}
+
+
+
+			}
+			catch (osucat::database_exception& ex) {
+				*params = u8"访问数据库时出现了一个错误，请稍后重试...";
+				char reportMsg[1024];
+				sprintf_s(reportMsg,
+					"[%s]\n"
+					u8"Mysql出现错误\n"
+					u8"错误代码：%d\n"
+					u8"详细信息：%s\n",
+					utils::unixTime2Str(time(NULL)).c_str(),
+					ex.Code(),
+					ex.Info().c_str()
+				);
+				Target exceptionReport;
+				exceptionReport.message_type = Target::MessageType::PRIVATE;
+				exceptionReport.user_id = MONO;
+				exceptionReport.message = reportMsg;
+				activepush(exceptionReport);
 				return true;
 			}
-			if (_stricmp(msg.substr(0, 3).c_str(), "chp") == 0) {
-				chp(params);
+			catch (osucat::NetWork_Exception& ex) {
+				*params = u8"访问api时超时...请稍后重试...";
 				return true;
 			}
-			/*if (_stricmp(msg.substr(0, 5).c_str(), "sleep") == 0) {
-				sleep(params);
-				return true;
-			}*/
-			if (_stricmp(msg.substr(0, 18).c_str(), u8"营销号生成器") == 0) {
-				marketingGenerator(msg.substr(18), params);
-				return true;
-			}
-			if (_stricmp(msg.substr(0, 7).c_str(), "nbnhhsh") == 0) {
-				nbnhhsh(msg.substr(7), params);
-				return true;
-			}
-			if (msg.find(u8"还是") != string::npos || msg.find(u8"不") != string::npos || msg.find(u8"没") != string::npos) {
-				randEvents(msg, params);
-				return true;
-			}
-			if (_stricmp(msg.substr(0, 6).c_str(), u8"上号") == 0) {
-				wyy(params);
+			catch (std::exception& ex) {
+				*params = u8"addons模块出现了一个未知错误，请稍后重试...";
+				char reportMsg[1024];
+				sprintf_s(reportMsg,
+					"[%s]\n"
+					u8"已捕获std::exception\n"
+					u8"操作者：%lld\n"
+					u8"触发指令：%s\n"
+					u8"详细信息：%s\n",
+					utils::unixTime2Str(time(NULL)).c_str(),
+					tar.user_id,
+					tar.message.c_str(),
+					ex.what()
+				);
+				Target exceptionReport;
+				exceptionReport.message_type = Target::MessageType::PRIVATE;
+				exceptionReport.user_id = MONO;
+				exceptionReport.message = reportMsg;
+				activepush(exceptionReport);
 				return true;
 			}
 			return false;
@@ -272,6 +337,83 @@ namespace osucat::addons {
 			catch (osucat::NetWork_Exception) {
 				*params = u8"抑郁太多对身体不好...";
 			}
+		}
+		static void driftingBottleVoid(bool ThrowOrPick, string cmd, Target tar, SenderInfo senderinfo, string* params) {
+			if (ThrowOrPick) {
+				cmd = utils::unescape(cmd);
+				utils::trim(cmd);
+				if (forbiddenWordsLibrary(cmd) == true) {
+					*params = u8"不想理你...";
+					return;
+				}
+				if (cmd.length() == 0) {
+					*params = u8"不如写点什么再扔...?";
+					return;
+				}
+				if (cmd.length() > 7500) {
+					*params = u8"太长了！";
+					return;
+				}
+				driftingBottle DB;
+				DB.msg = cmd;
+				DB.tar = tar;
+				DB.senderinfo = senderinfo;
+				DB.sendTime = time(NULL);
+				VdriftingBottle.push_back(DB);
+				*params = u8"你的漂流瓶已经漂往远方....";
+				return;
+			}
+			if (VdriftingBottle.size() != 0) {
+				int tempi = utils::randomNum(0, VdriftingBottle.size() - 1);
+				driftingBottle DB = VdriftingBottle[tempi];
+				VdriftingBottle.erase(VdriftingBottle.begin() + tempi);
+				char tempm[8192];
+				sprintf_s(tempm,
+					u8"这是来自 %s(%lld) 的漂流瓶....\n"
+					u8"发于 %s\n"
+					u8"内容是....\n%s",
+					DB.senderinfo.nikename.c_str(), DB.tar.user_id, utils::unixTime2StrChinese(DB.sendTime).c_str(), DB.msg.c_str());
+				*params = tempm;
+				Target tar1;
+				tar1.user_id = DB.tar.user_id;
+				tar1.message_type = Target::MessageType::PRIVATE;
+				char tempmm[8192];
+				sprintf_s(tempmm,
+					u8"你发于 %s\n"
+					u8"的内容为....%s的消息已经被 %s(%lld) 捡起来了....", 
+					utils::unixTime2StrChinese(DB.sendTime).c_str(),
+					DB.msg.c_str(),
+					senderinfo.nikename.c_str(), tar.user_id);
+				tar1.message = tempmm;
+				activepush(tar1);
+			}
+			else {
+				*params = u8"还没有人丢过漂流瓶呢...";
+			}
+		}
+		static bool BaiduTextCensor(string str) {
+			json j, jp;
+			jp["text"] = str;
+			string tmp = NetConnection::HttpsPostUrlEncode("https://aip.baidubce.com/rest/2.0/solution/v1/text_censor/v2/user_defined?access_token=", jp);
+			cout << tmp << endl;
+			try {
+				j = json::parse(tmp);
+			}
+			catch (osucat::NetWork_Exception& ex) {
+				return false;
+			}
+			int ct;
+			try { ct = j["conclusionType"].get<int>(); }
+			catch (json::exception) {
+				ct = 4;
+			}
+			if (ct == 1) {
+				return true;
+			}
+			else {
+				return false;
+			}
+
 		}
 	private:
 		static void activepush(Target tar) {
@@ -2765,67 +2907,29 @@ namespace osucat::addons {
 								  u8"孔丹",
 								  u8"分期u8" };
 			string specialCharactersLibrary[212]{ u8"︿",
-							   u8"！",
-							   u8"＃",
-							   u8"＄",
-							   u8"％",
-							   u8"＆",
-							   u8"＇",
-							   u8"（",
-							   u8"）",
 							   u8"）÷（１－",
 							   u8"）、",
-							   u8"＊",
-							   u8"＋",
 							   u8"＋ξ",
 							   u8"＋＋",
-							   u8"，",
-							   u8"，也",
-							   u8"－",
 							   u8"－β",
-							   u8"－－",
 							   u8"－［＊］－",
-							   u8"．",
-							   u8"／",
-							   u8"０",
-							   u8"０：２",
-							   u8"１",
-							   u8"１．",
-							   u8"１２％",
-							   u8"２",
-							   u8"２．３％",
-							   u8"３",
-							   u8"４",
-							   u8"５",
-							   u8"５：０",
-							   u8"６",
-							   u8"７",
-							   u8"８",
-							   u8"９",
-							   u8"：",
-							   u8"；",
 							   u8"＜",
 							   u8"＜±",
 							   u8"＜Δ",
 							   u8"＜λ",
 							   u8"＜φ",
 							   u8"＜＜",
-							   u8"＝",
 							   u8"＝″",
 							   u8"＝☆",
 							   u8"＝（",
 							   u8"＝－",
 							   u8"＝［",
 							   u8"＝｛",
-							   u8"＞",
 							   u8"＞λ",
-							   u8"？",
-							   u8"＠",
 							   u8"Ａ",
 							   u8"ＬＩ",
 							   u8"Ｒ．Ｌ．",
 							   u8"ＺＸＦＩＴＬ",
-							   u8"［",
 							   u8"［①①］",
 							   u8"［①②］",
 							   u8"［①③］",
@@ -2902,10 +3006,6 @@ namespace osucat::addons {
 							   u8"［⑧］",
 							   u8"［⑨］",
 							   u8"［⑩］",
-							   u8"［＊］",
-							   u8"［－",
-							   u8"［］",
-							   u8"］",
 							   u8"］∧′＝［",
 							   u8"］［",
 							   u8"＿",
@@ -2917,30 +3017,21 @@ namespace osucat::addons {
 							   u8"ｎｇ昉",
 							   u8"｛",
 							   u8"｛－",
-							   u8"｜",
 							   u8"｝",
 							   u8"｝＞",
-							   u8"～",
 							   u8"～±",
 							   u8"～＋",
-							   u8"￥",
 							   u8"Δ",
 							   u8"Ψ",
 							   u8"γ",
 							   u8"μ",
 							   u8"φ",
 							   u8"φ．",
-							   u8"В",
-							   u8"—",
-							   u8"——",
-							   u8"———",
 							   u8"…………………………………………………③",
 							   u8"′∈",
 							   u8"′｜",
 							   u8"℃",
 							   u8"Ⅲ",
-							   u8"↑",
-							   u8"→",
 							   u8"∈［",
 							   u8"∪φ∈",
 							   u8"≈",
@@ -2956,24 +3047,7 @@ namespace osucat::addons {
 							   u8"⑧",
 							   u8"⑨",
 							   u8"⑩",
-							   u8"──",
-							   u8"■",
-							   u8"▲",
-							   u8"　",
-							   u8"、",
-							   u8"。",
-							   u8"〈",
-							   u8"〉",
-							   u8"《",
-							   u8"》",
 							   u8"》），",
-							   u8"」",
-							   u8"『",
-							   u8"』",
-							   u8"【",
-							   u8"】",
-							   u8"〔",
-							   u8"〕",
 							   u8"〕〔",
 							   u8"㈧u8"
 
@@ -2995,6 +3069,7 @@ namespace osucat::addons {
 			}
 			return false;
 		}
+
 	};
 }
 

@@ -18,6 +18,34 @@ namespace osucat::utils {
 		strftime(rtn, 128, "%Y-%m-%d %H:%M:%S", &tm);
 		return rtn;
 	}
+	static std::string unixTime2StrChinese(int timetick)
+	{
+		char tmp[10];
+		std::string rtn;
+		time_t tick;
+		struct tm tm = { 0 };
+		tick = timetick;
+		tm = *localtime(&tick);
+		strftime(tmp, 10, "%Y", &tm);
+		rtn = tmp;
+		rtn += +u8"年";
+		strftime(tmp, 10, "%m", &tm);
+		rtn = rtn + tmp;
+		rtn += +u8"月";
+		strftime(tmp, 10, "%d", &tm);
+		rtn = rtn + tmp;
+		rtn += +u8"日 ";
+		strftime(tmp, 10, "%H", &tm);
+		rtn = rtn + tmp;
+		rtn += +u8"点";
+		strftime(tmp, 10, "%M", &tm);
+		rtn = rtn + tmp;
+		rtn += u8"分";
+		strftime(tmp, 10, "%S", &tm);
+		rtn = rtn + tmp;
+		rtn += u8"秒";
+		return rtn;
+	}
 	static inline void string_replace(std::string& str, const std::string& old_val, const std::string& new_val) {
 		// see https://stackoverflow.com/a/29752943
 
@@ -121,9 +149,16 @@ namespace osucat::utils {
 		}
 		return false;
 	}
-	static int64_t randomNum(int minNum, int maxNum) {
+	static int64_t randomNum(int minNum, int64_t maxNum) {
 		srand((unsigned)GetTickCount());
-		return rand() % (maxNum - minNum + 1) + minNum;
+		int64_t rtn;
+		try {
+			rtn = rand() % (maxNum - minNum + 1) + minNum;
+		}
+		catch (...) {
+			rtn = rand() % (100 - minNum + 1) + minNum;
+		}
+		return rtn;
 	}
 	static std::vector<std::string> string_split(const std::string& original_str, char split_character) {
 		std::string tmp;

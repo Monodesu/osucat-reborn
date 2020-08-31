@@ -350,7 +350,7 @@ namespace osucat::addons {
 					*params = u8"不如写点什么再扔...?";
 					return;
 				}
-				if (cmd.length() > 15000) {
+				if (cmd.length() > 7500) {
 					*params = u8"太长了！";
 					return;
 				}
@@ -367,7 +367,7 @@ namespace osucat::addons {
 				int tempi = utils::randomNum(0, VdriftingBottle.size() - 1);
 				driftingBottle DB = VdriftingBottle[tempi];
 				VdriftingBottle.erase(VdriftingBottle.begin() + tempi);
-				char tempm[16384];
+				char tempm[8192];
 				sprintf_s(tempm,
 					u8"这是来自 %s(%lld) 的漂流瓶....\n"
 					u8"发于 %s\n"
@@ -378,6 +378,30 @@ namespace osucat::addons {
 			else {
 				*params = u8"还没有人丢过漂流瓶呢...";
 			}
+		}
+		static bool BaiduTextCensor(string str) {
+			json j, jp;
+			jp["text"] = str;
+			string tmp = NetConnection::HttpsPostUrlEncode("https://aip.baidubce.com/rest/2.0/solution/v1/text_censor/v2/user_defined?access_token=", jp);
+			cout << tmp << endl;
+			try {
+				j = json::parse(tmp);
+			}
+			catch (osucat::NetWork_Exception& ex) {
+				return false;
+			}
+			int ct;
+			try { ct = j["conclusionType"].get<int>(); }
+			catch (json::exception) {
+				ct = 4;
+			}
+			if (ct == 1) {
+				return true;
+			}
+			else {
+				return false;
+			}
+
 		}
 	private:
 		static void activepush(Target tar) {
@@ -2871,67 +2895,29 @@ namespace osucat::addons {
 								  u8"孔丹",
 								  u8"分期u8" };
 			string specialCharactersLibrary[212]{ u8"︿",
-							   u8"！",
-							   u8"＃",
-							   u8"＄",
-							   u8"％",
-							   u8"＆",
-							   u8"＇",
-							   u8"（",
-							   u8"）",
 							   u8"）÷（１－",
 							   u8"）、",
-							   u8"＊",
-							   u8"＋",
 							   u8"＋ξ",
 							   u8"＋＋",
-							   u8"，",
-							   u8"，也",
-							   u8"－",
 							   u8"－β",
-							   u8"－－",
 							   u8"－［＊］－",
-							   u8"．",
-							   u8"／",
-							   u8"０",
-							   u8"０：２",
-							   u8"１",
-							   u8"１．",
-							   u8"１２％",
-							   u8"２",
-							   u8"２．３％",
-							   u8"３",
-							   u8"４",
-							   u8"５",
-							   u8"５：０",
-							   u8"６",
-							   u8"７",
-							   u8"８",
-							   u8"９",
-							   u8"：",
-							   u8"；",
 							   u8"＜",
 							   u8"＜±",
 							   u8"＜Δ",
 							   u8"＜λ",
 							   u8"＜φ",
 							   u8"＜＜",
-							   u8"＝",
 							   u8"＝″",
 							   u8"＝☆",
 							   u8"＝（",
 							   u8"＝－",
 							   u8"＝［",
 							   u8"＝｛",
-							   u8"＞",
 							   u8"＞λ",
-							   u8"？",
-							   u8"＠",
 							   u8"Ａ",
 							   u8"ＬＩ",
 							   u8"Ｒ．Ｌ．",
 							   u8"ＺＸＦＩＴＬ",
-							   u8"［",
 							   u8"［①①］",
 							   u8"［①②］",
 							   u8"［①③］",
@@ -3008,10 +2994,6 @@ namespace osucat::addons {
 							   u8"［⑧］",
 							   u8"［⑨］",
 							   u8"［⑩］",
-							   u8"［＊］",
-							   u8"［－",
-							   u8"［］",
-							   u8"］",
 							   u8"］∧′＝［",
 							   u8"］［",
 							   u8"＿",
@@ -3023,30 +3005,21 @@ namespace osucat::addons {
 							   u8"ｎｇ昉",
 							   u8"｛",
 							   u8"｛－",
-							   u8"｜",
 							   u8"｝",
 							   u8"｝＞",
-							   u8"～",
 							   u8"～±",
 							   u8"～＋",
-							   u8"￥",
 							   u8"Δ",
 							   u8"Ψ",
 							   u8"γ",
 							   u8"μ",
 							   u8"φ",
 							   u8"φ．",
-							   u8"В",
-							   u8"—",
-							   u8"——",
-							   u8"———",
 							   u8"…………………………………………………③",
 							   u8"′∈",
 							   u8"′｜",
 							   u8"℃",
 							   u8"Ⅲ",
-							   u8"↑",
-							   u8"→",
 							   u8"∈［",
 							   u8"∪φ∈",
 							   u8"≈",
@@ -3062,24 +3035,7 @@ namespace osucat::addons {
 							   u8"⑧",
 							   u8"⑨",
 							   u8"⑩",
-							   u8"──",
-							   u8"■",
-							   u8"▲",
-							   u8"　",
-							   u8"、",
-							   u8"。",
-							   u8"〈",
-							   u8"〉",
-							   u8"《",
-							   u8"》",
 							   u8"》），",
-							   u8"」",
-							   u8"『",
-							   u8"』",
-							   u8"【",
-							   u8"】",
-							   u8"〔",
-							   u8"〕",
 							   u8"〕〔",
 							   u8"㈧u8"
 
@@ -3101,6 +3057,7 @@ namespace osucat::addons {
 			}
 			return false;
 		}
+
 	};
 }
 

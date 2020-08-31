@@ -371,12 +371,11 @@ public:
 #endif
 	}
 
-	static std::string BaiduHttpsPost(const std::string& url, const string& Data) {
+	static std::string HttpsPostUrlEncode(const std::string& url, const json& Data) {
 #ifdef WIN32
 		std::string ret("");
 
-		std::string data_str = "image:" + Data;
-		cout << data_str << endl;
+		std::string data_str = Data.dump();
 		std::wstring wUrl = osucat::utils::s2ws(url);
 		URL_COMPONENTS urlComp;
 		ZeroMemory(&urlComp, sizeof(urlComp));
@@ -415,7 +414,7 @@ public:
 
 		if (hRequest) {
 			WinHttpAddRequestHeaders(hRequest,
-				L"Content-type: application/x-www-form-urlencoded",
+				L"Content-Type: application/json;charset=utf-8",
 				-1L,
 				WINHTTP_ADDREQ_FLAG_ADD | WINHTTP_ADDREQ_FLAG_REPLACE);
 			bResults = WinHttpSendRequest(hRequest,
@@ -425,7 +424,6 @@ public:
 				data_str.length(),
 				data_str.length(),
 				0);
-
 		}
 
 		if (bResults) bResults = WinHttpReceiveResponse(hRequest, NULL);
@@ -434,7 +432,8 @@ public:
 				LPSTR inBuf;
 				dwSize = 0;
 				if (!WinHttpQueryDataAvailable(hRequest, &dwSize))
-					throw osucat::NetWork_Exception("[Network] Error in WinHttpQueryDataAvailable", GetLastError());
+					throw osucat::NetWork_Exception("[Network] Error in WinHttpQueryDataAvailable",
+						GetLastError());
 				inBuf = new char[dwSize + 1];
 				if (!inBuf) throw osucat::NetWork_Exception("[Network] Out of Memory!", 1001);
 				ZeroMemory(inBuf, dwSize + 1);

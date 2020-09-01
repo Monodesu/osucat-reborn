@@ -350,7 +350,7 @@ namespace osucat::addons {
 					*params = u8"不如写点什么再扔...?";
 					return;
 				}
-				if (cmd.length() > 7500) {
+				if (cmd.length() > 5000) {
 					*params = u8"太长了！";
 					return;
 				}
@@ -367,7 +367,7 @@ namespace osucat::addons {
 				int tempi = utils::randomNum(0, VdriftingBottle.size() - 1);
 				driftingBottle DB = VdriftingBottle[tempi];
 				VdriftingBottle.erase(VdriftingBottle.begin() + tempi);
-				char tempm[8192];
+				char tempm[5500];
 				sprintf_s(tempm,
 					u8"这是来自 %s(%lld) 的漂流瓶....\n"
 					u8"发于 %s\n"
@@ -377,7 +377,7 @@ namespace osucat::addons {
 				Target tar1;
 				tar1.user_id = DB.tar.user_id;
 				tar1.message_type = Target::MessageType::PRIVATE;
-				char tempmm[8192];
+				char tempmm[5500];
 				sprintf_s(tempmm,
 					u8"你发于 %s\n"
 					u8"的内容为....%s的消息已经被 %s(%lld) 捡起来了....", 

@@ -220,7 +220,7 @@ namespace osucat::addons {
 					*params = u8"不想理你...";
 					return;
 				}
-				if (cmd.length() > 199) {
+				if (cmd.length() > 1024) {
 					*params = u8"你想干嘛...";
 					return;
 				}
@@ -2907,7 +2907,6 @@ namespace osucat::addons {
 							   u8"＋＋",
 							   u8"－β",
 							   u8"－［＊］－",
-							   u8"＜",
 							   u8"＜±",
 							   u8"＜Δ",
 							   u8"＜λ",
@@ -2920,7 +2919,6 @@ namespace osucat::addons {
 							   u8"＝［",
 							   u8"＝｛",
 							   u8"＞λ",
-							   u8"Ａ",
 							   u8"ＬＩ",
 							   u8"Ｒ．Ｌ．",
 							   u8"ＺＸＦＩＴＬ",
@@ -3009,41 +3007,19 @@ namespace osucat::addons {
 							   u8"ｅ］",
 							   u8"ｆ］",
 							   u8"ｎｇ昉",
-							   u8"｛",
 							   u8"｛－",
-							   u8"｝",
 							   u8"｝＞",
 							   u8"～±",
 							   u8"～＋",
-							   u8"Δ",
-							   u8"Ψ",
-							   u8"γ",
-							   u8"μ",
-							   u8"φ",
-							   u8"φ．",
 							   u8"…………………………………………………③",
 							   u8"′∈",
 							   u8"′｜",
-							   u8"℃",
-							   u8"Ⅲ",
 							   u8"∈［",
 							   u8"∪φ∈",
-							   u8"≈",
-							   u8"①",
-							   u8"②",
 							   u8"②ｃ",
-							   u8"③",
 							   u8"③］",
-							   u8"④",
-							   u8"⑤",
-							   u8"⑥",
-							   u8"⑦",
-							   u8"⑧",
-							   u8"⑨",
-							   u8"⑩",
 							   u8"》），",
 							   u8"〕〔",
-							   u8"㈧u8"
 
 			};
 			for (int i = 1; i < traditionalChineseLibrary->size() + 1; ++i) {

@@ -15,6 +15,16 @@ namespace osucat::addons {
 	public:
 		static bool cmdParse(string msg, Target tar, SenderInfo senderinfo, string* params) {
 			try {
+				if (_stricmp(msg.substr(0, 21).c_str(), u8"海上漂流瓶数量") == 0) {
+					int tmp = VdriftingBottle.size();
+					if (tmp == 0) {
+						*params = u8"海上目前还没有漂流瓶呢...";
+					}
+					else {
+						*params = u8"目前海上有 " +to_string(tmp)+u8" 个漂流瓶正在远航...";
+					}
+					return true;
+				}
 				if (_stricmp(msg.substr(0, 12).c_str(), u8"扔漂流瓶") == 0) {
 					driftingBottleVoid(true, msg.substr(12), tar, senderinfo, params);
 					return true;
@@ -51,8 +61,6 @@ namespace osucat::addons {
 					wyy(params);
 					return true;
 				}
-
-
 
 			}
 			catch (osucat::database_exception& ex) {

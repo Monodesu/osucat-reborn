@@ -3043,7 +3043,7 @@ namespace osucat {
 				*params = u8"此操作必须在群内完成。";
 				return;
 			}
-			if (sdr.member_role != "member") {
+			if (sdr.member_role == "member") {
 				*params = u8"此操作需要管理员执行。";
 				return;
 			}

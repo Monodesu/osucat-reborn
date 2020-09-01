@@ -340,6 +340,16 @@ namespace osucat::addons {
 		}
 		static void driftingBottleVoid(bool ThrowOrPick, string cmd, Target tar, SenderInfo senderinfo, string* params) {
 			if (ThrowOrPick) {
+				int throwcount = 0;
+				for (int i = 0; i < VdriftingBottle.size(); ++i) {
+					if (VdriftingBottle[i].tar.user_id == tar.user_id) {
+						++throwcount;
+					}
+				}
+				if (throwcount > 5) {
+					*params = u8"你已经扔了五个瓶子出去了...休息一下再扔吧...";
+					return;
+				}
 				cmd = utils::unescape(cmd);
 				utils::trim(cmd);
 				if (forbiddenWordsLibrary(cmd) == true) {
@@ -380,7 +390,7 @@ namespace osucat::addons {
 				char tempmm[5500];
 				sprintf_s(tempmm,
 					u8"你发于 %s\n"
-					u8"的内容为....%s的消息已经被 %s(%lld) 捡起来了....", 
+					u8"的内容为....%s的消息已经被 %s(%lld) 捡起来了....",
 					utils::unixTime2StrChinese(DB.sendTime).c_str(),
 					DB.msg.c_str(),
 					senderinfo.nikename.c_str(), tar.user_id);

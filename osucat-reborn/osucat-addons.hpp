@@ -401,30 +401,6 @@ namespace osucat::addons {
 				*params = u8"还没有人丢过漂流瓶呢...";
 			}
 		}
-		static bool BaiduTextCensor(string str) {
-			json j, jp;
-			jp["text"] = str;
-			string tmp = NetConnection::HttpsPostUrlEncode("https://aip.baidubce.com/rest/2.0/solution/v1/text_censor/v2/user_defined?access_token=", jp);
-			cout << tmp << endl;
-			try {
-				j = json::parse(tmp);
-			}
-			catch (osucat::NetWork_Exception& ex) {
-				return false;
-			}
-			int ct;
-			try { ct = j["conclusionType"].get<int>(); }
-			catch (json::exception) {
-				ct = 4;
-			}
-			if (ct == 1) {
-				return true;
-			}
-			else {
-				return false;
-			}
-
-		}
 	private:
 		static void activepush(Target tar) {
 			if (tar.message_type == Target::MessageType::PRIVATE) {

@@ -15,6 +15,16 @@ namespace osucat::addons {
 	public:
 		static bool cmdParse(string msg, Target tar, SenderInfo senderinfo, string* params) {
 			try {
+				if (_stricmp(msg.substr(0, 21).c_str(), u8"海上漂流瓶数量") == 0) {
+					int tmp = VdriftingBottle.size();
+					if (tmp == 0) {
+						*params = u8"海上目前还没有漂流瓶呢...";
+					}
+					else {
+						*params = u8"目前海上有 " +to_string(tmp)+u8" 个漂流瓶正在远航...";
+					}
+					return true;
+				}
 				if (_stricmp(msg.substr(0, 12).c_str(), u8"扔漂流瓶") == 0) {
 					driftingBottleVoid(true, msg.substr(12), tar, senderinfo, params);
 					return true;
@@ -51,8 +61,6 @@ namespace osucat::addons {
 					wyy(params);
 					return true;
 				}
-
-
 
 			}
 			catch (osucat::database_exception& ex) {
@@ -340,6 +348,16 @@ namespace osucat::addons {
 		}
 		static void driftingBottleVoid(bool ThrowOrPick, string cmd, Target tar, SenderInfo senderinfo, string* params) {
 			if (ThrowOrPick) {
+				int throwcount = 0;
+				for (int i = 0; i < VdriftingBottle.size(); ++i) {
+					if (VdriftingBottle[i].tar.user_id == tar.user_id) {
+						++throwcount;
+					}
+				}
+				if (throwcount > 5) {
+					*params = u8"你已经扔了五个瓶子出去了...休息一下再扔吧...";
+					return;
+				}
 				cmd = utils::unescape(cmd);
 				utils::trim(cmd);
 				if (forbiddenWordsLibrary(cmd) == true) {
@@ -350,7 +368,7 @@ namespace osucat::addons {
 					*params = u8"不如写点什么再扔...?";
 					return;
 				}
-				if (cmd.length() > 7500) {
+				if (cmd.length() > 5000) {
 					*params = u8"太长了！";
 					return;
 				}
@@ -367,7 +385,7 @@ namespace osucat::addons {
 				int tempi = utils::randomNum(0, VdriftingBottle.size() - 1);
 				driftingBottle DB = VdriftingBottle[tempi];
 				VdriftingBottle.erase(VdriftingBottle.begin() + tempi);
-				char tempm[8192];
+				char tempm[5500];
 				sprintf_s(tempm,
 					u8"这是来自 %s(%lld) 的漂流瓶....\n"
 					u8"发于 %s\n"
@@ -377,10 +395,10 @@ namespace osucat::addons {
 				Target tar1;
 				tar1.user_id = DB.tar.user_id;
 				tar1.message_type = Target::MessageType::PRIVATE;
-				char tempmm[8192];
+				char tempmm[5500];
 				sprintf_s(tempmm,
 					u8"你发于 %s\n"
-					u8"的内容为....%s的消息已经被 %s(%lld) 捡起来了....", 
+					u8"的内容为....%s的消息已经被 %s(%lld) 捡起来了....",
 					utils::unixTime2StrChinese(DB.sendTime).c_str(),
 					DB.msg.c_str(),
 					senderinfo.nikename.c_str(), tar.user_id);
@@ -390,30 +408,6 @@ namespace osucat::addons {
 			else {
 				*params = u8"还没有人丢过漂流瓶呢...";
 			}
-		}
-		static bool BaiduTextCensor(string str) {
-			json j, jp;
-			jp["text"] = str;
-			string tmp = NetConnection::HttpsPostUrlEncode("https://aip.baidubce.com/rest/2.0/solution/v1/text_censor/v2/user_defined?access_token=", jp);
-			cout << tmp << endl;
-			try {
-				j = json::parse(tmp);
-			}
-			catch (osucat::NetWork_Exception& ex) {
-				return false;
-			}
-			int ct;
-			try { ct = j["conclusionType"].get<int>(); }
-			catch (json::exception) {
-				ct = 4;
-			}
-			if (ct == 1) {
-				return true;
-			}
-			else {
-				return false;
-			}
-
 		}
 	private:
 		static void activepush(Target tar) {

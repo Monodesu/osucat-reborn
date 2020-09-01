@@ -36,7 +36,7 @@ namespace osucat {
 					tar.user_id = j["user_id"].get<int64_t>();
 					tar.time = j["time"].get<int64_t>();
 					tar.message = j["message"].get<string>();
-					char msg[32768];
+					char msg[16384];
 					if (tar.message_type == Target::MessageType::PRIVATE) {
 						sprintf_s(msg, u8"[%s] [osucat][↓]: 好友 %lld 的消息：%s", utils::unixTime2Str(tar.time).c_str(), tar.user_id, tar.message.c_str());
 						cout << msg << endl;
@@ -44,7 +44,6 @@ namespace osucat {
 							string str = tar.message;
 							str = tar.message[0] < 0 ? tar.message.substr(3) : tar.message.substr(1);
 							monitors(str, tar, sdr);
-
 						}
 					}
 					if (tar.message_type == Target::MessageType::GROUP) {
@@ -111,7 +110,8 @@ namespace osucat {
 					tar.message_type == Target::MessageType::PRIVATE ? activepushTar.user_id = tar.user_id : activepushTar.group_id = tar.group_id;
 					activepushTar.message = params;
 					activepush(activepushTar);
-				}				return;
+				}
+				return;
 			}
 		}
 #pragma endregion
@@ -119,6 +119,9 @@ namespace osucat {
 #pragma region 指令
 #pragma region 指令解析
 		static bool cmdParse(string msg, Target tar, SenderInfo senderinfo, string* params) {
+			Database db;
+			db.Connect();
+			if (db.is_Blocked(tar.user_id) == 1) return false; //在黑名单内的用户被忽略
 			try {
 				if (_stricmp(msg.substr(0, 18).c_str(), u8"猫猫调用次数") == 0) {
 					Database db;
@@ -287,15 +290,38 @@ namespace osucat {
 						_UpdateManually(tar);
 						return true;
 					}
+					if (_stricmp(msg.substr(0, 5).c_str(), "block") == 0) {
+						blockuser(msg.substr(5), params);
+						return true;
+					}
+					if (_stricmp(msg.substr(0, 15).c_str(), u8"清空漂流瓶") == 0) {
+						osucat::addons::VdriftingBottle.clear();
+						*params = u8"已清空海上的漂流瓶";
+						return true;
+					}
+
 				}
 #pragma region 娱乐模块
-				Database db;
-				db.Connect();
 				if (tar.message_type == Target::MessageType::GROUP)if (db.isGroupEnable(tar.group_id, 4) == 0) return false; //拦截娱乐模块
-				if (msg.find("[CQ:image") == string::npos) { //过滤图片
-					if (addons::entertainment::cmdParse(msg, tar, senderinfo, params))return true;
-					return false;
+				if (msg.find("[CQ:image") != string::npos) {
+					char reportMsg[1024];
+					sprintf_s(reportMsg,
+						"[%s]\n"
+						u8"用户 %s(%lld) 上传了图片,消息内容如下：\n%s",
+						utils::unixTime2Str(time(NULL)).c_str(),
+						senderinfo.nikename.c_str(),
+						tar.user_id,
+						tar.message.c_str()
+					);
+					Target exceptionReport;
+					exceptionReport.message_type = Target::MessageType::PRIVATE;
+					exceptionReport.user_id = MONO;
+					exceptionReport.message = reportMsg;
+					activepush(exceptionReport);
+
 				}
+				if (addons::entertainment::cmdParse(msg, tar, senderinfo, params))return true;
+				return false;
 				/*if (_stricmp(msg.substr(0, 2).c_str(), "me") == 0) {
 					memyselfact(msg.substr(2), tar, senderinfo, params);
 					return true;
@@ -3017,7 +3043,7 @@ namespace osucat {
 				*params = u8"此操作必须在群内完成。";
 				return;
 			}
-			if (sdr.member_role != "member") {
+			if (sdr.member_role == "member") {
 				*params = u8"此操作需要管理员执行。";
 				return;
 			}
@@ -3335,8 +3361,21 @@ namespace osucat {
 			db.addbadge(uid, temp);
 			*params = u8"已成功提交。";
 		}
+		static void blockuser(string cmd, string* params) {
+			if (utils::isNum(cmd)) {
+				Database db;
+				db.Connect();
+				utils::trim(cmd);
+				if (db.add_blacklist(stoll(cmd))) { *params = u8"用户已成功被列入黑名单"; }
+				else { *params = u8"用户已存在于黑名单中"; }
+			}
+			*params = u8"请提供纯数字qq，不要掺杂中文。";
+		}
 		/* 娱乐功能 */
 		static bool funStuff(string cmd, Target tar, SenderInfo senderinfo, string* params) {
+			Database db;
+			db.Connect();
+			if (db.isGroupEnable(tar.group_id, 4) == 0) return false;
 			if (randRepeater()) { *params = cmd; return true; }//复读机
 			return false;
 		}

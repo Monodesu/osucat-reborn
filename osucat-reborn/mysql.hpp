@@ -468,6 +468,26 @@ public:
 		}
 	}
 
+	bool add_blacklist(int64_t qq) {
+		try {
+			this->Insert("INSERT INTO blacklist (qq,is_blocked) values(" + to_string(qq) + ",1)");
+			return true;
+		}
+		catch (osucat::database_exception) {
+			return false;
+		}
+	}
+
+	int is_Blocked(int64_t qq) {
+		try {
+			json result = this->Select("select is_blocked from blacklist where qq=" + to_string(qq));
+			return std::stoi(result[0]["is_blocked"].get<std::string>());
+		}
+		catch (osucat::database_exception) {
+			return 0;
+		}
+	}
+
 	/*
 	int cmd
 	1 = bp

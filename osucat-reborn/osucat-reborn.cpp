@@ -34,8 +34,6 @@ int main()
 	Magick::InitializeMagick(OC_ROOT_PATH);
 	cout << "Done!" << endl;
 	cout << "Current Directory Path: \"" << OC_ROOT_PATH << "\"" << endl;
-
-	cout << osucat::addons::entertainment::BaiduTextCensor("%e4%b8%8d%e8%a6%81%e4%be%ae%e8%be%b1%e4%bc%9f%e5%a4%a7%e7%9a%84%e4%b9%90%e4%be%83") << endl;
 #pragma region DetecedFolder
 	if (!utils::isDirExist(".\\data")) {
 		cout << "Folder 'data' does not exist, created." << endl;

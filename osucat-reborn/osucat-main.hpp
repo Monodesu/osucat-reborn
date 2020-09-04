@@ -3362,14 +3362,20 @@ namespace osucat {
 			*params = u8"已成功提交。";
 		}
 		static void blockuser(string cmd, string* params) {
-			if (utils::isNum(cmd)) {
+			utils::trim(cmd);
+			try {
 				Database db;
 				db.Connect();
-				utils::trim(cmd);
-				if (db.add_blacklist(stoll(cmd))) { *params = u8"用户已成功被列入黑名单"; }
-				else { *params = u8"用户已存在于黑名单中"; }
+				if (db.add_blacklist(stoll(cmd))) { 
+					*params = u8"用户已成功被列入黑名单";
+				}
+				else {
+					*params = u8"用户已存在于黑名单中";
+				}
 			}
-			*params = u8"请提供纯数字qq，不要掺杂中文。";
+			catch (std::exception) {
+				*params = u8"请提供纯数字qq，不要掺杂中文。";
+			}
 		}
 		/* 娱乐功能 */
 		static bool funStuff(string cmd, Target tar, SenderInfo senderinfo, string* params) {

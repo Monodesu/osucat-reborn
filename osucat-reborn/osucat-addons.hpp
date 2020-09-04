@@ -73,7 +73,6 @@ namespace osucat::addons {
 					wyy(params);
 					return true;
 				}
-
 			}
 			catch (osucat::database_exception& ex) {
 				*params = u8"访问数据库时出现了一个错误，请稍后重试...";
@@ -3069,7 +3068,6 @@ namespace osucat::addons {
 			}
 			return false;
 		}
-
 	};
 }
 

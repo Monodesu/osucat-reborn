@@ -3388,7 +3388,7 @@ namespace osucat {
 			try {
 				Database db;
 				db.Connect();
-				if (db.add_blacklist(stoll(cmd))) { 
+				if (db.add_blacklist(stoll(cmd))) {
 					*params = u8"用户已成功被列入黑名单";
 				}
 				else {
@@ -3401,10 +3401,14 @@ namespace osucat {
 		}
 		/* 娱乐功能 */
 		static bool funStuff(string cmd, Target tar, SenderInfo senderinfo, string* params) {
-			Database db;
-			db.Connect();
-			if (db.isGroupEnable(tar.group_id, 5) == 0) return false;
-			if (randRepeater()) { *params = cmd; return true; }//复读机
+			if (randRepeater()) {
+				if (cmd.find("[CQ:record") != string::npos || cmd.find("[CQ:share") != string::npos || cmd.find("[CQ:forward") != string::npos || cmd.find("[CQ:node") != string::npos || cmd.find("[CQ:video") != string::npos)return false;
+				Database db;
+				db.Connect();
+				if (db.isGroupEnable(tar.group_id, 5) == 0) return false;
+				*params = cmd;
+				return true;
+			}//复读机
 			return false;
 		}
 		static bool randRepeater() {

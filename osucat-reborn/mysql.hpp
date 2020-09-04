@@ -494,6 +494,7 @@ public:
 	2 = rctpp
 	3 = recent
 	4 = entertainment
+	5 = repeater
 	*/
 	int isGroupEnable(int64_t group_id, int cmd) {
 		try {
@@ -511,6 +512,9 @@ public:
 			case 4:
 				_cmd = "entertainment";
 				break;
+			case 5:
+				_cmd = "repeater";
+				break;
 			}
 			json result = this->Select("select " + _cmd + " from group_settings where group_id=" + to_string(group_id));
 			switch (cmd) {
@@ -522,6 +526,8 @@ public:
 				return std::stoi(result[0]["recent"].get<std::string>());
 			case 4:
 				return std::stoi(result[0]["entertainment"].get<std::string>());
+			case 5:
+				return std::stoi(result[0]["repeater"].get<std::string>());
 			}
 
 		}
@@ -537,6 +543,7 @@ public:
 	2 = rctpp
 	3 = recent
 	4 = entertainment
+	5 = repeater
 	*/
 	void changeGroupSettings(int64_t group_id, int cmd, bool on_off) {
 		try {
@@ -553,6 +560,9 @@ public:
 				break;
 			case 4:
 				_cmd = "entertainment";
+				break;
+			case 5:
+				_cmd = "repeater";
 				break;
 			}
 			if (on_off == true) {
@@ -641,29 +651,20 @@ public:
 	*/
 	void setBottleRemaining(int isdaily, int64_t qq) {
 		if (isdaily==1) {
-			string query = "SELECT remaining FROM bottlerecord WHERE qq=" + to_string(qq);
-			json j = this->Select(query);
-			int oldr;
-			oldr = stoi(j[0]["remaining"].get<std::string>());
-			query = "update bottlerecord set remaining=" + to_string(oldr + 5) + ",lastrewardtime=" + to_string(time(NULL)) + " where qq=" + to_string(qq);
+			int oldr = this->getUserBottleRemaining(qq);
+			string query = "update bottlerecord set remaining=" + to_string(oldr + 5) + ",lastrewardtime=" + to_string(time(NULL)) + " where qq=" + to_string(qq);
 			this->Update(query);
 			return;
 		}
 		if (isdaily == 2) {
-			string query = "SELECT remaining FROM bottlerecord WHERE qq=" + to_string(qq);
-			json j = this->Select(query);
-			int oldr;
-			oldr = stoi(j[0]["remaining"].get<std::string>());
-			query = "update bottlerecord set remaining=" + to_string(oldr + 1) + " where qq=" + to_string(qq);
+			int oldr = this->getUserBottleRemaining(qq);
+			string query = "update bottlerecord set remaining=" + to_string(oldr + 1) + " where qq=" + to_string(qq);
 			this->Update(query);
 			return;
 		}
 		if (isdaily == 3) {
-			string query = "SELECT remaining FROM bottlerecord WHERE qq=" + to_string(qq);
-			json j = this->Select(query);
-			int oldr;
-			oldr = stoi(j[0]["remaining"].get<std::string>());
-			query = "update bottlerecord set remaining=" + to_string(oldr - 1) + " where qq=" + to_string(qq);
+			int oldr = this->getUserBottleRemaining(qq);
+			string query = "update bottlerecord set remaining=" + to_string(oldr - 1) + " where qq=" + to_string(qq);
 			this->Update(query);
 			return;
 		}

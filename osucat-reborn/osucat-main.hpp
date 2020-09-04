@@ -3055,7 +3055,7 @@ namespace osucat {
 			db.addcallcount();
 			vector<string> temp = utils::string_split(cmd, ':');
 			string 参数不正确 =
-				u8"给定的参数不正确\n正确的参数例：{function}:{on/off}\n参数名：bp/rctpp/recent/entertainment",
+				u8"给定的参数不正确\n正确的参数例：{function}:{on/off}\n参数名：bp/rctpp/recent/entertainment/repeater",
 				功能已开启 = u8"这项功能已经是启用状态了", 功能已关闭 = u8"这项功能已经处于禁用状态了",
 				已提交 = u8"操作已成功提交。";
 			if (temp.size() != 2) {
@@ -3144,6 +3144,28 @@ namespace osucat {
 						return;
 					}
 					db.changeGroupSettings(tar.group_id, 4, false);
+					*params = 已提交;
+					return;
+				}
+				*params = 参数不正确;
+				return;
+			}
+			if (temp[0] == "repeater") {
+				if (temp[1] == "on") {
+					if (db.isGroupEnable(tar.group_id, 5) == 1) {
+						*params = 功能已开启;
+						return;
+					}
+					db.changeGroupSettings(tar.group_id, 5, true);
+					*params = 已提交;
+					return;
+				}
+				if (temp[1] == "off") {
+					if (db.isGroupEnable(tar.group_id, 5) == 0) {
+						*params = 功能已关闭;
+						return;
+					}
+					db.changeGroupSettings(tar.group_id, 5, false);
 					*params = 已提交;
 					return;
 				}
@@ -3366,7 +3388,7 @@ namespace osucat {
 			try {
 				Database db;
 				db.Connect();
-				if (db.add_blacklist(stoll(cmd))) { 
+				if (db.add_blacklist(stoll(cmd))) {
 					*params = u8"用户已成功被列入黑名单";
 				}
 				else {
@@ -3379,10 +3401,14 @@ namespace osucat {
 		}
 		/* 娱乐功能 */
 		static bool funStuff(string cmd, Target tar, SenderInfo senderinfo, string* params) {
-			Database db;
-			db.Connect();
-			if (db.isGroupEnable(tar.group_id, 4) == 0) return false;
-			if (randRepeater()) { *params = cmd; return true; }//复读机
+			if (randRepeater()) {
+				if (cmd.find("[CQ:record") != string::npos || cmd.find("[CQ:share") != string::npos || cmd.find("[CQ:forward") != string::npos || cmd.find("[CQ:node") != string::npos || cmd.find("[CQ:video") != string::npos)return false;
+				Database db;
+				db.Connect();
+				if (db.isGroupEnable(tar.group_id, 5) == 0) return false;
+				*params = cmd;
+				return true;
+			}//复读机
 			return false;
 		}
 		static bool randRepeater() {

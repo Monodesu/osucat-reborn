@@ -15,21 +15,33 @@ namespace osucat::addons {
 	public:
 		static bool cmdParse(string msg, Target tar, SenderInfo senderinfo, string* params) {
 			try {
+				if (_stricmp(msg.substr(0, 18).c_str(), u8"剩余打捞次数") == 0) {
+					Database db;
+					db.Connect();
+					int t = db.getUserBottleRemaining(tar.user_id);
+					if (t > 0) {
+						*params = u8"你当前还可以捡" + to_string(t) + u8"个瓶子！";
+					}
+					else {
+						*params = u8"你当前没有捡瓶子的机会了，扔漂流瓶可以获得一次打捞的机会，或每日首次使用漂流瓶也可获得5次免费打捞的机会~";
+					}
+					return true;
+				}
 				if (_stricmp(msg.substr(0, 21).c_str(), u8"海上漂流瓶数量") == 0) {
 					int tmp = VdriftingBottle.size();
 					if (tmp == 0) {
 						*params = u8"海上目前还没有漂流瓶呢...";
 					}
 					else {
-						*params = u8"目前海上有 " +to_string(tmp)+u8" 个漂流瓶正在远航...";
+						*params = u8"目前海上有 " + to_string(tmp) + u8" 个漂流瓶正在远航...";
 					}
 					return true;
 				}
-				if (_stricmp(msg.substr(0, 12).c_str(), u8"扔漂流瓶") == 0) {
+				if (_stricmp(msg.substr(0, 12).c_str(), u8"扔漂流瓶") == 0 || _stricmp(msg.substr(0, 12).c_str(), u8"丢漂流瓶") == 0) {
 					driftingBottleVoid(true, msg.substr(12), tar, senderinfo, params);
 					return true;
 				}
-				if (_stricmp(msg.substr(0, 12).c_str(), u8"捡漂流瓶") == 0) {
+				if (_stricmp(msg.substr(0, 12).c_str(), u8"捡漂流瓶") == 0 || _stricmp(msg.substr(0, 12).c_str(), u8"捞漂流瓶") == 0) {
 					driftingBottleVoid(false, msg.substr(12), tar, senderinfo, params);
 					return true;
 				}
@@ -347,6 +359,8 @@ namespace osucat::addons {
 			}
 		}
 		static void driftingBottleVoid(bool ThrowOrPick, string cmd, Target tar, SenderInfo senderinfo, string* params) {
+			Database db;
+			db.Connect();
 			if (ThrowOrPick) {
 				int throwcount = 0;
 				for (int i = 0; i < VdriftingBottle.size(); ++i) {
@@ -355,7 +369,7 @@ namespace osucat::addons {
 					}
 				}
 				if (throwcount > 5) {
-					*params = u8"你已经扔了五个瓶子出去了...休息一下再扔吧...";
+					*params = u8"你已经扔了5个瓶子出去了...休息一下再扔吧...";
 					return;
 				}
 				cmd = utils::unescape(cmd);
@@ -368,10 +382,11 @@ namespace osucat::addons {
 					*params = u8"不如写点什么再扔...?";
 					return;
 				}
-				if (cmd.length() > 5000) {
+				if (cmd.length() > 10000) {
 					*params = u8"太长了！";
 					return;
 				}
+				db.setBottleRemaining(2,tar.user_id);
 				driftingBottle DB;
 				DB.msg = cmd;
 				DB.tar = tar;
@@ -381,33 +396,48 @@ namespace osucat::addons {
 				*params = u8"你的漂流瓶已经漂往远方....";
 				return;
 			}
-			if (VdriftingBottle.size() != 0) {
-				int tempi = utils::randomNum(0, VdriftingBottle.size() - 1);
-				driftingBottle DB = VdriftingBottle[tempi];
-				VdriftingBottle.erase(VdriftingBottle.begin() + tempi);
-				char tempm[5500];
-				sprintf_s(tempm,
-					u8"这是来自 %s(%lld) 的漂流瓶....\n"
-					u8"发于 %s\n"
-					u8"内容是....\n%s",
-					DB.senderinfo.nikename.c_str(), DB.tar.user_id, utils::unixTime2StrChinese(DB.sendTime).c_str(), DB.msg.c_str());
-				*params = tempm;
-				Target tar1;
-				tar1.user_id = DB.tar.user_id;
-				tar1.message_type = Target::MessageType::PRIVATE;
-				char tempmm[5500];
-				sprintf_s(tempmm,
-					u8"你发于 %s\n"
-					u8"的内容为....%s的消息已经被 %s(%lld) 捡起来了....",
-					utils::unixTime2StrChinese(DB.sendTime).c_str(),
-					DB.msg.c_str(),
-					senderinfo.nikename.c_str(), tar.user_id);
-				tar1.message = tempmm;
-				activepush(tar1);
+
+			int a = db.getUserBottleRemaining(tar.user_id);
+			if (a > 0) {
+				if (VdriftingBottle.size() != 0) {
+					db.setBottleRemaining(3, tar.user_id);
+					int tempi = utils::randomNum(0, VdriftingBottle.size() - 1);
+					driftingBottle DB;
+					for (int i = 0; i < VdriftingBottle.size(); ++i) {
+						if (VdriftingBottle[tempi].tar.user_id != tar.user_id) {
+							break;
+						}
+						else { Sleep(314); tempi = utils::randomNum(0, VdriftingBottle.size() - 1); }
+					}
+					DB = VdriftingBottle[tempi];
+					VdriftingBottle.erase(VdriftingBottle.begin() + tempi);
+					char tempm[12288];
+					sprintf_s(tempm,
+						u8"这是来自 %s(%lld) 的漂流瓶....\n"
+						u8"发于 %s\n"
+						u8"内容是....\n%s",
+						DB.senderinfo.nikename.c_str(), DB.tar.user_id, utils::unixTime2StrChinese(DB.sendTime).c_str(), DB.msg.c_str());
+					*params = tempm;
+					Target tar1;
+					tar1.user_id = DB.tar.user_id;
+					tar1.message_type = Target::MessageType::PRIVATE;
+					sprintf_s(tempm,
+						u8"你发于 %s\n"
+						u8"的内容为....%s的消息已经被 %s(%lld) 捡起来了....",
+						utils::unixTime2StrChinese(DB.sendTime).c_str(),
+						DB.msg.c_str(),
+						senderinfo.nikename.c_str(), tar.user_id);
+					tar1.message = tempm;
+					activepush(tar1);
+				}
+				else {
+					*params = u8"还没有人丢过漂流瓶呢...";
+				}
 			}
 			else {
-				*params = u8"还没有人丢过漂流瓶呢...";
+				*params = u8"你当前没有捡瓶子的机会了，扔漂流瓶可以获得一次打捞的机会，或每日首次使用漂流瓶也可获得5次免费打捞的机会~";
 			}
+
 		}
 	private:
 		static void activepush(Target tar) {

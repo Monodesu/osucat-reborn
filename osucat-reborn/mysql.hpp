@@ -632,6 +632,73 @@ public:
 		this->Delete(query1);
 		this->Delete(query2);
 	}
+
+	/*
+	int isdaily
+	1 = isdaily plus+5
+	2 = plus
+	3 = minus
+	*/
+	void setBottleRemaining(int isdaily, int64_t qq) {
+		if (isdaily==1) {
+			string query = "SELECT remaining FROM bottlerecord WHERE qq=" + to_string(qq);
+			json j = this->Select(query);
+			int oldr;
+			oldr = stoi(j[0]["remaining"].get<std::string>());
+			query = "update bottlerecord set remaining=" + to_string(oldr + 5) + ",lastrewardtime=" + to_string(time(NULL)) + " where qq=" + to_string(qq);
+			this->Update(query);
+			return;
+		}
+		if (isdaily == 2) {
+			string query = "SELECT remaining FROM bottlerecord WHERE qq=" + to_string(qq);
+			json j = this->Select(query);
+			int oldr;
+			oldr = stoi(j[0]["remaining"].get<std::string>());
+			query = "update bottlerecord set remaining=" + to_string(oldr + 1) + " where qq=" + to_string(qq);
+			this->Update(query);
+			return;
+		}
+		if (isdaily == 3) {
+			string query = "SELECT remaining FROM bottlerecord WHERE qq=" + to_string(qq);
+			json j = this->Select(query);
+			int oldr;
+			oldr = stoi(j[0]["remaining"].get<std::string>());
+			query = "update bottlerecord set remaining=" + to_string(oldr - 1) + " where qq=" + to_string(qq);
+			this->Update(query);
+			return;
+		}
+	}
+
+	int getUserBottleRemaining(int64_t qq) {
+		try {
+			string query = "SELECT * FROM bottlerecord WHERE qq=" + to_string(qq);
+			json j = this->Select(query);
+			int64_t a = stoll(j[0]["lastrewardtime"].get<std::string>());
+			char rtn[128];
+			time_t tick = a;
+			struct tm tm = { 0 };
+			tm = *localtime(&tick);
+			strftime(rtn, 128, "%d", &tm);
+			string tmp1 = rtn;
+			tick = time(NULL);
+			tm = *localtime(&tick);
+			strftime(rtn, 128, "%d", &tm);
+			string tmp2 = rtn;
+			if (tmp1 != tmp2) {
+				this->setBottleRemaining(1, qq);
+				j = this->Select(query);
+				return stoi(j[0]["remaining"].get<std::string>());
+			}
+			else {
+				return stoi(j[0]["remaining"].get<std::string>());
+			}
+		}
+		catch (osucat::database_exception) {
+			string query = "INSERT INTO bottlerecord (qq,remaining,lastrewardtime) VALUES (" + to_string(qq) + ",5," + to_string(time(NULL)) + ")";
+			this->Insert(query);
+			return 5;
+		}
+	}
 	void Close() {
 		if (this->conn.net.vio != NULL) mysql_close(&this->conn);
 	}

@@ -126,10 +126,10 @@ int main()
 		if (utils::fileExist(".\\.remotesql")) {
 			cout << u8"\n/*** osucat now using remote sql server ***/\n" << endl;
 			sprintf_s(SQL_USER, "osucat");
-			sprintf_s(SQL_HOST, "139.196.8.242");
-			sprintf_s(SQL_PWD, "wPGAHft4M2W8Y88i");
+			sprintf_s(SQL_HOST, "192.168.0.103");
+			sprintf_s(SQL_PWD, "ASDasdASD32111!");
 			sprintf_s(SQL_DATABASE, "osucat");
-			SQL_PORT = 3306;
+			SQL_PORT = 32148;
 		}
 		else {
 			sprintf_s(SQL_USER, "root");
@@ -157,8 +157,8 @@ int main()
 			return 1;
 		}
 		using easywsclient::WebSocket;
-		cout << u8"Ready...Waiting for connection..." << endl;
-		std::unique_ptr<WebSocket> ws(WebSocket::from_url("ws://localhost:6700/"));
+		cout << u8"Ready...Waiting for connection..." << endl; 
+		std::unique_ptr<WebSocket> ws(WebSocket::from_url(utils::fileExist(".\\.remotesql")?"ws://192.168.0.103:6700":"ws://localhost:6700/"));
 		if (ws == false) {
 			printf(u8"An attempt to connect to the WebSocket server has failed.");
 			return 2;

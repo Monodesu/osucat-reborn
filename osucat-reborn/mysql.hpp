@@ -650,10 +650,9 @@ public:
 	2 = plus
 	3 = minus
 	*/
-	void setBottleRemaining(int isdaily, int64_t qq) {
-		if (isdaily==1) {
-			int oldr = this->getUserBottleRemaining(qq);
-			string query = "update bottlerecord set remaining=" + to_string(oldr + 5) + ",lastrewardtime=" + to_string(time(NULL)) + " where qq=" + to_string(qq);
+	void setBottleRemaining(int isdaily, int64_t qq, int dailyoldvalue = 0) {
+		if (isdaily == 1) {
+			string query = "update bottlerecord set remaining=" + to_string(dailyoldvalue + 5) + ",lastrewardtime=" + to_string(time(NULL)) + " where qq=" + to_string(qq);
 			this->Update(query);
 			return;
 		}
@@ -676,6 +675,7 @@ public:
 			string query = "SELECT * FROM bottlerecord WHERE qq=" + to_string(qq);
 			json j = this->Select(query);
 			int64_t a = stoll(j[0]["lastrewardtime"].get<std::string>());
+			int b = stoi(j[0]["remaining"].get<std::string>());
 			char rtn[128];
 			time_t tick = a;
 			struct tm tm = { 0 };
@@ -687,7 +687,7 @@ public:
 			strftime(rtn, 128, "%d", &tm);
 			string tmp2 = rtn;
 			if (tmp1 != tmp2) {
-				this->setBottleRemaining(1, qq);
+				this->setBottleRemaining(1, qq, b);
 				j = this->Select(query);
 				return stoi(j[0]["remaining"].get<std::string>());
 			}

@@ -119,10 +119,10 @@ namespace osucat {
 #pragma region 指令
 #pragma region 指令解析
 		static bool cmdParse(string msg, Target tar, SenderInfo senderinfo, string* params) {
-			Database db;
-			db.Connect();
-			if (db.is_Blocked(tar.user_id) == 1) return false; //在黑名单内的用户被忽略
 			try {
+				Database db;
+				db.Connect();
+				if (db.is_Blocked(tar.user_id) == 1) return false; //在黑名单内的用户被忽略
 				if (_stricmp(msg.substr(0, 18).c_str(), u8"猫猫调用次数") == 0) {
 					Database db;
 					db.Connect();

@@ -144,12 +144,14 @@ namespace osucat::addons {
 					tar.user_id,
 					tar.message.c_str()
 				);
-				Target exceptionReport;
-				exceptionReport.message_type = Target::MessageType::PRIVATE;
-				exceptionReport.user_id = MONO;
-				exceptionReport.message = reportMsg;
-				activepush(exceptionReport);
-
+				for (int fi = 0; fi < adminlist.size(); ++fi) {
+					Target exceptionReport;
+					exceptionReport.message_type = Target::MessageType::PRIVATE;
+					exceptionReport.user_id = adminlist[fi].user_id;
+					exceptionReport.message = reportMsg;
+					activepush(exceptionReport);
+					Sleep(500);
+				}
 			}
 		}
 		static void roll(string cmd, Target tar, string* params) {
@@ -433,12 +435,14 @@ namespace osucat::addons {
 						db.getBottleID(tar.user_id, cmd),
 						tar.message.c_str()
 					);
-					Target exceptionReport;
-					exceptionReport.message_type = Target::MessageType::PRIVATE;
-					exceptionReport.user_id = MONO;
-					exceptionReport.message = reportMsg;
-					activepush(exceptionReport);
-
+					for (int fi = 0; fi < adminlist.size(); ++fi) {
+						Target exceptionReport;
+						exceptionReport.message_type = Target::MessageType::PRIVATE;
+						exceptionReport.user_id = adminlist[fi].user_id;
+						exceptionReport.message = reportMsg;
+						activepush(exceptionReport);
+						Sleep(500);
+					}
 				}
 				*params = u8"你的漂流瓶已经漂往远方....";
 				return;

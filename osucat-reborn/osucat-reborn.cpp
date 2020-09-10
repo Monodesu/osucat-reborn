@@ -149,6 +149,16 @@ int main()
 		cout << u8"Creating daily update thread..." << endl;
 		osucat::main::_CreateDUThread();
 
+		cout << "Loading the admin list..." << endl;
+		Database db;
+		db.Connect();
+		if (db.reloadAdmin()) {
+			cout << "The admin list has successfully loaded!" << endl;
+		}
+		else {
+			cout << "Failed. Please check database settings." << endl;
+		}
+
 		INT rc;
 		WSADATA wsaData;
 		rc = WSAStartup(MAKEWORD(2, 2), &wsaData);

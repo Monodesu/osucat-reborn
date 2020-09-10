@@ -14,6 +14,14 @@ namespace osucat::addons {
 	enum driftingBottleDBEvent { WRITEIN = 0, ADDCOUNTER, CHANGESTATUS, DELETEBOTTLE };
 }
 
+namespace osucat {
+	struct admins {
+		int64_t user_id;
+		int role; //0=normal user 1=admin/owner 2=moderator
+	};
+	static vector<admins> adminlist;
+}
+
 class Database {
 public:
 	/*
@@ -477,6 +485,18 @@ public:
 	bool add_blacklist(int64_t qq) {
 		try {
 			this->Insert("INSERT INTO blacklist (qq,is_blocked) values(" + to_string(qq) + ",1)");
+			try {
+				int64_t uid = this->GetUserID(qq);
+				if (uid != 0) {
+					this->Delete("DELETE from info where uid = " + to_string(uid));
+					this->Delete("DELETE from info_record where uid = " + to_string(uid));
+				}
+			}
+			catch (osucat::database_exception) {}
+			try {
+				this->Update(u8"UPDATE bottlemsgrecord SET available=0,sendtime=0,sender=-1,nickname=\"deleted\",message=\"此消息已被管理员删除\" where sender=" + to_string(qq));
+			}
+			catch (osucat::database_exception) {}
 			return true;
 		}
 		catch (osucat::database_exception) {
@@ -736,9 +756,9 @@ public:
 			break;
 		case osucat::addons::driftingBottleDBEvent::DELETEBOTTLE:
 			sprintf_s(tmp,
-				"DELETE FROM bottlemsgrecord where id=%d",
+				u8"UPDATE bottlemsgrecord SET available=0,sendtime=0,sender=-1,nickname=\"deleted\",message=\"此消息已被管理员删除\" where id=%d",
 				id);
-			this->Delete(tmp);
+			this->Update(tmp);
 			break;
 		default:
 			break;
@@ -822,6 +842,24 @@ public:
 		}
 		catch (osucat::database_exception) {
 			return 0;
+		}
+	}
+
+	bool reloadAdmin() {
+		string query = "SELECT * FROM info where role=1 or role=2";
+		try {
+			json j = this->Select(query);
+			adminlist.clear();
+			for (int i = 0; i < j.size(); ++i) {
+				admins s;
+				s.user_id = stoll(j[i]["qq"].get<std::string>());
+				s.role = stoi(j[i]["role"].get<std::string>());
+				adminlist.push_back(s);
+			}
+			return true;
+		}
+		catch (osucat::database_exception) {
+			return false;
 		}
 	}
 

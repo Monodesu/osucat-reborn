@@ -7,6 +7,9 @@ using json = nlohmann::json;
 using namespace std;
 
 namespace osucat {
+
+
+
 	class main {
 	public:
 		static void _CreateDUThread() {
@@ -257,59 +260,97 @@ namespace osucat {
 					return true;
 				}
 				// admin commands //
-				if (tar.user_id == MONO) {
-					if (_stricmp(msg.substr(0, 11).c_str(), "adoptbanner") == 0) {
-						adoptbanner_v1(msg.substr(11), tar, params);
-						return true;
-					}
-					if (_stricmp(msg.substr(0, 14).c_str(), "adoptinfopanel") == 0) {
-						adoptinfopanel_v1(msg.substr(14), tar, params);
-						return true;
-					}
-					if (_stricmp(msg.substr(0, 9).c_str(), "cleartemp") == 0) {
-						cleartemp(msg.substr(9), tar, params);
-						return true;
-					}
-					if (_stricmp(msg.substr(0, 12).c_str(), "rejectbanner") == 0) {
-						rejectbanner_v1(msg.substr(12), tar, params);
-						return true;
-					}
-					if (_stricmp(msg.substr(0, 15).c_str(), "rejectinfopanel") == 0) {
-						rejectinfopanel_v1(msg.substr(15), tar, params);
-						return true;
-					}
-					if (_stricmp(msg.substr(0, 9).c_str(), "resetuser") == 0) {
-						resetuser(msg.substr(9), tar, params);
-						return true;
-					}
-					if (_stricmp(msg.substr(0, 8).c_str(), "addbadge") == 0) {
-						addbadge(msg.substr(8), tar, params);
-						return true;
-					}
-					if (_stricmp(msg.substr(0, 11).c_str(), "dailyupdate") == 0) {
-						_UpdateManually(tar);
-						return true;
-					}
-					if (_stricmp(msg.substr(0, 5).c_str(), "block") == 0) {
-						blockuser(msg.substr(5), params);
-						return true;
-					}
-					if (_stricmp(msg.substr(0, 15).c_str(), u8"删除漂流瓶") == 0) {
-						Database db;
-						int i;
-						try {
-							i = stoi(msg.substr(15));
-						}
-						catch (std::exception) {
-							*params = u8"参数错误";
+				for (int fi = 0; fi < adminlist.size(); ++fi) {
+					if (tar.user_id == adminlist[fi].user_id) {
+						if (_stricmp(msg.substr(0, 11).c_str(), "adoptbanner") == 0) {
+							adoptbanner_v1(msg.substr(11), tar, params);
 							return true;
 						}
-						db.writeBottle(osucat::addons::driftingBottleDBEvent::DELETEBOTTLE, i, 0, 0, "", "");
-						*params = u8"已删除指定的漂流瓶";
-						return true;
+						if (_stricmp(msg.substr(0, 14).c_str(), "adoptinfopanel") == 0) {
+							adoptinfopanel_v1(msg.substr(14), tar, params);
+							return true;
+						}
+						if (_stricmp(msg.substr(0, 9).c_str(), "cleartemp") == 0) {
+							if (adminlist[fi].role != 1) {
+								*params = u8"权限不足";
+								return true;
+							}
+							cleartemp(msg.substr(9), tar, params);
+							return true;
+						}
+						if (_stricmp(msg.substr(0, 12).c_str(), "rejectbanner") == 0) {
+							rejectbanner_v1(msg.substr(12), tar, params);
+							return true;
+						}
+						if (_stricmp(msg.substr(0, 15).c_str(), "rejectinfopanel") == 0) {
+							rejectinfopanel_v1(msg.substr(15), tar, params);
+							return true;
+						}
+						if (_stricmp(msg.substr(0, 9).c_str(), "resetuser") == 0) {
+							if (adminlist[fi].role != 1) {
+								*params = u8"权限不足";
+								return true;
+							}
+							resetuser(msg.substr(9), tar, params);
+							return true;
+						}
+						if (_stricmp(msg.substr(0, 8).c_str(), "addbadge") == 0) {
+							if (adminlist[fi].role != 1) {
+								*params = u8"权限不足";
+								return true;
+							}
+							addbadge(msg.substr(8), tar, params);
+							return true;
+						}
+						if (_stricmp(msg.substr(0, 11).c_str(), "dailyupdate") == 0) {
+							if (adminlist[fi].role != 1) {
+								*params = u8"权限不足";
+								return true;
+							}
+							_UpdateManually(tar);
+							return true;
+						}
+						if (_stricmp(msg.substr(0, 5).c_str(), "block") == 0) {
+							blockuser(msg.substr(5), tar, params);
+							return true;
+						}
+						if (_stricmp(msg.substr(0, 8).c_str(), "rmbottle") == 0) {
+							int i;
+							try {
+								i = stoi(msg.substr(8));
+							}
+							catch (std::exception) {
+								*params = u8"参数错误";
+								return true;
+							}
+							db.writeBottle(osucat::addons::driftingBottleDBEvent::DELETEBOTTLE, i, 0, 0, "", "");
+							*params = u8"已移除ID为 " + to_string(i) + u8" 的漂流瓶";
+							for (int fi = 0; fi < adminlist.size(); ++fi) {
+								Target at;
+								at.message_type = Target::MessageType::PRIVATE;
+								at.user_id = adminlist[fi].user_id;
+								at.message = *params;
+								activepush(at);
+								Sleep(500);
+							}
+							return false;
+						}
+						if (_stricmp(msg.substr(0, 11).c_str(), "reloadadmin") == 0) {
+							if (adminlist[fi].role != 1) {
+								*params = u8"权限不足";
+								return true;
+							}
+							if (db.reloadAdmin()) {
+								*params = u8"管理员列表已更新。";
+							}
+							else {
+								*params = u8"更新失败.";
+							}
+							return true;
+						}
 					}
-
 				}
+
 #pragma region 娱乐模块
 				if (tar.message_type == Target::MessageType::GROUP)if (db.isGroupEnable(tar.group_id, 4) == 0) return false; //拦截娱乐模块
 				if (addons::entertainment::cmdParse(msg, tar, senderinfo, params))return true;
@@ -3188,6 +3229,16 @@ namespace osucat {
 					userMsg.message = u8"你上传的Banner通过审核啦，可以使用info指令查看~";
 					activepush(userMsg);
 					*params = u8"ID：" + UserID + u8" ，已成功通知用户Banner已审核成功。";
+					for (int fi = 0; fi < adminlist.size(); ++fi) {
+						if (adminlist[fi].role == 1 && adminlist[fi].user_id != tar.user_id) {
+							Target at;
+							at.message_type = Target::MessageType::PRIVATE;
+							at.user_id = adminlist[fi].user_id;
+							at.message = *params;
+							activepush(at);
+							Sleep(500);
+						}
+					}
 				}
 				else {
 					*params = u8"在移动文件时发生了一个错误。";
@@ -3218,6 +3269,16 @@ namespace osucat {
 					userMsg.message = u8"你上传的Info面板通过审核啦，可以使用info指令查看~";
 					activepush(userMsg);
 					*params = u8"ID：" + UserID + u8" ，已成功通知用户InfoPanel已审核成功。";
+					for (int fi = 0; fi < adminlist.size(); ++fi) {
+						if (adminlist[fi].role == 1 && adminlist[fi].user_id != tar.user_id) {
+							Target at;
+							at.message_type = Target::MessageType::PRIVATE;
+							at.user_id = adminlist[fi].user_id;
+							at.message = *params;
+							activepush(at);
+							Sleep(500);
+						}
+					}
 				}
 				else {
 					*params = u8"在移动文件时发生了一个错误。";
@@ -3255,6 +3316,16 @@ namespace osucat {
 				activepushTar.message = u8"你上传的Banner已被管理员驳回，详情：" + Content;
 				activepush(activepushTar);
 				*params = "ID：" + UserID + u8" ，已成功通知用户Banner已被驳回。详情：" + Content;
+				for (int fi = 0; fi < adminlist.size(); ++fi) {
+					if (adminlist[fi].role == 1 && adminlist[fi].user_id != tar.user_id) {
+						Target at;
+						at.message_type = Target::MessageType::PRIVATE;
+						at.user_id = adminlist[fi].user_id;
+						at.message = *params;
+						activepush(at);
+						Sleep(500);
+					}
+				}
 			}
 			else {
 				*params = u8"此用户的内容不在待审核清单内。";
@@ -3288,6 +3359,16 @@ namespace osucat {
 				activepushTar.message = u8"你上传的InfoPanel已被管理员驳回，详情：" + Content;
 				activepush(activepushTar);
 				*params = "ID：" + UserID + u8" ，已成功通知用户InfoPanel已被驳回。详情：" + Content;
+				for (int fi = 0; fi < adminlist.size(); ++fi) {
+					if (adminlist[fi].role == 1 && adminlist[fi].user_id != tar.user_id) {
+						Target at;
+						at.message_type = Target::MessageType::PRIVATE;
+						at.user_id = adminlist[fi].user_id;
+						at.message = *params;
+						activepush(at);
+						Sleep(500);
+					}
+				}
 			}
 			else {
 				*params = u8"此用户的内容不在待审核清单内。";
@@ -3330,6 +3411,16 @@ namespace osucat {
 				activepushTar.message = u8"你的个人资料已被重置，详情：" + Content;
 				activepush(activepushTar);
 				*params = "ID：" + UserID + u8" ，已成功通知用户他的个人资料已被重置。详情：" + Content;
+				for (int fi = 0; fi < adminlist.size(); ++fi) {
+					if (adminlist[fi].role == 1 && adminlist[fi].user_id != tar.user_id) {
+						Target at;
+						at.message_type = Target::MessageType::PRIVATE;
+						at.user_id = adminlist[fi].user_id;
+						at.message = *params;
+						activepush(at);
+						Sleep(500);
+					}
+				}
 			}
 			else {
 				*params = u8"找不到此用户。";
@@ -3375,16 +3466,26 @@ namespace osucat {
 			db.addbadge(uid, temp);
 			*params = u8"已成功提交。";
 		}
-		static void blockuser(string cmd, string* params) {
+		static void blockuser(string cmd, Target tar, string* params) {
 			utils::trim(cmd);
 			try {
 				Database db;
 				db.Connect();
 				if (db.add_blacklist(stoll(cmd))) {
-					*params = u8"用户已成功被列入黑名单";
+					*params = u8"用户 " + cmd + u8" 已成功被列入黑名单";
+					for (int fi = 0; fi < adminlist.size(); ++fi) {
+						if (adminlist[fi].user_id != tar.user_id) {
+							Target at;
+							at.message_type = Target::MessageType::PRIVATE;
+							at.user_id = adminlist[fi].user_id;
+							at.message = *params;
+							activepush(at);
+							Sleep(500);
+						}
+					}
 				}
 				else {
-					*params = u8"用户已存在于黑名单中";
+					*params = u8"用户 " + cmd + u8" 已存在于黑名单中";
 				}
 			}
 			catch (std::exception) {

@@ -123,9 +123,9 @@ int main()
 	if (utils::fileExist(".\\.active")) {
 		ISACTIVE = true;
 		cout << u8"osucat is activated!" << endl;;
-		if (utils::fileExist(".\\.remotesql")) {
+		if (utils::fileExist(".\\.remote")) {
 			cout << u8"\n/*** osucat now using remote sql server ***/\n" << endl;
-			sprintf_s(SQL_USER, "osucat");
+			sprintf_s(SQL_USER, "root");
 			sprintf_s(SQL_HOST, "192.168.0.103");
 			sprintf_s(SQL_PWD, "ASDasdASD32111!");
 			sprintf_s(SQL_DATABASE, "osucat");
@@ -158,7 +158,7 @@ int main()
 		}
 		using easywsclient::WebSocket;
 		cout << u8"Ready...Waiting for connection..." << endl; 
-		std::unique_ptr<WebSocket> ws(WebSocket::from_url(utils::fileExist(".\\.remotesql")?"ws://192.168.0.103:6700":"ws://localhost:6700/"));
+		std::unique_ptr<WebSocket> ws(WebSocket::from_url(utils::fileExist(".\\.remote")?"ws://192.168.0.103:6700":"ws://localhost:6700/"));
 		if (ws == false) {
 			printf(u8"An attempt to connect to the WebSocket server has failed.");
 			return 2;

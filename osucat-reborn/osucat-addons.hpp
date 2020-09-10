@@ -3,6 +3,7 @@
 #define OSUCAT_ADDONS_HPP
 
 namespace osucat::addons {
+
 	struct driftingBottle
 	{
 		string msg;
@@ -10,7 +11,9 @@ namespace osucat::addons {
 		SenderInfo senderinfo;
 		time_t sendTime;
 	};
-	static vector<driftingBottle> VdriftingBottle;
+
+
+
 	class entertainment {
 	public:
 		static bool cmdParse(string msg, Target tar, SenderInfo senderinfo, string* params) {
@@ -28,7 +31,10 @@ namespace osucat::addons {
 					return true;
 				}
 				if (_stricmp(msg.substr(0, 21).c_str(), u8"海上漂流瓶数量") == 0) {
-					int tmp = VdriftingBottle.size();
+					Database db;
+					db.Connect();
+					json j = db.getBottles();
+					int tmp = j.size();
 					if (tmp == 0) {
 						*params = u8"海上目前还没有漂流瓶呢...";
 					}
@@ -47,6 +53,7 @@ namespace osucat::addons {
 				}
 				if (_stricmp(msg.substr(0, 4).c_str(), "roll") == 0) {
 					roll(msg.substr(4), tar, params);
+					imagemonitor(msg, senderinfo, tar);
 					return true;
 				}
 				if (_stricmp(msg.substr(0, 3).c_str(), "chp") == 0) {
@@ -59,18 +66,26 @@ namespace osucat::addons {
 				}*/
 				if (_stricmp(msg.substr(0, 18).c_str(), u8"营销号生成器") == 0) {
 					marketingGenerator(msg.substr(18), params);
+					imagemonitor(msg, senderinfo, tar);
 					return true;
 				}
 				if (_stricmp(msg.substr(0, 7).c_str(), "nbnhhsh") == 0) {
 					nbnhhsh(msg.substr(7), params);
+					imagemonitor(msg, senderinfo, tar);
 					return true;
 				}
 				if (msg.find(u8"还是") != string::npos || msg.find(u8"不") != string::npos || msg.find(u8"没") != string::npos) {
 					randEvents(msg, params);
+					imagemonitor(msg, senderinfo, tar);
 					return true;
 				}
 				if (_stricmp(msg.substr(0, 6).c_str(), u8"上号") == 0) {
 					wyy(params);
+					return true;
+				}
+				if (_stricmp(msg.substr(0, 7).c_str(), "cardimg") == 0) {
+					return false;
+					cardimagetest(msg.substr(7), tar, senderinfo, params);
 					return true;
 				}
 			}
@@ -119,6 +134,25 @@ namespace osucat::addons {
 				return true;
 			}
 			return false;
+		}
+		static void imagemonitor(string msg, SenderInfo senderinfo, Target tar) {
+			if (msg.find("[CQ:image") != string::npos) {
+				char reportMsg[1024];
+				sprintf_s(reportMsg,
+					"[%s]\n"
+					u8"用户 %s(%lld) 上传了图片,消息内容如下：\n%s",
+					utils::unixTime2Str(time(NULL)).c_str(),
+					senderinfo.nikename.c_str(),
+					tar.user_id,
+					tar.message.c_str()
+				);
+				Target exceptionReport;
+				exceptionReport.message_type = Target::MessageType::PRIVATE;
+				exceptionReport.user_id = MONO;
+				exceptionReport.message = reportMsg;
+				activepush(exceptionReport);
+
+			}
 		}
 		static void roll(string cmd, Target tar, string* params) {
 			cmd = utils::unescape(cmd);
@@ -360,15 +394,16 @@ namespace osucat::addons {
 		static void driftingBottleVoid(bool ThrowOrPick, string cmd, Target tar, SenderInfo senderinfo, string* params) {
 			Database db;
 			db.Connect();
+			json j = db.getBottles();
 			if (ThrowOrPick) {
 				int throwcount = 0;
-				for (int i = 0; i < VdriftingBottle.size(); ++i) {
-					if (VdriftingBottle[i].tar.user_id == tar.user_id) {
+				for (int i = 0; i < j.size(); ++i) {
+					if (stoll(j[i]["sender"].get<std::string>()) == tar.user_id) {
 						++throwcount;
 					}
 				}
-				if (throwcount > 5) {
-					*params = u8"你已经扔了5个瓶子出去了...休息一下再扔吧...";
+				if (throwcount > 10) {
+					*params = u8"你已经扔了10个瓶子出去了...休息一下再扔吧...";
 					return;
 				}
 				cmd = utils::unescape(cmd);
@@ -381,53 +416,85 @@ namespace osucat::addons {
 					*params = u8"不如写点什么再扔...?";
 					return;
 				}
-				if (cmd.length() > 10000) {
+				if (cmd.length() > 5000) {
 					*params = u8"太长了！";
 					return;
 				}
-				db.setBottleRemaining(2,tar.user_id);
-				driftingBottle DB;
-				DB.msg = cmd;
-				DB.tar = tar;
-				DB.senderinfo = senderinfo;
-				DB.sendTime = time(NULL);
-				VdriftingBottle.push_back(DB);
+
+				db.setBottleRemaining(2, tar.user_id);
+				db.writeBottle(driftingBottleDBEvent::WRITEIN, 0, time(NULL), tar.user_id, senderinfo.nikename, cmd);
+				db.addPickThrowCount(false);
+				if (cmd.find("[CQ:image") != string::npos) {
+					char reportMsg[1024];
+					sprintf_s(reportMsg,
+						"[%s]\n"
+						u8"用户 %s(%lld) 在漂流瓶内上传了图片\n漂流瓶id:%d\n消息内容如下：\n%s",
+						utils::unixTime2Str(time(NULL)).c_str(),
+						senderinfo.nikename.c_str(),
+						tar.user_id,
+						db.getBottleID(tar.user_id, cmd),
+						tar.message.c_str()
+					);
+					Target exceptionReport;
+					exceptionReport.message_type = Target::MessageType::PRIVATE;
+					exceptionReport.user_id = MONO;
+					exceptionReport.message = reportMsg;
+					activepush(exceptionReport);
+
+				}
 				*params = u8"你的漂流瓶已经漂往远方....";
 				return;
 			}
 
 			int a = db.getUserBottleRemaining(tar.user_id);
 			if (a > 0) {
-				if (VdriftingBottle.size() != 0) {
+				if (j.size() != 0) {
 					db.setBottleRemaining(3, tar.user_id);
-					int tempi = utils::randomNum(0, VdriftingBottle.size() - 1);
-					driftingBottle DB;
-					for (int i = 0; i < VdriftingBottle.size(); ++i) {
-						if (VdriftingBottle[tempi].tar.user_id != tar.user_id) {
+					int tempi = utils::randomNum(0, j.size() - 1);
+					for (int i = 0; i < j.size(); ++i) {
+						if (stoll(j[tempi]["sender"].get<std::string>()) != tar.user_id) {
 							break;
 						}
-						else { Sleep(314); tempi = utils::randomNum(0, VdriftingBottle.size() - 1); }
+						else { Sleep(314); tempi = utils::randomNum(0, j.size() - 1); }
 					}
-					DB = VdriftingBottle[tempi];
-					VdriftingBottle.erase(VdriftingBottle.begin() + tempi);
-					char tempm[12288];
+					string message = j[tempi]["message"].get<std::string>(),
+						nikename = j[tempi]["nickname"].get<std::string>();
+					int64_t sender = stoll(j[tempi]["sender"].get<std::string>()),
+						sendtime = stoll(j[tempi]["sendtime"].get<std::string>());
+					int id = stoi(j[tempi]["id"].get<std::string>()),
+						pickcount = stoi(j[tempi]["pickcount"].get<std::string>());
+					db.addPickThrowCount(true);
+					db.writeBottle(osucat::addons::driftingBottleDBEvent::ADDCOUNTER, id, 0, 0, "", "");
+					char tempm[6000];
 					sprintf_s(tempm,
 						u8"这是来自 %s(%lld) 的漂流瓶....\n"
 						u8"发于 %s\n"
 						u8"内容是....\n%s",
-						DB.senderinfo.nikename.c_str(), DB.tar.user_id, utils::unixTime2StrChinese(DB.sendTime).c_str(), DB.msg.c_str());
+						nikename.c_str(), sender, utils::unixTime2StrChinese(sendtime).c_str(), message.c_str());
 					*params = tempm;
-					Target tar1;
-					tar1.user_id = DB.tar.user_id;
-					tar1.message_type = Target::MessageType::PRIVATE;
-					sprintf_s(tempm,
-						u8"你发于 %s\n"
-						u8"的内容为....%s的消息已经被 %s(%lld) 捡起来了....",
-						utils::unixTime2StrChinese(DB.sendTime).c_str(),
-						DB.msg.c_str(),
-						senderinfo.nikename.c_str(), tar.user_id);
-					tar1.message = tempm;
-					activepush(tar1);
+					if (db.RemoveBottle(floor((time(NULL) - stoll(j[tempi]["sendtime"].get<std::string>())) / 86400), id)) {
+						Target tar1;
+						tar1.user_id = sender;
+						tar1.message_type = Target::MessageType::PRIVATE;
+						if (pickcount == 0) {
+							sprintf_s(tempm,
+								u8"你发于 %s\n"
+								u8"的内容为....%s的消息已经被 %s(%lld) 捞起来了....\n",
+								utils::unixTime2StrChinese(sendtime).c_str(),
+								message.c_str(),
+								senderinfo.nikename.c_str(), tar.user_id);
+						}
+						else {
+							sprintf_s(tempm,
+								u8"你发于 %s\n"
+								u8"的内容为....%s的消息已经被 %s(%lld) 捞起来了....\n在此之前你的瓶子还被阅读了 %d 次...",
+								utils::unixTime2StrChinese(sendtime).c_str(),
+								message.c_str(),
+								senderinfo.nikename.c_str(), tar.user_id, pickcount);
+						}		
+						tar1.message = tempm;
+						activepush(tar1);
+					}
 				}
 				else {
 					*params = u8"还没有人丢过漂流瓶呢...";
@@ -438,6 +505,9 @@ namespace osucat::addons {
 			}
 
 		}
+		static void cardimagetest(string cmd, Target tar, SenderInfo senderinfo, string* params) {
+			*params = "[CQ:cardimage,file=https://i0.hdslb.com/bfs/article/f1fce3050d0184ac6830041a19aba2517f03c06a.jpg]";
+		}
 	private:
 		static void activepush(Target tar) {
 			if (tar.message_type == Target::MessageType::PRIVATE) {
@@ -445,7 +515,7 @@ namespace osucat::addons {
 				jp["user_id"] = tar.user_id;
 				jp["message"] = tar.message;
 				try {
-					NetConnection::HttpPost("http://127.0.0.1:5700/send_private_msg", jp);
+					utils::fileExist(".\\.remote") ? NetConnection::HttpPost("http://192.168.0.103:5700/send_private_msg", jp) : NetConnection::HttpPost("http://127.0.0.1:5700/send_private_msg", jp);
 				}
 				catch (osucat::NetWork_Exception& ex) {
 					cout << ex.Show() << endl;
@@ -463,7 +533,7 @@ namespace osucat::addons {
 				jp["group_id"] = tar.group_id;
 				jp["message"] = tar.message;
 				try {
-					NetConnection::HttpPost("http://127.0.0.1:5700/send_group_msg", jp);
+					utils::fileExist(".\\.remote") ? NetConnection::HttpPost("http://192.168.0.103:5700/send_group_msg", jp) : NetConnection::HttpPost("http://127.0.0.1:5700/send_group_msg", jp);
 				}
 				catch (osucat::NetWork_Exception& ex) {
 					cout << ex.Show() << endl;

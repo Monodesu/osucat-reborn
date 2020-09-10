@@ -12,8 +12,6 @@ namespace osucat::addons {
 		time_t sendTime;
 	};
 
-
-
 	class entertainment {
 	public:
 		static bool cmdParse(string msg, Target tar, SenderInfo senderinfo, string* params) {
@@ -26,7 +24,7 @@ namespace osucat::addons {
 						*params = u8"你当前还可以捡" + to_string(t) + u8"个瓶子！";
 					}
 					else {
-						*params = u8"你当前没有捡瓶子的机会了，扔漂流瓶可以获得一次打捞的机会，或每日首次使用漂流瓶也可获得5次免费打捞的机会~";
+						*params = u8"你当前没有捡瓶子的机会了，扔漂流瓶可以获得一次打捞的机会，或每日首次使用漂流瓶也可获得20次免费打捞的机会~";
 					}
 					return true;
 				}
@@ -501,7 +499,7 @@ namespace osucat::addons {
 				}
 			}
 			else {
-				*params = u8"你当前没有捡瓶子的机会了，扔漂流瓶可以获得一次打捞的机会，或每日首次使用漂流瓶也可获得5次免费打捞的机会~";
+				*params = u8"你当前没有捡瓶子的机会了，扔漂流瓶可以获得一次打捞的机会，或每日首次使用漂流瓶也可获得20次免费打捞的机会~";
 			}
 
 		}

@@ -657,7 +657,7 @@ public:
 	*/
 	void setBottleRemaining(int isdaily, int64_t qq, int dailyoldvalue = 0) {
 		if (isdaily == 1) {
-			string query = "update bottlerecord set remaining=" + to_string(dailyoldvalue + 5) + ",lastrewardtime=" + to_string(time(NULL)) + " where qq=" + to_string(qq);
+			string query = "update bottlerecord set remaining=" + to_string(dailyoldvalue + 20) + ",lastrewardtime=" + to_string(time(NULL)) + " where qq=" + to_string(qq);
 			this->Update(query);
 			return;
 		}

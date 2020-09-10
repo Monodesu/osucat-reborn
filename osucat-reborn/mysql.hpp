@@ -2,7 +2,7 @@
 #ifndef MYSQL_HPP
 #define MYSQL_HPP
 
-#define BOTLEEXPECTEDVALUE 50
+#define BOTLEEXPECTEDVALUE 50.00
 #define BOTTLEMAXEXISTDAYS 3
 #include <mysql.h>
 char SQL_USER[32], SQL_HOST[32], SQL_PWD[32], SQL_DATABASE[32];
@@ -651,7 +651,7 @@ public:
 
 	/*
 	int isdaily
-	1 = isdaily plus+5
+	1 = isdaily plus+20
 	2 = plus
 	3 = minus
 	*/
@@ -701,13 +701,13 @@ public:
 			}
 		}
 		catch (osucat::database_exception) {
-			string query = "INSERT INTO bottlerecord (qq,remaining,lastrewardtime) VALUES (" + to_string(qq) + ",5," + to_string(time(NULL)) + ")";
+			string query = "INSERT INTO bottlerecord (qq,remaining,lastrewardtime) VALUES (" + to_string(qq) + ",20," + to_string(time(NULL)) + ")";
 			this->Insert(query);
-			return 5;
+			return 20;
 		}
 	}
 
-	void writeBottle(osucat::addons::driftingBottleDBEvent d, int id, int64_t sendtimetick, int64_t senderuid, string nickname,string message) {
+	void writeBottle(osucat::addons::driftingBottleDBEvent d, int id, int64_t sendtimetick, int64_t senderuid, string nickname, string message) {
 		char tmp[10240];
 		switch (d) {
 		case osucat::addons::driftingBottleDBEvent::WRITEIN:
@@ -760,12 +760,12 @@ public:
 	bool RemoveBottle(int bottleExsitDays, int bottleid) {
 		try {
 			json j = this->Select("SELECT * FROM bottletprecord where date=\"" + utils::unixTime2DateStr(time(NULL) - 86400) + "\"");
-			int bpick = stoi(j[0]["pick"].get<std::string>()),
+			double bpick = stoi(j[0]["pick"].get<std::string>()),
 				bthrow = stoi(j[0]["throw"].get<std::string>());
 			double br = stod(j[0]["pickuprate"].get<std::string>());
 			double r = 0.8 * br + 0.2 * (bthrow / bpick),
-				p = pow(min(1, r * sqrt(this->getBottles().size() / BOTLEEXPECTEDVALUE)), 1 / (max(1, bottleExsitDays - BOTTLEMAXEXISTDAYS)));
-			if (p > 1.0) return false;
+				p = pow(min(1, r * sqrt((double)this->getBottles().size() / BOTLEEXPECTEDVALUE)), 1 / (max(1, bottleExsitDays - BOTTLEMAXEXISTDAYS)));;
+			if (p > 0) return false;
 			this->writeBottle(osucat::addons::driftingBottleDBEvent::CHANGESTATUS, bottleid, 0, 0, "", "");
 			return true;
 		}
@@ -802,12 +802,12 @@ public:
 			j = this->Select("SELECT * FROM bottletprecord where date=\"" + utils::unixTime2DateStr(time(NULL) - 86400) + "\"");
 		}
 		catch (osucat::database_exception) {
-			j[0]["pick"] = "150";
-			j[0]["throw"] = "100";
+			j[0]["pick"] = "0";
+			j[0]["throw"] = "0";
 			j[0]["pickuprate"] = "1";
 		}
-		int bpick = stoi(j[0]["pick"].get<std::string>()),
-			bthrow = stoi(j[0]["throw"].get<std::string>());
+		double bpick = stod(j[0]["pick"].get<std::string>()),
+			bthrow = stod(j[0]["throw"].get<std::string>());
 		double br = stod(j[0]["pickuprate"].get<std::string>());
 		double r = 0.8 * br + 0.2 * (bthrow / bpick);
 		this->Insert("INSERT INTO bottletprecord (date,pickuprate) values (\"" + utils::unixTime2DateStr(time(NULL)) + "\"," + to_string(r) + ")");

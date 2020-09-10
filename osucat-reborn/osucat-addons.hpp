@@ -489,7 +489,7 @@ namespace osucat::addons {
 								utils::unixTime2StrChinese(sendtime).c_str(),
 								message.c_str(),
 								senderinfo.nikename.c_str(), tar.user_id, pickcount);
-						}		
+						}
 						tar1.message = tempm;
 						activepush(tar1);
 					}

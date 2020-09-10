@@ -763,11 +763,13 @@ public:
 			double bpick = stoi(j[0]["pick"].get<std::string>()),
 				bthrow = stoi(j[0]["throw"].get<std::string>());
 			double br = stod(j[0]["pickuprate"].get<std::string>());
-			double r = 0.8 * br + 0.2 * (bthrow / bpick),
-				p = pow(min(1, r * sqrt((double)this->getBottles().size() / BOTLEEXPECTEDVALUE)), 1 / (max(1, bottleExsitDays - BOTTLEMAXEXISTDAYS)));;
-			if (p > 0) return false;
-			this->writeBottle(osucat::addons::driftingBottleDBEvent::CHANGESTATUS, bottleid, 0, 0, "", "");
-			return true;
+			double r = 0.8 * br + 0.2 * (bthrow / bpick);
+			double p = pow(min(1, r * sqrt((double)this->getBottles().size() / BOTLEEXPECTEDVALUE)), 1 / (max(1, bottleExsitDays - BOTTLEMAXEXISTDAYS)));
+			if (utils::randomNum(1, 10000) / 10000.0 < p) {
+				this->writeBottle(osucat::addons::driftingBottleDBEvent::CHANGESTATUS, bottleid, 0, 0, "", "");
+				return true;
+			}
+			else return false;
 		}
 		catch (osucat::database_exception) {
 			return false;

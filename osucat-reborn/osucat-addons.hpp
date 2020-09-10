@@ -400,8 +400,8 @@ namespace osucat::addons {
 						++throwcount;
 					}
 				}
-				if (throwcount > 10) {
-					*params = u8"你已经扔了10个瓶子出去了...休息一下再扔吧...";
+				if (throwcount > 20) {
+					*params = u8"你已经扔了20个瓶子出去了...休息一下再扔吧...";
 					return;
 				}
 				cmd = utils::unescape(cmd);
@@ -426,7 +426,7 @@ namespace osucat::addons {
 					char reportMsg[1024];
 					sprintf_s(reportMsg,
 						"[%s]\n"
-						u8"用户 %s(%lld) 在漂流瓶内上传了图片\n漂流瓶id:%d\n消息内容如下：\n%s",
+						u8"用户 %s(%lld) 在漂流瓶内上传了图片\n漂流瓶ID: %d\n消息内容如下：\n%s",
 						utils::unixTime2Str(time(NULL)).c_str(),
 						senderinfo.nikename.c_str(),
 						tar.user_id,

@@ -2,12 +2,17 @@
 #ifndef MYSQL_HPP
 #define MYSQL_HPP
 
+#define BOTLEEXPECTEDVALUE 50
+#define BOTTLEMAXEXISTDAYS 3
 #include <mysql.h>
 char SQL_USER[32], SQL_HOST[32], SQL_PWD[32], SQL_DATABASE[32];
 int SQL_PORT;
 
 using json = nlohmann::json;
-using namespace osucat;
+
+namespace osucat::addons {
+	enum driftingBottleDBEvent { WRITEIN = 0, ADDCOUNTER, CHANGESTATUS, DELETEBOTTLE };
+}
 
 class Database {
 public:
@@ -701,6 +706,123 @@ public:
 			return 5;
 		}
 	}
+
+	void writeBottle(osucat::addons::driftingBottleDBEvent d, int id, int64_t sendtimetick, int64_t senderuid, string nickname,string message) {
+		char tmp[10240];
+		switch (d) {
+		case osucat::addons::driftingBottleDBEvent::WRITEIN:
+			sprintf_s(tmp,
+				"INSERT INTO bottlemsgrecord (sendtime,sender,message,nickname) values (%lld,%lld,\"%s\",\"%s\")",
+				sendtimetick,
+				senderuid,
+				message.c_str(),
+				nickname.c_str());
+			this->Insert(tmp);
+			break;
+		case osucat::addons::driftingBottleDBEvent::ADDCOUNTER: {
+			json j = this->Select("SELECT pickcount FROM bottlemsgrecord where id=" + to_string(id));
+			sprintf_s(tmp,
+				"UPDATE bottlemsgrecord SET pickcount=%d where id=%d",
+				stoi(j[0]["pickcount"].get<std::string>()) + 1,
+				id);
+			this->Update(tmp);
+			break;
+		}
+		case osucat::addons::driftingBottleDBEvent::CHANGESTATUS:
+			sprintf_s(tmp,
+				"UPDATE bottlemsgrecord SET available=0 where id=%d",
+				id);
+			this->Update(tmp);
+			break;
+		case osucat::addons::driftingBottleDBEvent::DELETEBOTTLE:
+			sprintf_s(tmp,
+				"DELETE FROM bottlemsgrecord where id=%d",
+				id);
+			this->Delete(tmp);
+			break;
+		default:
+			break;
+		}
+	}
+
+	json getBottles() {
+		try {
+			json j = this->Select("SELECT * FROM bottlemsgrecord where available = 1");
+			return j;
+		}
+		catch (osucat::database_exception) {
+			json j;
+			return j;
+		}
+
+	}
+
+	bool RemoveBottle(int bottleExsitDays, int bottleid) {
+		try {
+			json j = this->Select("SELECT * FROM bottletprecord where date=\"" + utils::unixTime2DateStr(time(NULL) - 86400) + "\"");
+			int bpick = stoi(j[0]["pick"].get<std::string>()),
+				bthrow = stoi(j[0]["throw"].get<std::string>());
+			double br = stod(j[0]["pickuprate"].get<std::string>());
+			double r = 0.8 * br + 0.2 * (bthrow / bpick),
+				p = pow(min(1, r * sqrt(this->getBottles().size() / BOTLEEXPECTEDVALUE)), 1 / (max(1, bottleExsitDays - BOTTLEMAXEXISTDAYS)));
+			if (p > 1.0) return false;
+			this->writeBottle(osucat::addons::driftingBottleDBEvent::CHANGESTATUS, bottleid, 0, 0, "", "");
+			return true;
+		}
+		catch (osucat::database_exception) {
+			return false;
+		}
+	}
+
+	/*
+	bool pickthrow
+	true = pick
+	false = throw
+	*/
+	void addPickThrowCount(bool pickthrow) {
+		json j;
+		try {
+			j = this->Select("SELECT * FROM bottletprecord where date=\"" + utils::unixTime2DateStr(time(NULL)) + "\"");
+		}
+		catch (osucat::database_exception) {
+			this->setNewPickThrowRecord();
+			return;
+		}
+		if (pickthrow) {
+			this->Update("UPDATE bottletprecord set pick=" + to_string(stoi(j[0]["pick"].get<std::string>()) + 1) + " where date=\"" + utils::unixTime2DateStr(time(NULL)) + "\"");
+		}
+		else {
+			this->Update("UPDATE bottletprecord set throw=" + to_string(stoi(j[0]["throw"].get<std::string>()) + 1) + " where date=\"" + utils::unixTime2DateStr(time(NULL)) + "\"");
+		}
+	}
+
+	void setNewPickThrowRecord() {
+		json j;
+		try {
+			j = this->Select("SELECT * FROM bottletprecord where date=\"" + utils::unixTime2DateStr(time(NULL) - 86400) + "\"");
+		}
+		catch (osucat::database_exception) {
+			j[0]["pick"] = "150";
+			j[0]["throw"] = "100";
+			j[0]["pickuprate"] = "1";
+		}
+		int bpick = stoi(j[0]["pick"].get<std::string>()),
+			bthrow = stoi(j[0]["throw"].get<std::string>());
+		double br = stod(j[0]["pickuprate"].get<std::string>());
+		double r = 0.8 * br + 0.2 * (bthrow / bpick);
+		this->Insert("INSERT INTO bottletprecord (date,pickuprate) values (\"" + utils::unixTime2DateStr(time(NULL)) + "\"," + to_string(r) + ")");
+	}
+
+	int getBottleID(int64_t sender, string message) {
+		try {
+			json j = this->Select("SELECT id FROM bottlemsgrecord where sender=" + to_string(sender) + " and message=\"" + message + "\"");
+			return stoi(j[0]["id"].get<std::string>());
+		}
+		catch (osucat::database_exception) {
+			return 0;
+		}
+	}
+
 	void Close() {
 		if (this->conn.net.vio != NULL) mysql_close(&this->conn);
 	}

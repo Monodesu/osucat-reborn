@@ -40,7 +40,7 @@ namespace osucat {
 					if (tar.message_type == Target::MessageType::PRIVATE) {
 						sprintf_s(msg, u8"[%s] [osucat][↓]: 好友 %lld 的消息：%s", utils::unixTime2Str(tar.time).c_str(), tar.user_id, tar.message.c_str());
 						cout << msg << endl;
-						if (tar.message[0] == '!' || tar.message.find(u8"！") == 0) {
+						if (utils::fileExist(".\\.debug") ? tar.message[0] == '#' : tar.message[0] == '!' || tar.message.find(u8"！") == 0) {
 							string str = tar.message;
 							str = tar.message[0] < 0 ? tar.message.substr(3) : tar.message.substr(1);
 							monitors(str, tar, sdr);
@@ -50,7 +50,7 @@ namespace osucat {
 						sdr.member_role = sj["role"].get<string>();
 						sprintf_s(msg, u8"[%s] [osucat][↓]: 群 %lld 的 %lld 的消息：%s", utils::unixTime2Str(tar.time).c_str(), tar.group_id, tar.user_id, tar.message.c_str());
 						cout << msg << endl;
-						if (tar.message[0] == '!' || tar.message.find(u8"！") == 0) {
+						if (utils::fileExist(".\\.debug") ? tar.message[0] == '#' : tar.message[0] == '!' || tar.message.find(u8"！") == 0) {
 							string str = tar.message;
 							str = tar.message[0] < 0 ? tar.message.substr(3) : tar.message.substr(1);
 							monitors(str, tar, sdr);
@@ -294,32 +294,24 @@ namespace osucat {
 						blockuser(msg.substr(5), params);
 						return true;
 					}
-					if (_stricmp(msg.substr(0, 15).c_str(), u8"清空漂流瓶") == 0) {
-						osucat::addons::VdriftingBottle.clear();
-						*params = u8"已清空海上的漂流瓶";
+					if (_stricmp(msg.substr(0, 15).c_str(), u8"删除漂流瓶") == 0) {
+						Database db;
+						int i;
+						try {
+							i = stoi(msg.substr(15));
+						}
+						catch (std::exception) {
+							*params = u8"参数错误";
+							return true;
+						}
+						db.writeBottle(osucat::addons::driftingBottleDBEvent::DELETEBOTTLE, i, 0, 0, "", "");
+						*params = u8"已删除指定的漂流瓶";
 						return true;
 					}
 
 				}
 #pragma region 娱乐模块
 				if (tar.message_type == Target::MessageType::GROUP)if (db.isGroupEnable(tar.group_id, 4) == 0) return false; //拦截娱乐模块
-				if (msg.find("[CQ:image") != string::npos) {
-					char reportMsg[1024];
-					sprintf_s(reportMsg,
-						"[%s]\n"
-						u8"用户 %s(%lld) 上传了图片,消息内容如下：\n%s",
-						utils::unixTime2Str(time(NULL)).c_str(),
-						senderinfo.nikename.c_str(),
-						tar.user_id,
-						tar.message.c_str()
-					);
-					Target exceptionReport;
-					exceptionReport.message_type = Target::MessageType::PRIVATE;
-					exceptionReport.user_id = MONO;
-					exceptionReport.message = reportMsg;
-					activepush(exceptionReport);
-
-				}
 				if (addons::entertainment::cmdParse(msg, tar, senderinfo, params))return true;
 				return false;
 				/*if (_stricmp(msg.substr(0, 2).c_str(), "me") == 0) {
@@ -3702,12 +3694,12 @@ namespace osucat {
 				jp["user_id"] = tar.user_id;
 				jp["message"] = tar.message;
 				try {
-					NetConnection::HttpPost("http://127.0.0.1:5700/send_private_msg", jp);
+					utils::fileExist(".\\.remote") ? NetConnection::HttpPost("http://192.168.0.103:5700/send_private_msg", jp) : NetConnection::HttpPost("http://127.0.0.1:5700/send_private_msg", jp);
 				}
 				catch (osucat::NetWork_Exception& ex) {
 					cout << ex.Show() << endl;
 				}
-				char msg[4096];
+				char msg[8192];
 				sprintf_s(msg,
 					u8"[%s] [osucat][↑]: 发送至好友 %lld 的消息：%s",
 					utils::unixTime2Str(time(NULL)).c_str(),
@@ -3720,12 +3712,12 @@ namespace osucat {
 				jp["group_id"] = tar.group_id;
 				jp["message"] = tar.message;
 				try {
-					NetConnection::HttpPost("http://127.0.0.1:5700/send_group_msg", jp);
+					utils::fileExist(".\\.remote") ? NetConnection::HttpPost("http://192.168.0.103:5700/send_group_msg", jp) : NetConnection::HttpPost("http://127.0.0.1:5700/send_group_msg", jp);
 				}
 				catch (osucat::NetWork_Exception& ex) {
 					cout << ex.Show() << endl;
 				}
-				char msg[4096];
+				char msg[8192];
 				sprintf_s(msg,
 					u8"[%s] [osucat][↑]: 发送至群 %lld 的消息：%s",
 					utils::unixTime2Str(time(NULL)).c_str(),

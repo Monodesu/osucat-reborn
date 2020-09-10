@@ -18,6 +18,16 @@ namespace osucat::utils {
 		strftime(rtn, 128, "%Y-%m-%d %H:%M:%S", &tm);
 		return rtn;
 	}
+	static std::string unixTime2DateStr(int timetick)
+	{
+		char rtn[128];
+		time_t tick;
+		struct tm tm = { 0 };
+		tick = timetick;
+		tm = *localtime(&tick);
+		strftime(rtn, 128, "%Y-%m-%d", &tm);
+		return rtn;
+	}
 	static std::string unixTime2StrChinese(int timetick)
 	{
 		char tmp[10];

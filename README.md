@@ -16,7 +16,7 @@ GNU General Public License for more details.<br><br>
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-本项目基于[GPLv3](https://www.gnu.org/licenses/gpl-3.0.html "GPLv3")许可证开源
+本项目基于[AGPLv3](https://www.gnu.org/licenses/agpl-3.0.html "AGPLv3")许可证开源
 
 且在未经允许的情况下，任何人不得使用osucat及其美术资源进行一切商用行为，或其他未许可的行为。
 

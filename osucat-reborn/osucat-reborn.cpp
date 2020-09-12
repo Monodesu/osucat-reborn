@@ -3,6 +3,9 @@
 using namespace std;
 static unsigned old_code_page;
 
+char wshost[64];
+int wsport;
+
 int main()
 {
 	// 保存当前控制台代码页
@@ -32,8 +35,7 @@ int main()
 	GetCurrentDirectory(512, OC_ROOT_PATH);
 	SetCurrentDirectory(OC_ROOT_PATH);
 	Magick::InitializeMagick(OC_ROOT_PATH);
-	cout << "Done!" << endl;
-	cout << "Current Directory Path: \"" << OC_ROOT_PATH << "\"" << endl;
+	cout << "Done!\nCurrent Directory Path: \"" << OC_ROOT_PATH << "\"" << endl;
 #pragma region DetecedFolder
 	if (!utils::isDirExist(".\\data")) {
 		cout << "Folder 'data' does not exist, created." << endl;
@@ -122,21 +124,155 @@ int main()
 #pragma endregion
 	if (utils::fileExist(".\\.active")) {
 		ISACTIVE = true;
-		cout << u8"osucat is activated!" << endl;;
-		if (utils::fileExist(".\\.remote")) {
-			cout << u8"\n/*** osucat now using remote sql server ***/\n" << endl;
-			sprintf_s(SQL_USER, "root");
-			sprintf_s(SQL_HOST, "192.168.0.103");
-			sprintf_s(SQL_PWD, "ASDasdASD32111!");
-			sprintf_s(SQL_DATABASE, "osucat");
-			SQL_PORT = 32148;
+		ifstream configfile(".\\osucat_config.json");
+		string config;
+		if (configfile)
+		{
+			json j;
+			try {
+				ostringstream tmp;
+				tmp << configfile.rdbuf();
+				config = tmp.str();
+				configfile.close();
+				j = json::parse(config);
+			}
+			catch (std::exception& ex) {
+				cout << ex.what() << endl;
+				system("pause");
+				return 0;
+			}
+			if (j["apikey"].get<string>() == "") { cout << "\nMissing API key!\n" << endl; system("pause"); return 0; }
+			else sprintf_s(OSU_KEY, "%s", j["apikey"].get<string>().c_str());
+			if (j["debugmode"].get<bool>()) { DEBUGMODE = true; cout << u8"Debug mode is enabled...\n" << endl; }
+			else DEBUGMODE = false;
+			if (j["use_remote_server"].get<bool>() == false) {
+				if (!utils::fileExist(".\\go-cqhttp.exe")) {
+					cout << "Missing go-cqhttp file." << endl;
+					cout << "Get from https://github.com/Mrs4s/go-cqhttp/releases" << endl;
+					system("pause");
+					return 0;
+				}
+				if (j["local_settings"]["ws_host"].get<string>() != "") {
+					cout << "\n\nMissing \"ws_host\" settings..\n\n\n" << endl;
+					system("pause");
+					return 0;
+				}
+				else sprintf_s(wshost, "%s", j["local_settings"]["ws_host"].get<string>().c_str());
+				if (j["local_settings"]["ws_port"].is_null()) {
+					cout << "\n\nMissing \"ws_port\" settings..\n\n\n" << endl;
+					system("pause");
+					return 0;
+				}
+				else wsport = j["local_settings"]["ws_port"].get<int>();
+				if (j["local_settings"]["sql_user"].get<string>() != "") {
+					cout << "\n\nMissing \"sql_user\" settings..\n\n\n" << endl;
+					system("pause");
+					return 0;
+				}
+				else sprintf_s(SQL_USER, "%s", j["local_settings"]["sql_user"].get<string>().c_str());
+				if (j["local_settings"]["sql_host"].get<string>() != "") {
+					cout << "\n\nMissing \"sql_host\" settings..\n\n\n" << endl;
+					system("pause");
+					return 0;
+				}
+				else sprintf_s(SQL_HOST, "%s", j["local_settings"]["sql_host"].get<string>().c_str());
+				if (j["local_settings"]["sql_password"].get<string>() != "") {
+					cout << "\n\nMissing \"sql_password\" settings..\n\n\n" << endl;
+					system("pause");
+					return 0;
+				}
+				else sprintf_s(SQL_PWD, "%s", j["local_settings"]["sql_password"].get<string>().c_str());
+				if (j["local_settings"]["sql_database"].get<string>() != "") {
+					cout << "\n\nMissing \"sql_database\" settings..\n\n\n" << endl;
+					system("pause");
+					return 0;
+				}
+				else sprintf_s(SQL_DATABASE, "%s", j["local_settings"]["sql_database"].get<string>().c_str());
+				if (j["local_settings"]["sql_port"].is_null()) {
+					cout << "\n\nMissing \"sql_port\" settings..\n\n\n" << endl;
+					system("pause");
+					return 0;
+				}
+				else SQL_PORT = j["local_settings"]["sql_port"].get<int>();
+			}
+			else {
+				cout << u8"\n/*** osucat now using remote server ***/\n" << endl;
+				if (j["remote_settings"]["ws_host"].get<string>() != "") {
+					cout << "\n\nMissing \"ws_host\" settings..\n\n\n" << endl;
+					system("pause");
+					return 0;
+				}
+				else sprintf_s(wshost, "%s", j["remote_settings"]["ws_host"].get<string>().c_str());
+				if (j["remote_settings"]["ws_port"].is_null()) {
+					cout << "\n\nMissing \"ws_port\" settings..\n\n\n" << endl;
+					system("pause");
+					return 0;
+				}
+				else wsport = j["remote_settings"]["ws_port"].get<int>();
+				if (j["remote_settings"]["sql_user"].get<string>() != "") {
+					cout << "\n\nMissing \"sql_user\" settings..\n\n\n" << endl;
+					system("pause");
+					return 0;
+				}
+				else sprintf_s(SQL_USER, "%s", j["remote_settings"]["sql_user"].get<string>().c_str());
+				if (j["remote_settings"]["sql_host"].get<string>() != "") {
+					cout << "\n\nMissing \"sql_host\" settings..\n\n\n" << endl;
+					system("pause");
+					return 0;
+				}
+				else sprintf_s(SQL_HOST, "%s", j["remote_settings"]["sql_host"].get<string>().c_str());
+				if (j["remote_settings"]["sql_password"].get<string>() != "") {
+					cout << "\n\nMissing \"sql_password\" settings..\n\n\n" << endl;
+					system("pause");
+					return 0;
+				}
+				else sprintf_s(SQL_PWD, "%s", j["remote_settings"]["sql_password"].get<string>().c_str());
+				if (j["remote_settings"]["sql_database"].get<string>() != "") {
+					cout << "\n\nMissing \"sql_database\" settings..\n\n\n" << endl;
+					system("pause");
+					return 0;
+				}
+				else sprintf_s(SQL_DATABASE, "%s", j["remote_settings"]["sql_database"].get<string>().c_str());
+				if (j["remote_settings"]["sql_port"].is_null()) {
+					cout << "\n\nMissing \"sql_port\" settings..\n\n\n" << endl;
+					system("pause");
+					return 0;
+				}
+				else SQL_PORT = j["remote_settings"]["sql_port"].get<int>();
+			}
 		}
-		else {
-			sprintf_s(SQL_USER, "root");
-			sprintf_s(SQL_HOST, "127.0.0.1");
-			sprintf_s(SQL_PWD, "ASDasdASD32111!");
-			sprintf_s(SQL_DATABASE, "osucat");
-			SQL_PORT = 32148;
+		else
+		{
+			cout << "Missing config file.\nInitializing config file..." << endl;
+			ofstream writeconfig(".\\osucat_config.json");
+			if (!writeconfig) {
+				cout << "Unable to create config file.";
+				system("pause");
+				return 0;
+			}
+			json j;
+			j["apikey"] = "";
+			j["use_remote_server"] = false;
+			j["debugmode"] = false;
+			j["local_settings"]["ws_host"] = "127.0.0.1";
+			j["local_settings"]["ws_port"] = 6700;
+			j["local_settings"]["sql_host"] = "127.0.0.1";
+			j["local_settings"]["sql_user"] = "";
+			j["local_settings"]["sql_password"] = "";
+			j["local_settings"]["sql_database"] = "";
+			j["local_settings"]["sql_port"] = 3306;
+			j["remote_settings"]["ws_host"] = "";
+			j["remote_settings"]["ws_port"] = 6700;
+			j["remote_settings"]["sql_host"] = "";
+			j["remote_settings"]["sql_user"] = "";
+			j["remote_settings"]["sql_password"] = "";
+			j["remote_settings"]["sql_database"] = "";
+			j["remote_settings"]["sql_port"] = 3306;
+			writeconfig << j.dump().c_str() << endl;
+			writeconfig.close();
+			cout << "\n\nThe config file has created. Please complete the settings.\n\n\n";
+			system("pause");
+			return 0;
 		}
 	}
 	else {
@@ -144,33 +280,38 @@ int main()
 		cout << u8"\nosucat is not activated,\nthe program is about to exit..." << endl;;
 	}
 	if (ISACTIVE) {
-		utils::fileExist(".\\.debug") ? DEBUGMODE = true : DEBUGMODE = false; //判断是否启用了debug模式
-		if (DEBUGMODE) cout << u8"Debug mode is enabled...\n" << endl;
 		cout << u8"Creating daily update thread..." << endl;
 		osucat::main::_CreateDUThread();
-
 		cout << "Loading the admin list..." << endl;
-		Database db;
-		db.Connect();
-		if (db.reloadAdmin()) {
-			cout << "The admin list has successfully loaded!" << endl;
+		try {
+			Database db;
+			db.Connect();
+			if (db.reloadAdmin()) {
+				cout << "The admin list has successfully loaded!" << endl;
+			}
+			else {
+				cout << "Failed. Please check database settings." << endl;
+			}
 		}
-		else {
-			cout << "Failed. Please check database settings." << endl;
+		catch (osucat::database_exception) {
+			cout << "\n\nUnable to connect to the database. Is the database settings correctly filled in?\n\n\n" << endl;
+			system("pause");
+			return 0;
 		}
-
 		INT rc;
 		WSADATA wsaData;
 		rc = WSAStartup(MAKEWORD(2, 2), &wsaData);
 		if (rc) {
 			printf("WSAStartup Failed.\n");
+			system("pause");
 			return 1;
 		}
 		using easywsclient::WebSocket;
-		cout << u8"Ready...Waiting for connection..." << endl; 
-		std::unique_ptr<WebSocket> ws(WebSocket::from_url(utils::fileExist(".\\.remote")?"ws://192.168.0.103:6700":"ws://localhost:6700/"));
+		cout << u8"Ready...Waiting for connection..." << endl;
+		std::unique_ptr<WebSocket> ws(WebSocket::from_url(utils::fileExist(".\\.remote") ? "ws://192.168.0.103:6700" : "ws://localhost:6700/"));
 		if (ws == false) {
-			printf(u8"An attempt to connect to the WebSocket server has failed.");
+			printf(u8"Trying to connect to the WebSocket server has failed.");
+			system("pause");
 			return 2;
 		}
 		cout << u8"WebSocket connection was successfully established!" << endl;
@@ -185,6 +326,7 @@ int main()
 		}
 		WSACleanup();
 		cout << u8"WebSocket connection closed." << endl;
+		system("pause");
 	}
 	return 0;
 }

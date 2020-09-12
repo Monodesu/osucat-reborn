@@ -7,9 +7,6 @@ using json = nlohmann::json;
 using namespace std;
 
 namespace osucat {
-
-
-
 	class main {
 	public:
 		static void _CreateDUThread() {

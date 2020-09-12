@@ -308,7 +308,9 @@ int main()
 		}
 		using easywsclient::WebSocket;
 		cout << u8"Ready...Waiting for connection..." << endl;
-		std::unique_ptr<WebSocket> ws(WebSocket::from_url(utils::fileExist(".\\.remote") ? "ws://192.168.0.103:6700" : "ws://localhost:6700/"));
+		char tmp[1024];
+		sprintf_s(tmp, "ws://%s:%d/", wshost, wsport);
+		std::unique_ptr<WebSocket> ws(WebSocket::from_url(tmp));
 		if (ws == false) {
 			printf(u8"Trying to connect to the WebSocket server has failed.");
 			system("pause");

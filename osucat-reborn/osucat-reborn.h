@@ -5,6 +5,7 @@
 char OC_ROOT_PATH[512];
 bool DEBUGMODE = false;
 bool ISACTIVE = false;
+long long int owner_userid;
 
 #include <easywsclient/easywsclient.hpp>
 #include <json/json.hpp>

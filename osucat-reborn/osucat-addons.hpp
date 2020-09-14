@@ -101,7 +101,7 @@ namespace osucat::addons {
 				);
 				Target exceptionReport;
 				exceptionReport.message_type = Target::MessageType::PRIVATE;
-				exceptionReport.user_id = MONO;
+				exceptionReport.user_id = owner_userid;
 				exceptionReport.message = reportMsg;
 				activepush(exceptionReport);
 				return true;
@@ -126,7 +126,7 @@ namespace osucat::addons {
 				);
 				Target exceptionReport;
 				exceptionReport.message_type = Target::MessageType::PRIVATE;
-				exceptionReport.user_id = MONO;
+				exceptionReport.user_id = owner_userid;
 				exceptionReport.message = reportMsg;
 				activepush(exceptionReport);
 				return true;

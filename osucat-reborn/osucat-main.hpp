@@ -40,7 +40,7 @@ namespace osucat {
 					if (tar.message_type == Target::MessageType::PRIVATE) {
 						sprintf_s(msg, u8"[%s] [osucat][↓]: 好友 %lld 的消息：%s", utils::unixTime2Str(tar.time).c_str(), tar.user_id, tar.message.c_str());
 						cout << msg << endl;
-						if (utils::fileExist(".\\.debug") ? tar.message[0] == '#' : tar.message[0] == '!' || tar.message.find(u8"！") == 0) {
+						if (DEBUGMODE == true ? tar.message[0] == '#' : tar.message[0] == '!' || tar.message.find(u8"！") == 0) {
 							string str = tar.message;
 							str = tar.message[0] < 0 ? tar.message.substr(3) : tar.message.substr(1);
 							monitors(str, tar, sdr);
@@ -50,7 +50,7 @@ namespace osucat {
 						sdr.member_role = sj["role"].get<string>();
 						sprintf_s(msg, u8"[%s] [osucat][↓]: 群 %lld 的 %lld 的消息：%s", utils::unixTime2Str(tar.time).c_str(), tar.group_id, tar.user_id, tar.message.c_str());
 						cout << msg << endl;
-						if (utils::fileExist(".\\.debug") ? tar.message[0] == '#' : tar.message[0] == '!' || tar.message.find(u8"！") == 0) {
+						if (DEBUGMODE == true ? tar.message[0] == '#' : tar.message[0] == '!' || tar.message.find(u8"！") == 0) {
 							string str = tar.message;
 							str = tar.message[0] < 0 ? tar.message.substr(3) : tar.message.substr(1);
 							monitors(str, tar, sdr);
@@ -372,7 +372,7 @@ namespace osucat {
 				);
 				Target exceptionReport;
 				exceptionReport.message_type = Target::MessageType::PRIVATE;
-				exceptionReport.user_id = MONO;
+				exceptionReport.user_id = owner_userid;
 				exceptionReport.message = reportMsg;
 				activepush(exceptionReport);
 				return true;
@@ -397,7 +397,7 @@ namespace osucat {
 				);
 				Target exceptionReport;
 				exceptionReport.message_type = Target::MessageType::PRIVATE;
-				exceptionReport.user_id = MONO;
+				exceptionReport.user_id = owner_userid;
 				exceptionReport.message = reportMsg;
 				activepush(exceptionReport);
 				return true;
@@ -440,7 +440,7 @@ namespace osucat {
 			*params = u8"[CQ:at,qq=" + to_string(tar.user_id) + u8"] 你想传达的话已成功传达给麻麻了哦。";
 			Target activepushTar;
 			activepushTar.message_type = Target::MessageType::PRIVATE;
-			activepushTar.user_id = MONO;
+			activepushTar.user_id = owner_userid;
 			activepushTar.message = u8"收到来自用户 " + to_string(tar.user_id) + u8" 的消息：" + cmd;
 			activepush(activepushTar);
 		}
@@ -501,7 +501,7 @@ namespace osucat {
 			activepush(userreturnMsg);
 			Target activepushTar;
 			activepushTar.message_type = Target::MessageType::PRIVATE;
-			activepushTar.user_id = MONO;
+			activepushTar.user_id = owner_userid;
 			activepushTar.message = u8"有1位用户绑定了他的osu!id,\nqq: " + to_string(tar.user_id)
 				+ "\nosu!username: " + UI.username + "\nosu!uid: " + to_string(UI.user_id);
 			activepush(activepushTar);
@@ -553,7 +553,7 @@ namespace osucat {
 					*params = u8"已成功解绑。";
 					Target activepushTar;
 					activepushTar.message_type = Target::MessageType::PRIVATE;
-					activepushTar.user_id = MONO;
+					activepushTar.user_id = owner_userid;
 					activepushTar.message = u8"有1位用户解绑了他的osu!id,\nqq: " + to_string(tar.user_id)
 						+ "\nosu!uid: " + to_string(uid);
 					activepush(activepushTar);
@@ -3000,7 +3000,7 @@ namespace osucat {
 			*params = 已上传待审核提示;
 			Target activepushTar;
 			activepushTar.message_type = Target::MessageType::PRIVATE;
-			activepushTar.user_id = MONO;
+			activepushTar.user_id = owner_userid;
 			activepushTar.message = u8"有一个新的banner被上传，操作者UID：" + to_string(UserID) + u8"\n操作者QQ：" + to_string(QQ)
 				+ u8" ,请尽快审核哦。\r\nbanner内容：\r\n"
 				+ "[CQ:image,file=" + filepath.substr(14) + "]";
@@ -3044,7 +3044,7 @@ namespace osucat {
 			*params = 已上传待审核提示;
 			Target activepushTar;
 			activepushTar.message_type = Target::MessageType::PRIVATE;
-			activepushTar.user_id = MONO;
+			activepushTar.user_id = owner_userid;
 			activepushTar.message = u8"有一个新的InfoPanel被上传，操作者UID：" + to_string(UserID) + u8"\n操作者QQ：" + to_string(QQ)
 				+ u8" ,请尽快审核哦。\r\nInfoPanel内容：\r\n"
 				+ "[CQ:image,file=osucat\\custom\\infopanel_verify\\" + to_string(UserID) + ".png]";
@@ -3544,7 +3544,7 @@ namespace osucat {
 			activepushTar.message = u8"正在启动更新";
 			activepush(activepushTar);
 			activepushTar.message_type = Target::MessageType::PRIVATE;
-			activepushTar.user_id = MONO;
+			activepushTar.user_id = owner_userid;
 			activepushTar.message = u8"管理员 " + to_string(tar.user_id) + u8" 手动发起了每日更新 正在启动更新";
 			activepush(activepushTar);
 			sprintf_s(dugtmp, u8"[%s] [osucat][updater]：启动更新", utils::unixTime2Str(time(NULL)).c_str());
@@ -3588,7 +3588,7 @@ namespace osucat {
 				else {
 					Target activepushTar;
 					activepushTar.message_type = Target::MessageType::PRIVATE;
-					activepushTar.user_id = MONO;
+					activepushTar.user_id = owner_userid;
 					activepushTar.message = u8"正在启动更新";
 					activepush(activepushTar);
 					try {
@@ -3627,15 +3627,6 @@ namespace osucat {
 			db.Connect();
 
 			try {
-				if (api::GetUser(userid, osu_api_v1::mode::std, &UI) != 0) {
-					try {
-						db.AddUserData(&UI, timeStr);
-					}
-					catch (osucat::database_exception) {
-					}
-				}
-			}
-			catch (osucat::NetWork_Exception) {
 				try {
 					if (api::GetUser(userid, osu_api_v1::mode::std, &UI) != 0) {
 						try {
@@ -3656,20 +3647,20 @@ namespace osucat {
 						}
 					}
 					catch (osucat::NetWork_Exception) {
+						try {
+							if (api::GetUser(userid, osu_api_v1::mode::std, &UI) != 0) {
+								try {
+									db.AddUserData(&UI, timeStr);
+								}
+								catch (osucat::database_exception) {
+								}
+							}
+						}
+						catch (osucat::NetWork_Exception) {
+						}
 					}
 				}
-			}
 
-			try {
-				if (api::GetUser(userid, osu_api_v1::mode::taiko, &UI) != 0) {
-					try {
-						db.AddUserData(&UI, timeStr);
-					}
-					catch (osucat::database_exception) {
-					}
-				}
-			}
-			catch (osucat::NetWork_Exception) {
 				try {
 					if (api::GetUser(userid, osu_api_v1::mode::taiko, &UI) != 0) {
 						try {
@@ -3690,20 +3681,20 @@ namespace osucat {
 						}
 					}
 					catch (osucat::NetWork_Exception) {
+						try {
+							if (api::GetUser(userid, osu_api_v1::mode::taiko, &UI) != 0) {
+								try {
+									db.AddUserData(&UI, timeStr);
+								}
+								catch (osucat::database_exception) {
+								}
+							}
+						}
+						catch (osucat::NetWork_Exception) {
+						}
 					}
 				}
-			}
 
-			try {
-				if (api::GetUser(userid, osu_api_v1::mode::ctb, &UI) != 0) {
-					try {
-						db.AddUserData(&UI, timeStr);
-					}
-					catch (osucat::database_exception) {
-					}
-				}
-			}
-			catch (osucat::NetWork_Exception) {
 				try {
 					if (api::GetUser(userid, osu_api_v1::mode::ctb, &UI) != 0) {
 						try {
@@ -3724,20 +3715,20 @@ namespace osucat {
 						}
 					}
 					catch (osucat::NetWork_Exception) {
+						try {
+							if (api::GetUser(userid, osu_api_v1::mode::ctb, &UI) != 0) {
+								try {
+									db.AddUserData(&UI, timeStr);
+								}
+								catch (osucat::database_exception) {
+								}
+							}
+						}
+						catch (osucat::NetWork_Exception) {
+						}
 					}
 				}
-			}
 
-			try {
-				if (api::GetUser(userid, osu_api_v1::mode::mania, &UI) != 0) {
-					try {
-						db.AddUserData(&UI, timeStr);
-					}
-					catch (osucat::database_exception) {
-					}
-				}
-			}
-			catch (osucat::NetWork_Exception) {
 				try {
 					if (api::GetUser(userid, osu_api_v1::mode::mania, &UI) != 0) {
 						try {
@@ -3758,8 +3749,23 @@ namespace osucat {
 						}
 					}
 					catch (osucat::NetWork_Exception) {
+						try {
+							if (api::GetUser(userid, osu_api_v1::mode::mania, &UI) != 0) {
+								try {
+									db.AddUserData(&UI, timeStr);
+								}
+								catch (osucat::database_exception) {
+								}
+							}
+						}
+						catch (osucat::NetWork_Exception) {
+						}
 					}
 				}
+			}
+			catch (std::exception& ex) {
+				string a = u8"dailyUpdatePoster 出现了错误！！！！！\n详情：\nuid：" + to_string(userid) + u8"\n错误详情：" + ex.what();
+				send_message(Target::MessageType::PRIVATE, owner_userid, a);
 			}
 			char dugtmp[256];
 			sprintf_s(dugtmp, u8"[%s] [osucat][updater]：(No.%d) 已成功更新用户 %lld 的数据。",
@@ -3786,6 +3792,13 @@ namespace osucat {
 		通过message_type来判断是群组消息还是好友消息
 		message在这里等同于params
 		*/
+		static void send_message(Target::MessageType messagetype, int64_t recipient, const string message) {
+			Target activepushTar;
+			messagetype == Target::MessageType::GROUP ? activepushTar.message_type = Target::MessageType::GROUP : activepushTar.message_type = Target::MessageType::PRIVATE;
+			messagetype == Target::MessageType::GROUP ? activepushTar.group_id = recipient : activepushTar.user_id = recipient;
+			activepushTar.message = message;
+			activepush(activepushTar);
+		}
 		static void activepush(Target tar) {
 			if (tar.message_type == Target::MessageType::PRIVATE) {
 				json jp;

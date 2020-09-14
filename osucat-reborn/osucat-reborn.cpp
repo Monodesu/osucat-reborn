@@ -141,6 +141,8 @@ int main()
 				system("pause");
 				return 0;
 			}
+			if (j["owner_userid"].get<string>() == "") { cout << "\nMissing owner user_id!\n" << endl; system("pause"); return 0; }
+			else owner_userid = stoll(j["owner_userid"].get<string>());
 			if (j["apikey"].get<string>() == "") { cout << "\nMissing API key!\n" << endl; system("pause"); return 0; }
 			else sprintf_s(OSU_KEY, "%s", j["apikey"].get<string>().c_str());
 			if (j["debugmode"].get<bool>()) { DEBUGMODE = true; cout << u8"Debug mode is enabled...\n" << endl; }
@@ -152,7 +154,7 @@ int main()
 					system("pause");
 					return 0;
 				}
-				if (j["local_settings"]["ws_host"].get<string>() != "") {
+				if (j["local_settings"]["ws_host"].get<string>() == "") {
 					cout << "\n\nMissing \"ws_host\" settings..\n\n\n" << endl;
 					system("pause");
 					return 0;
@@ -164,25 +166,25 @@ int main()
 					return 0;
 				}
 				else wsport = j["local_settings"]["ws_port"].get<int>();
-				if (j["local_settings"]["sql_user"].get<string>() != "") {
+				if (j["local_settings"]["sql_user"].get<string>() == "") {
 					cout << "\n\nMissing \"sql_user\" settings..\n\n\n" << endl;
 					system("pause");
 					return 0;
 				}
 				else sprintf_s(SQL_USER, "%s", j["local_settings"]["sql_user"].get<string>().c_str());
-				if (j["local_settings"]["sql_host"].get<string>() != "") {
+				if (j["local_settings"]["sql_host"].get<string>() == "") {
 					cout << "\n\nMissing \"sql_host\" settings..\n\n\n" << endl;
 					system("pause");
 					return 0;
 				}
 				else sprintf_s(SQL_HOST, "%s", j["local_settings"]["sql_host"].get<string>().c_str());
-				if (j["local_settings"]["sql_password"].get<string>() != "") {
+				if (j["local_settings"]["sql_password"].get<string>() == "") {
 					cout << "\n\nMissing \"sql_password\" settings..\n\n\n" << endl;
 					system("pause");
 					return 0;
 				}
 				else sprintf_s(SQL_PWD, "%s", j["local_settings"]["sql_password"].get<string>().c_str());
-				if (j["local_settings"]["sql_database"].get<string>() != "") {
+				if (j["local_settings"]["sql_database"].get<string>() == "") {
 					cout << "\n\nMissing \"sql_database\" settings..\n\n\n" << endl;
 					system("pause");
 					return 0;
@@ -197,7 +199,7 @@ int main()
 			}
 			else {
 				cout << u8"\n/*** osucat now using remote server ***/\n" << endl;
-				if (j["remote_settings"]["ws_host"].get<string>() != "") {
+				if (j["remote_settings"]["ws_host"].get<string>() == "") {
 					cout << "\n\nMissing \"ws_host\" settings..\n\n\n" << endl;
 					system("pause");
 					return 0;
@@ -209,25 +211,25 @@ int main()
 					return 0;
 				}
 				else wsport = j["remote_settings"]["ws_port"].get<int>();
-				if (j["remote_settings"]["sql_user"].get<string>() != "") {
+				if (j["remote_settings"]["sql_user"].get<string>() == "") {
 					cout << "\n\nMissing \"sql_user\" settings..\n\n\n" << endl;
 					system("pause");
 					return 0;
 				}
 				else sprintf_s(SQL_USER, "%s", j["remote_settings"]["sql_user"].get<string>().c_str());
-				if (j["remote_settings"]["sql_host"].get<string>() != "") {
+				if (j["remote_settings"]["sql_host"].get<string>() == "") {
 					cout << "\n\nMissing \"sql_host\" settings..\n\n\n" << endl;
 					system("pause");
 					return 0;
 				}
 				else sprintf_s(SQL_HOST, "%s", j["remote_settings"]["sql_host"].get<string>().c_str());
-				if (j["remote_settings"]["sql_password"].get<string>() != "") {
+				if (j["remote_settings"]["sql_password"].get<string>() == "") {
 					cout << "\n\nMissing \"sql_password\" settings..\n\n\n" << endl;
 					system("pause");
 					return 0;
 				}
 				else sprintf_s(SQL_PWD, "%s", j["remote_settings"]["sql_password"].get<string>().c_str());
-				if (j["remote_settings"]["sql_database"].get<string>() != "") {
+				if (j["remote_settings"]["sql_database"].get<string>() == "") {
 					cout << "\n\nMissing \"sql_database\" settings..\n\n\n" << endl;
 					system("pause");
 					return 0;
@@ -268,6 +270,7 @@ int main()
 			j["remote_settings"]["sql_password"] = "";
 			j["remote_settings"]["sql_database"] = "";
 			j["remote_settings"]["sql_port"] = 3306;
+			j["owner_userid"] = "";
 			writeconfig << j.dump().c_str() << endl;
 			writeconfig.close();
 			cout << "\n\nThe config file has created. Please complete the settings.\n\n\n";

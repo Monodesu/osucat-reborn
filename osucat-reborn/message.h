@@ -4,7 +4,6 @@
 
 #define BOT_NAME "osuCat"
 #define OSUCAT_SELF 834276213
-#define MONO 451577581
 
 #define 未绑定 u8"你还没有绑定你的账户，请使用(!)setid id来绑定~"
 #define 他人未绑定 u8"他还没有绑定他的账户，请让他使用(!)setid id来绑定哦——"

@@ -37,19 +37,16 @@ public:
 	 */
 	void Connect() {
 		if (mysql_real_connect(&this->conn, SQL_HOST, SQL_USER, SQL_PWD, SQL_DATABASE, SQL_PORT, NULL, 0) == NULL) {
-			// throw OsuCat::database_exception(mysql_error(&this->conn), mysql_errno(&this->conn));
 			throw osucat::database_exception(mysql_error(&this->conn), mysql_errno(&this->conn));
 		}
-		if (int t = mysql_set_character_set(&conn, "utf8") != NULL) {
+		if (int t = mysql_set_character_set(&conn, "utf8mb4") != NULL) {
 			mysql_close(&this->conn);
-			// throw OsuCat::database_exception(mysql_error(&this->conn), t);
 			throw osucat::database_exception(mysql_error(&this->conn), t);
 		}
 	}
 
 	void Execute(const std::string& sql) {
 		if (0 != mysql_query(&this->conn, sql.c_str())) {
-			// throw OsuCat::database_exception(mysql_error(&this->conn), mysql_errno(&this->conn));
 			throw osucat::database_exception(mysql_error(&this->conn), mysql_errno(&this->conn));
 		}
 	}
@@ -677,13 +674,13 @@ public:
 	*/
 	void setBottleRemaining(int isdaily, int64_t qq, int dailyoldvalue = 0) {
 		if (isdaily == 1) {
-			string query = "update bottlerecord set remaining=" + to_string(dailyoldvalue + 20) + ",lastrewardtime=" + to_string(time(NULL)) + " where qq=" + to_string(qq);
+			string query = "update bottlerecord set remaining=" + to_string(floor(dailyoldvalue * 0.5) + 5) + ",lastrewardtime=" + to_string(time(NULL)) + " where qq=" + to_string(qq);
 			this->Update(query);
 			return;
 		}
 		if (isdaily == 2) {
 			int oldr = this->getUserBottleRemaining(qq);
-			string query = "update bottlerecord set remaining=" + to_string(oldr + 1) + " where qq=" + to_string(qq);
+			string query = "update bottlerecord set remaining=" + to_string(oldr + 2) + " where qq=" + to_string(qq);
 			this->Update(query);
 			return;
 		}
@@ -721,9 +718,9 @@ public:
 			}
 		}
 		catch (osucat::database_exception) {
-			string query = "INSERT INTO bottlerecord (qq,remaining,lastrewardtime) VALUES (" + to_string(qq) + ",20," + to_string(time(NULL)) + ")";
+			string query = "INSERT INTO bottlerecord (qq,remaining,lastrewardtime) VALUES (" + to_string(qq) + ",5," + to_string(time(NULL)) + ")";
 			this->Insert(query);
-			return 20;
+			return 5;
 		}
 	}
 

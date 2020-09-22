@@ -126,7 +126,7 @@ namespace osucat {
 				if (_stricmp(msg.substr(0, 18).c_str(), u8"猫猫调用次数") == 0) {
 					Database db;
 					db.Connect();
-					*params = u8"猫猫从0.4版本开始，至今一共被调用了 " + to_string(db.Getcallcount()) + u8" 次。";
+					*params = u8"猫猫从0.4版本开始，主要功能至今一共被调用了 " + to_string(db.Getcallcount()) + u8" 次。";
 					return true;
 				}
 				if (_stricmp(msg.substr(0, 6).c_str(), "recent") == 0) {
@@ -312,24 +312,49 @@ namespace osucat {
 							return true;
 						}
 						if (_stricmp(msg.substr(0, 8).c_str(), "rmbottle") == 0) {
+							string returnmsg = "null", cmd = msg.substr(8);
 							int i;
-							try {
-								i = stoi(msg.substr(8));
+							if (cmd.find('#') != string::npos) {
+								i = stoi(cmd.substr(0, cmd.find('#')));
+								returnmsg = cmd.substr(cmd.find('#') + 1);
 							}
-							catch (std::exception) {
-								*params = u8"参数错误";
+							else {
+								try {
+									i = stoi(cmd);
+								}
+								catch (std::exception) {
+									*params = u8"参数错误";
+									return true;
+								}
+							}
+							json j = db.getBottleByID(i);
+							addons::driftingBottle dfb;
+							if (j.size() == 1) {
+								dfb.nikename = j[0]["nickname"].get<std::string>();
+								dfb.sender = stoll(j[0]["sender"].get<std::string>());
+								dfb.sendTime = stoll(j[0]["sendtime"].get<std::string>());
+								string tmp;
+								returnmsg != "null" ?
+									tmp = u8"你发于 " + utils::unixTime2Str(dfb.sendTime) + u8" 的消息已被管理员删除。\n详情：" + returnmsg : tmp = u8"你发于 " + utils::unixTime2Str(dfb.sendTime) + u8" 的消息已被管理员删除。";
+								send_message(Target::MessageType::PRIVATE, dfb.sender, tmp);
+							}
+							else {
+								*params = u8"没有找到这个漂流瓶。";
 								return true;
 							}
-							db.writeBottle(osucat::addons::driftingBottleDBEvent::DELETEBOTTLE, i, 0, 0, "", "");
-							*params = u8"已移除ID为 " + to_string(i) + u8" 的漂流瓶";
+
+							returnmsg == "null" ?
+								*params = u8"已移除ID为 " + to_string(i) + u8" 的漂流瓶" : *params = u8"已移除ID为 " + to_string(i) + u8" 的漂流瓶，并返回以下消息：" + returnmsg;
 							for (int fi = 0; fi < adminlist.size(); ++fi) {
-								Target at;
+								send_message(Target::MessageType::PRIVATE, adminlist[fi].user_id, *params);
+								/*Target at;
 								at.message_type = Target::MessageType::PRIVATE;
 								at.user_id = adminlist[fi].user_id;
 								at.message = *params;
-								activepush(at);
+								activepush(at);*/
 								Sleep(500);
 							}
+							db.writeBottle(osucat::addons::driftingBottleDBEvent::DELETEBOTTLE, i, 0, 0, "", "");
 							return false;
 						}
 						if (_stricmp(msg.substr(0, 11).c_str(), "reloadadmin") == 0) {

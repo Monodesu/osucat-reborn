@@ -2,8 +2,8 @@
 #ifndef MYSQL_HPP
 #define MYSQL_HPP
 
-#define BOTLEEXPECTEDVALUE 50.00
-#define BOTTLEMAXEXISTDAYS 3
+#define BOTLEEXPECTEDVALUE 100.00
+#define BOTTLEMAXEXISTDAYS 7
 #include <mysql.h>
 char SQL_USER[32], SQL_HOST[32], SQL_PWD[32], SQL_DATABASE[32];
 int SQL_PORT;
@@ -774,6 +774,18 @@ public:
 
 	}
 
+	json getBottleByID(int id) {
+		try {
+			json j = this->Select("SELECT * FROM bottlemsgrecord where id = " + to_string(id));
+			return j;
+		}
+		catch (osucat::database_exception) {
+			json j;
+			return j;
+		}
+
+	}
+
 	bool RemoveBottle(int bottleExsitDays, int bottleid) {
 		try {
 			json j = this->Select("SELECT * FROM bottletprecord where date=\"" + utils::unixTime2DateStr(time(NULL) - 86400) + "\"");
@@ -832,9 +844,10 @@ public:
 		this->Insert("INSERT INTO bottletprecord (date,pickuprate) values (\"" + utils::unixTime2DateStr(time(NULL)) + "\"," + to_string(r) + ")");
 	}
 
-	int getBottleID(int64_t sender, string message) {
+	int getBottleID(int64_t sender, string message, time_t time) {
 		try {
-			json j = this->Select("SELECT id FROM bottlemsgrecord where sender=" + to_string(sender) + " and message=\"" + message + "\"");
+			string query = "SELECT id FROM bottlemsgrecord where sendtime=" + to_string(time) + " AND sender=" + to_string(sender) + " AND message=\"" + message + "\"";
+			json j = this->Select(query);
 			return stoi(j[0]["id"].get<std::string>());
 		}
 		catch (osucat::database_exception) {

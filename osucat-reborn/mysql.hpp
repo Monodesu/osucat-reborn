@@ -4,6 +4,10 @@
 
 #define BOTLEEXPECTEDVALUE 100.00
 #define BOTTLEMAXEXISTDAYS 7
+#define MAXPOOLSIZE	200
+#define MINPOOLSIZE 20
+#define INITIALTPRATE 0.6
+
 #include <mysql.h>
 char SQL_USER[32], SQL_HOST[32], SQL_PWD[32], SQL_DATABASE[32];
 int SQL_PORT;
@@ -774,6 +778,42 @@ public:
 
 	}
 
+	int getNumberOfAvailableBottles() {
+		try {
+			json j = this->Select("SELECT * FROM bottlemsgrecord where available = 1");
+			return j.size();
+		}
+		catch (osucat::database_exception) {
+			return -1;
+		}
+	}
+
+	string getBottleStatistics() {
+		json j = this->Select("SELECT * FROM bottletprecord");
+		int length = j.size();
+		double total_pick = 0;
+		double total_throw = 0;
+		double poolSize = BOTLEEXPECTEDVALUE;
+		double rate = INITIALTPRATE;
+		string last3 = "";
+		for (int k = 0; k < length; k++) {
+			double kpick = stoi(j[k]["pick"].get<std::string>());
+			double kthrow = stoi(j[k]["throw"].get<std::string>());
+			total_pick += kpick;
+			total_throw += kthrow;
+			if (k < length -1) {
+				poolSize = poolSize * 0.8 + 0.2 * kpick * 0.4;
+				if (kpick > 0.5) rate = rate * 0.8 + 0.2 * kthrow / kpick;
+			}
+			if (k >= length - 3) last3 = last3 + "\n" + to_string((int)kthrow) + "/" + to_string((int)kpick);
+		}
+		if (poolSize > MAXPOOLSIZE) poolSize = MAXPOOLSIZE;
+		if (poolSize < MINPOOLSIZE) poolSize = MINPOOLSIZE;
+
+		double removeProb = min(1, rate * pow((double)this->getNumberOfAvailableBottles() / poolSize, 0.7));
+		return u8"当前剩余瓶数 = " + to_string(this->getNumberOfAvailableBottles()) + u8"\n总扔/捡数 = " + to_string((int)total_throw) + "/" + to_string((int)total_pick) + u8"\n扔捡率 = " + to_string(rate) + u8"\n期望池子大小 = " + to_string((int)poolSize) + u8"\n当前移除概率 = " + to_string(removeProb) + u8"\n近3天扔捡 = " + last3;
+  }
+
 	json getBottleByID(int id) {
 		try {
 			json j = this->Select("SELECT * FROM bottlemsgrecord where id = " + to_string(id));
@@ -783,18 +823,25 @@ public:
 			json j;
 			return j;
 		}
-
 	}
 
 	bool RemoveBottle(int bottleExsitDays, int bottleid) {
 		try {
 			json j = this->Select("SELECT * FROM bottletprecord where date=\"" + utils::unixTime2DateStr(time(NULL) - 86400) + "\"");
-			double bpick = stoi(j[0]["pick"].get<std::string>()),
-				bthrow = stoi(j[0]["throw"].get<std::string>());
-			double br = stod(j[0]["pickuprate"].get<std::string>());
-			double r = 0.8 * br + 0.2 * (bthrow / bpick);
-			double p = pow(min(1, r * sqrt((double)this->getBottles().size() / BOTLEEXPECTEDVALUE)), 1 / (max(1, bottleExsitDays - BOTTLEMAXEXISTDAYS)));
-			if (utils::randomNum(1, 10000) / 10000.0 < p) {
+			int length = j.size();
+			double poolSize = BOTLEEXPECTEDVALUE;
+			double rate = INITIALTPRATE;
+			for (int k = 0; k < length; k++) {
+				double kpick = stoi(j[k]["pick"].get<std::string>());
+				double kthrow = stoi(j[k]["throw"].get<std::string>());
+				poolSize = poolSize * 0.8 + 0.2 * kpick * 0.4;  // Adjust the size of pool to around 40% of #average daily pickups
+				if (kpick > 0.5) rate = rate * 0.8 + 0.2 * kthrow / kpick;
+			}
+			if (poolSize > MAXPOOLSIZE) poolSize = MAXPOOLSIZE;
+			if (poolSize < MINPOOLSIZE) poolSize = MINPOOLSIZE;
+
+			double removeProb = pow(min(1, rate * pow((double)this->getNumberOfAvailableBottles() / poolSize, 0.7)), 1 / (max(1, bottleExsitDays - BOTTLEMAXEXISTDAYS)));
+			if (utils::randomNum(1, 10000) / 10000.0 < removeProb) {
 				this->writeBottle(osucat::addons::driftingBottleDBEvent::CHANGESTATUS, bottleid, 0, 0, "", "");
 				return true;
 			}

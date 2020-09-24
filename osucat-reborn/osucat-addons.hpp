@@ -28,16 +28,21 @@ namespace osucat::addons {
 					}
 					return true;
 				}
+				if (_stricmp(msg.substr(0, 15).c_str(), u8"漂流瓶参数") == 0) {
+					Database db;
+					db.Connect();
+					*params = db.getBottleStatistics();
+					return true;
+				}
 				if (_stricmp(msg.substr(0, 21).c_str(), u8"海上漂流瓶数量") == 0) {
 					Database db;
 					db.Connect();
-					json j = db.getBottles();
-					int tmp = j.size();
-					if (tmp == 0) {
+					int n = db.getNumberOfAvailableBottles();
+					if (n == 0) {
 						*params = u8"海上目前还没有漂流瓶呢...";
 					}
 					else {
-						*params = u8"目前海上有 " + to_string(tmp) + u8" 个漂流瓶正在远航...";
+						*params = u8"当前海上有 " + to_string(n) + u8" 个漂流瓶正在远航...";
 					}
 					return true;
 				}

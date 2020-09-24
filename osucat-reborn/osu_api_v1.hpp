@@ -236,108 +236,40 @@ namespace osucat::osu_api_v1 {
 				info->username = data["username"].get<string>();
 				utils::fakestrptime(data["join_date"].get<string>().c_str(), "%Y-%m-%d %H:%M:%S", &time_temp);
 				info->registed_timestamp = (int64_t)mktime(&time_temp) + 16 * 3600;
-				try {
-					info->n50 = stoll(data["count50"].get<string>());
-				}
-				catch (std::exception) {
-					info->n50 = 0;
-				}
-				try {
-					info->n100 = stoll(data["count100"].get<string>());
-				}
-				catch (std::exception) {
-					info->n100 = 0;
-				}
-				try {
-					info->n300 = stoll(data["count300"].get<string>());
-				}
-				catch (std::exception) {
-					info->n300 = 0;
-				}
-				try {
-					info->playcount = stoll(data["playcount"].get<string>());
-				}
-				catch (std::exception) {
-					info->playcount = 0;
-				}
-				try {
-					info->ranked_score = stoll(data["ranked_score"].get<string>());
-				}
-				catch (std::exception) {
-					info->ranked_score = 0;
-				}
-				try {
-					info->total_score = stoll(data["total_score"].get<string>());
-				}
-				catch (std::exception) {
-					info->total_score = 0;
-				}
-				try {
-					info->global_rank = stoll(data["pp_rank"].get<string>());
-				}
-				catch (std::exception) {
-					info->global_rank = 0;
-				}
-				try {
-					info->level = stof(data["level"].get<string>());
-				}
-				catch (std::exception) {
-					info->level = 0.0;
-				}
-				try {
-					info->pp = stof(data["pp_raw"].get<string>());
-				}
-				catch (std::exception) {
-					info->pp = 0.0;
-				}
-				try {
-					info->accuracy = stod(data["accuracy"].get<string>());
-				}
-				catch (std::exception) {
-					info->accuracy = 0.0;
-				}
-				try {
-					info->count_ss = stoi(data["count_rank_ss"].get<string>());
-				}
-				catch (std::exception) {
-					info->count_ss = 0;
-				}
-				try {
-					info->count_ssh = stoi(data["count_rank_ssh"].get<string>());
-				}
-				catch (std::exception) {
-					info->count_ssh = 0;
-				}
-				try {
-					info->count_s = stoi(data["count_rank_s"].get<string>());
-				}
-				catch (std::exception) {
-					info->count_s = 0;
-				}
-				try {
-					info->count_sh = stoi(data["count_rank_sh"].get<string>());
-				}
-				catch (std::exception) {
-					info->count_sh = 0;
-				}
-				try {
-					info->count_a = stoi(data["count_rank_a"].get<string>());
-				}
-				catch (std::exception) {
-					info->count_a = 0;
-				}
-				try {
-					info->playtime = stoll(data["total_seconds_played"].get<string>());
-				}
-				catch (std::exception) {
-					info->playtime = 0;
-				}
-				try {
-					info->country_rank = stoll(data["pp_country_rank"].get<string>());
-				}
-				catch (std::exception) {
-					info->country_rank = 0;
-				}
+				try { info->n50 = stoll(data["count50"].get<string>()); }
+				catch (std::exception) { info->n50 = 0; }
+				try { info->n100 = stoll(data["count100"].get<string>()); }
+				catch (std::exception) { info->n100 = 0; }
+				try { info->n300 = stoll(data["count300"].get<string>()); }
+				catch (std::exception) { info->n300 = 0; }
+				try { info->playcount = stoll(data["playcount"].get<string>()); }
+				catch (std::exception) { info->playcount = 0; }
+				try { info->ranked_score = stoll(data["ranked_score"].get<string>()); }
+				catch (std::exception) { info->ranked_score = 0; }
+				try { info->total_score = stoll(data["total_score"].get<string>()); }
+				catch (std::exception) { info->total_score = 0; }
+				try { info->global_rank = stoll(data["pp_rank"].get<string>()); }
+				catch (std::exception) { info->global_rank = 0; }
+				try { info->level = stof(data["level"].get<string>()); }
+				catch (std::exception) { info->level = 0.0; }
+				try { info->pp = stof(data["pp_raw"].get<string>()); }
+				catch (std::exception) { info->pp = 0.0; }
+				try { info->accuracy = stod(data["accuracy"].get<string>()); }
+				catch (std::exception) { info->accuracy = 0.0; }
+				try { info->count_ss = stoi(data["count_rank_ss"].get<string>()); }
+				catch (std::exception) { info->count_ss = 0; }
+				try { info->count_ssh = stoi(data["count_rank_ssh"].get<string>()); }
+				catch (std::exception) { info->count_ssh = 0; }
+				try { info->count_s = stoi(data["count_rank_s"].get<string>()); }
+				catch (std::exception) { info->count_s = 0; }
+				try { info->count_sh = stoi(data["count_rank_sh"].get<string>()); }
+				catch (std::exception) { info->count_sh = 0; }
+				try { info->count_a = stoi(data["count_rank_a"].get<string>()); }
+				catch (std::exception) { info->count_a = 0; }
+				try { info->playtime = stoll(data["total_seconds_played"].get<string>()); }
+				catch (std::exception) { info->playtime = 0; }
+				try { info->country_rank = stoll(data["pp_country_rank"].get<string>()); }
+				catch (std::exception) { info->country_rank = 0; }
 				info->country = data["country"].get<string>();
 				info->mode = (int)mode;
 				return 1;
@@ -355,108 +287,40 @@ namespace osucat::osu_api_v1 {
 				info->username = data["username"].get<string>();
 				utils::fakestrptime(data["join_date"].get<string>().c_str(), "%Y-%m-%d %H:%M:%S", &time_temp);
 				info->registed_timestamp = (long)mktime(&time_temp) + 16 * 3600;
-				try {
-					info->n50 = stoll(data["count50"].get<string>());
-				}
-				catch (std::exception) {
-					info->n50 = 0;
-				}
-				try {
-					info->n100 = stoll(data["count100"].get<string>());
-				}
-				catch (std::exception) {
-					info->n100 = 0;
-				}
-				try {
-					info->n300 = stoll(data["count300"].get<string>());
-				}
-				catch (std::exception) {
-					info->n300 = 0;
-				}
-				try {
-					info->playcount = stoll(data["playcount"].get<string>());
-				}
-				catch (std::exception) {
-					info->playcount = 0;
-				}
-				try {
-					info->ranked_score = stoll(data["ranked_score"].get<string>());
-				}
-				catch (std::exception) {
-					info->ranked_score = 0;
-				}
-				try {
-					info->total_score = stoll(data["total_score"].get<string>());
-				}
-				catch (std::exception) {
-					info->total_score = 0;
-				}
-				try {
-					info->global_rank = stoll(data["pp_rank"].get<string>());
-				}
-				catch (std::exception) {
-					info->global_rank = 0;
-				}
-				try {
-					info->level = stof(data["level"].get<string>());
-				}
-				catch (std::exception) {
-					info->level = 0.0;
-				}
-				try {
-					info->pp = stof(data["pp_raw"].get<string>());
-				}
-				catch (std::exception) {
-					info->pp = 0.0;
-				}
-				try {
-					info->accuracy = stod(data["accuracy"].get<string>());
-				}
-				catch (std::exception) {
-					info->accuracy = 0.0;
-				}
-				try {
-					info->count_ss = stoi(data["count_rank_ss"].get<string>());
-				}
-				catch (std::exception) {
-					info->count_ss = 0;
-				}
-				try {
-					info->count_ssh = stoi(data["count_rank_ssh"].get<string>());
-				}
-				catch (std::exception) {
-					info->count_ssh = 0;
-				}
-				try {
-					info->count_s = stoi(data["count_rank_s"].get<string>());
-				}
-				catch (std::exception) {
-					info->count_s = 0;
-				}
-				try {
-					info->count_sh = stoi(data["count_rank_sh"].get<string>());
-				}
-				catch (std::exception) {
-					info->count_sh = 0;
-				}
-				try {
-					info->count_a = stoi(data["count_rank_a"].get<string>());
-				}
-				catch (std::exception) {
-					info->count_a = 0;
-				}
-				try {
-					info->playtime = stoll(data["total_seconds_played"].get<string>());
-				}
-				catch (std::exception) {
-					info->playtime = 0;
-				}
-				try {
-					info->country_rank = stoll(data["pp_country_rank"].get<string>());
-				}
-				catch (std::exception) {
-					info->country_rank = 0;
-				}
+				try { info->n50 = stoll(data["count50"].get<string>()); }
+				catch (std::exception) { info->n50 = 0; }
+				try { info->n100 = stoll(data["count100"].get<string>()); }
+				catch (std::exception) { info->n100 = 0; }
+				try { info->n300 = stoll(data["count300"].get<string>()); }
+				catch (std::exception) { info->n300 = 0; }
+				try { info->playcount = stoll(data["playcount"].get<string>()); }
+				catch (std::exception) { info->playcount = 0; }
+				try { info->ranked_score = stoll(data["ranked_score"].get<string>()); }
+				catch (std::exception) { info->ranked_score = 0; }
+				try { info->total_score = stoll(data["total_score"].get<string>()); }
+				catch (std::exception) { info->total_score = 0; }
+				try { info->global_rank = stoll(data["pp_rank"].get<string>()); }
+				catch (std::exception) { info->global_rank = 0; }
+				try { info->level = stof(data["level"].get<string>()); }
+				catch (std::exception) { info->level = 0.0; }
+				try { info->pp = stof(data["pp_raw"].get<string>()); }
+				catch (std::exception) { info->pp = 0.0; }
+				try { info->accuracy = stod(data["accuracy"].get<string>()); }
+				catch (std::exception) { info->accuracy = 0.0; }
+				try { info->count_ss = stoi(data["count_rank_ss"].get<string>()); }
+				catch (std::exception) { info->count_ss = 0; }
+				try { info->count_ssh = stoi(data["count_rank_ssh"].get<string>()); }
+				catch (std::exception) { info->count_ssh = 0; }
+				try { info->count_s = stoi(data["count_rank_s"].get<string>()); }
+				catch (std::exception) { info->count_s = 0; }
+				try { info->count_sh = stoi(data["count_rank_sh"].get<string>()); }
+				catch (std::exception) { info->count_sh = 0; }
+				try { info->count_a = stoi(data["count_rank_a"].get<string>()); }
+				catch (std::exception) { info->count_a = 0; }
+				try { info->playtime = stoll(data["total_seconds_played"].get<string>()); }
+				catch (std::exception) { info->playtime = 0; }
+				try { info->country_rank = stoll(data["pp_country_rank"].get<string>()); }
+				catch (std::exception) { info->country_rank = 0; }
 				info->country = data["country"].get<string>();
 				info->mode = (int)mode;
 				return 1;
@@ -502,18 +366,10 @@ namespace osucat::osu_api_v1 {
 				info->creator = data["creator"].get<string>();
 				info->creator_id = stoi(data["creator_id"].get<string>());
 				info->stars = stod(data["difficultyrating"].get<string>());
-				try {
-					info->aim_stars = stod(data["diff_aim"].get<string>());
-				}
-				catch (std::exception) {
-					info->aim_stars = 0.0;
-				}
-				try {
-					info->speed_stars = stod(data["diff_speed"].get<string>());
-				}
-				catch (std::exception) {
-					info->speed_stars = 0.0;
-				}
+				try { info->aim_stars = stod(data["diff_aim"].get<string>()); }
+				catch (std::exception) { info->aim_stars = 0.0; }
+				try { info->speed_stars = stod(data["diff_speed"].get<string>()); }
+				catch (std::exception) { info->speed_stars = 0.0; }
 				info->cs = stof(data["diff_size"].get<string>());
 				info->ar = stof(data["diff_approach"].get<string>());
 				info->od = stof(data["diff_overall"].get<string>());
@@ -537,12 +393,8 @@ namespace osucat::osu_api_v1 {
 				info->count_circle = stoi(data["count_normal"].get<string>());
 				info->count_slider = stoi(data["count_slider"].get<string>());
 				info->count_spinner = stoi(data["count_spinner"].get<string>());
-				try {
-					info->maxcombo = stoi(data["max_combo"].get<string>());
-				}
-				catch (std::exception) {
-					info->maxcombo = 0;
-				}
+				try { info->maxcombo = stoi(data["max_combo"].get<string>()); }
+				catch (std::exception) { info->maxcombo = 0; }
 				info->hasStoryboard = stoi(data["storyboard"].get<string>());
 				info->hasVideo = stoi(data["video"].get<string>());
 				info->canDownload = stoi(data["download_unavailable"].get<string>()) != 0;
@@ -592,18 +444,10 @@ namespace osucat::osu_api_v1 {
 					single.creator = it["creator"].get<string>();
 					single.creator_id = stoi(it["creator_id"].get<string>());
 					single.stars = stod(it["difficultyrating"].get<string>());
-					try {
-						single.aim_stars = stod(it["diff_aim"].get<string>());
-					}
-					catch (std::exception) {
-						single.aim_stars = 0.0;
-					}
-					try {
-						single.speed_stars = stod(it["diff_speed"].get<string>());
-					}
-					catch (std::exception) {
-						single.speed_stars = 0.0;
-					}
+					try { single.aim_stars = stod(it["diff_aim"].get<string>()); }
+					catch (std::exception) { single.aim_stars = 0.0; }
+					try { single.speed_stars = stod(it["diff_speed"].get<string>()); }
+					catch (std::exception) { single.speed_stars = 0.0; }
 					single.cs = stof(it["diff_size"].get<string>());
 					single.ar = stof(it["diff_approach"].get<string>());
 					single.od = stof(it["diff_overall"].get<string>());
@@ -627,12 +471,8 @@ namespace osucat::osu_api_v1 {
 					single.count_circle = stoi(it["count_normal"].get<string>());
 					single.count_slider = stoi(it["count_slider"].get<string>());
 					single.count_spinner = stoi(it["count_spinner"].get<string>());
-					try {
-						single.maxcombo = stoi(it["max_combo"].get<string>());
-					}
-					catch (std::exception) {
-						single.maxcombo = 0;
-					}
+					try { single.maxcombo = stoi(it["max_combo"].get<string>()); }
+					catch (std::exception) { single.maxcombo = 0; }
 					single.hasStoryboard = stoi(it["storyboard"].get<string>());
 					single.hasVideo = stoi(it["video"].get<string>());
 					single.canDownload = stoi(it["download_unavailable"].get<string>()) != 0;
@@ -788,26 +628,37 @@ namespace osucat::osu_api_v1 {
 			if (response.length() > 50) {
 				json data = json::parse(response)[0];
 				info->beatmap_id = beatmapid;
-				info->score = stoll(data["score"].get<string>());
-				info->combo = stoi(data["maxcombo"].get<string>());
-				info->n50 = stoi(data["count50"].get<string>());
-				info->n100 = stoi(data["count100"].get<string>());
-				info->n300 = stoi(data["count300"].get<string>());
-				info->nkatu = stoi(data["countkatu"].get<string>());
-				info->ngeki = stoi(data["countgeki"].get<string>());
-				info->nmiss = stoi(data["countmiss"].get<string>());
-				info->mods = stoi(data["enabled_mods"].get<string>());
-				info->user_id = stoll(data["user_id"].get<string>());
-				info->username = data["username"].get<string>();
-				info->rank = data["rank"].get<string>();
-				try {
-					info->pp = stol(data["pp"].get<string>());
-				}
-				catch (exception) {
-					info->pp = 0.0;
-				}
+				try { info->score = stoll(data["score"].get<string>()); }
+				catch (exception) { info->score = 0; }
+				try { info->combo = stoi(data["maxcombo"].get<string>()); }
+				catch (exception) { info->combo = 0; }
+				try { info->n50 = stoi(data["count50"].get<string>()); }
+				catch (exception) { info->n50 = 0; }
+				try { info->n100 = stoi(data["count100"].get<string>()); }
+				catch (exception) { info->n100 = 0; }
+				try { info->n300 = stoi(data["count300"].get<string>()); }
+				catch (exception) { info->n300 = 0; }
+				try { info->nkatu = stoi(data["countkatu"].get<string>()); }
+				catch (exception) { info->nkatu = 0; }
+				try { info->ngeki = stoi(data["countgeki"].get<string>()); }
+				catch (exception) { info->ngeki = 0; }
+				try { info->nmiss = stoi(data["countmiss"].get<string>()); }
+				catch (exception) { info->nmiss = 0; }
+				try { info->mods = stoi(data["enabled_mods"].get<string>()); }
+				catch (exception) { info->mods = 0; }
+				try { info->user_id = stoll(data["user_id"].get<string>()); }
+				catch (exception) { info->user_id = 0; }
+				try { info->username = data["username"].get<string>(); }
+				catch (exception) { info->username = "error"; }
+				try { info->rank = data["rank"].get<string>(); }
+				catch (exception) { info->rank = "D"; }
+				try { info->pp = stol(data["pp"].get<string>()); }
+				catch (exception) { info->pp = 0.0; }
 				tm time_temp;
-				utils::fakestrptime(data["date"].get<string>().c_str(), "%Y-%m-%d %H:%M:%S", &time_temp);
+				string date;
+				try { date = data["date"].get<string>(); }
+				catch (exception) { date = "2020-01-01 00:00:00"; }
+				utils::fakestrptime(date.c_str(), "%Y-%m-%d %H:%M:%S", &time_temp);
 				info->achieved_timestamp = (long)mktime(&time_temp) + 16 * 3600;
 				return 1;
 			}

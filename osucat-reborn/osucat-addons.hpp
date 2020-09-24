@@ -6,10 +6,12 @@ namespace osucat::addons {
 
 	struct driftingBottle
 	{
+		int id;
+		int pickcount;
 		string msg;
-		Target tar;
-		SenderInfo senderinfo;
-		time_t sendTime;
+		int64_t sender;
+		string nikename;
+		int sendTime;
 	};
 
 	class entertainment {
@@ -47,12 +49,10 @@ namespace osucat::addons {
 					return true;
 				}
 				if (_stricmp(msg.substr(0, 12).c_str(), u8"扔漂流瓶") == 0 || _stricmp(msg.substr(0, 12).c_str(), u8"丢漂流瓶") == 0) {
-					driftingBottleVoid(true, msg.substr(12), tar, senderinfo, params);
-					return true;
+					if (driftingBottleVoid(true, msg.substr(12), tar, senderinfo, params))  return true; else return false;
 				}
 				if (_stricmp(msg.substr(0, 12).c_str(), u8"捡漂流瓶") == 0 || _stricmp(msg.substr(0, 12).c_str(), u8"捞漂流瓶") == 0) {
-					driftingBottleVoid(false, msg.substr(12), tar, senderinfo, params);
-					return true;
+					if (driftingBottleVoid(false, msg.substr(12), tar, senderinfo, params))  return true; else return false;
 				}
 				if (_stricmp(msg.substr(0, 4).c_str(), "roll") == 0) {
 					roll(msg.substr(4), tar, params);
@@ -396,7 +396,7 @@ namespace osucat::addons {
 				*params = u8"抑郁太多对身体不好...";
 			}
 		}
-		static void driftingBottleVoid(bool ThrowOrPick, string cmd, Target tar, SenderInfo senderinfo, string* params) {
+		static bool driftingBottleVoid(bool ThrowOrPick, string cmd, Target tar, SenderInfo senderinfo, string* params) {
 			Database db;
 			db.Connect();
 			json j = db.getBottles();
@@ -409,48 +409,45 @@ namespace osucat::addons {
 				}
 				if (throwcount > 20) {
 					*params = u8"你已经扔了20个瓶子出去了...休息一下再扔吧...";
-					return;
+					return true;
 				}
 				cmd = utils::unescape(cmd);
 				utils::trim(cmd);
 				if (forbiddenWordsLibrary(cmd) == true) {
 					*params = u8"不想理你...";
-					return;
+					return true;
 				}
 				if (cmd.length() == 0) {
 					*params = u8"不如写点什么再扔...?";
-					return;
+					return true;
 				}
 				if (cmd.length() > 5000) {
 					*params = u8"太长了！";
-					return;
+					return true;
 				}
-
+				time_t timetmp = time(NULL);
 				db.setBottleRemaining(2, tar.user_id);
-				db.writeBottle(driftingBottleDBEvent::WRITEIN, 0, time(NULL), tar.user_id, senderinfo.nikename, cmd);
+				db.writeBottle(driftingBottleDBEvent::WRITEIN, 0, timetmp, tar.user_id, senderinfo.nikename, cmd);
 				db.addPickThrowCount(false);
 				if (cmd.find("[CQ:image") != string::npos) {
-					char reportMsg[1024];
+					char reportMsg[6000];
 					sprintf_s(reportMsg,
 						"[%s]\n"
 						u8"用户 %s(%lld) 在漂流瓶内上传了图片\n漂流瓶ID: %d\n消息内容如下：\n%s",
 						utils::unixTime2Str(time(NULL)).c_str(),
 						senderinfo.nikename.c_str(),
 						tar.user_id,
-						db.getBottleID(tar.user_id, cmd),
+						db.getBottleID(tar.user_id, cmd, timetmp),
 						tar.message.c_str()
 					);
+					send_message(tar.message_type == Target::MessageType::PRIVATE ? Target::MessageType::PRIVATE : Target::MessageType::GROUP,
+						tar.message_type == Target::MessageType::PRIVATE ? tar.user_id : tar.group_id, u8"你的漂流瓶已经漂往远方....");
 					for (int fi = 0; fi < adminlist.size(); ++fi) {
-						Target exceptionReport;
-						exceptionReport.message_type = Target::MessageType::PRIVATE;
-						exceptionReport.user_id = adminlist[fi].user_id;
-						exceptionReport.message = reportMsg;
-						activepush(exceptionReport);
+						send_message(Target::MessageType::PRIVATE, adminlist[fi].user_id, reportMsg);
 						Sleep(500);
 					}
 				}
-				*params = u8"你的漂流瓶已经漂往远方....";
-				return;
+				return false;
 			}
 
 			int a = db.getUserBottleRemaining(tar.user_id);
@@ -464,40 +461,41 @@ namespace osucat::addons {
 						}
 						else { Sleep(314); tempi = utils::randomNum(0, j.size() - 1); }
 					}
-					string message = j[tempi]["message"].get<std::string>(),
-						nikename = j[tempi]["nickname"].get<std::string>();
-					int64_t sender = stoll(j[tempi]["sender"].get<std::string>()),
-						sendtime = stoll(j[tempi]["sendtime"].get<std::string>());
-					int id = stoi(j[tempi]["id"].get<std::string>()),
-						pickcount = stoi(j[tempi]["pickcount"].get<std::string>());
+					driftingBottle dfb;
+					dfb.msg = j[tempi]["message"].get<std::string>();
+					dfb.nikename = j[tempi]["nickname"].get<std::string>();
+					dfb.sender = stoll(j[tempi]["sender"].get<std::string>());
+					dfb.sendTime = stoi(j[tempi]["sendtime"].get<std::string>());
+					dfb.id = stoi(j[tempi]["id"].get<std::string>());
+					dfb.pickcount = stoi(j[tempi]["pickcount"].get<std::string>());
 					db.addPickThrowCount(true);
-					db.writeBottle(osucat::addons::driftingBottleDBEvent::ADDCOUNTER, id, 0, 0, "", "");
+					db.writeBottle(osucat::addons::driftingBottleDBEvent::ADDCOUNTER, dfb.id, 0, 0, "", "");
 					char tempm[6000];
 					sprintf_s(tempm,
 						u8"这是来自 %s(%lld) 的漂流瓶....\n"
 						u8"发于 %s\n"
 						u8"内容是....\n%s",
-						nikename.c_str(), sender, utils::unixTime2StrChinese(sendtime).c_str(), message.c_str());
+						dfb.nikename.c_str(), dfb.sender, utils::unixTime2StrChinese(dfb.sendTime).c_str(), dfb.msg.c_str());
 					*params = tempm;
-					if (db.RemoveBottle(floor((time(NULL) - stoll(j[tempi]["sendtime"].get<std::string>())) / 86400), id)) {
+					if (db.RemoveBottle(floor((time(NULL) - stoll(j[tempi]["sendtime"].get<std::string>())) / 86400), dfb.id)) {
 						Target tar1;
-						tar1.user_id = sender;
+						tar1.user_id = dfb.sender;
 						tar1.message_type = Target::MessageType::PRIVATE;
-						if (pickcount == 0) {
+						if (dfb.pickcount == 0) {
 							sprintf_s(tempm,
 								u8"你发于 %s\n"
 								u8"的内容为....%s的消息已经被 %s(%lld) 捞起来了....\n",
-								utils::unixTime2StrChinese(sendtime).c_str(),
-								message.c_str(),
+								utils::unixTime2StrChinese(dfb.sendTime).c_str(),
+								dfb.msg.c_str(),
 								senderinfo.nikename.c_str(), tar.user_id);
 						}
 						else {
 							sprintf_s(tempm,
 								u8"你发于 %s\n"
 								u8"的内容为....%s的消息已经被 %s(%lld) 捞起来了....\n在此之前你的瓶子还被阅读了 %d 次...",
-								utils::unixTime2StrChinese(sendtime).c_str(),
-								message.c_str(),
-								senderinfo.nikename.c_str(), tar.user_id, pickcount);
+								utils::unixTime2StrChinese(dfb.sendTime).c_str(),
+								dfb.msg.c_str(),
+								senderinfo.nikename.c_str(), tar.user_id, dfb.pickcount);
 						}
 						tar1.message = tempm;
 						activepush(tar1);
@@ -510,12 +508,19 @@ namespace osucat::addons {
 			else {
 				*params = u8"你当前没有捡瓶子的机会了，扔漂流瓶可以获得一次打捞的机会，或每日首次使用漂流瓶也可获得20次免费打捞的机会~";
 			}
-
+			return true;
 		}
 		static void cardimagetest(string cmd, Target tar, SenderInfo senderinfo, string* params) {
 			*params = "[CQ:cardimage,file=https://i0.hdslb.com/bfs/article/f1fce3050d0184ac6830041a19aba2517f03c06a.jpg]";
 		}
 	private:
+		static void send_message(Target::MessageType messagetype, int64_t recipient, const string message) {
+			Target activepushTar;
+			messagetype == Target::MessageType::GROUP ? activepushTar.message_type = Target::MessageType::GROUP : activepushTar.message_type = Target::MessageType::PRIVATE;
+			messagetype == Target::MessageType::GROUP ? activepushTar.group_id = recipient : activepushTar.user_id = recipient;
+			activepushTar.message = message;
+			activepush(activepushTar);
+		}
 		static void activepush(Target tar) {
 			if (tar.message_type == Target::MessageType::PRIVATE) {
 				json jp;

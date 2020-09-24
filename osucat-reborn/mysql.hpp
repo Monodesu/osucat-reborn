@@ -2,8 +2,8 @@
 #ifndef MYSQL_HPP
 #define MYSQL_HPP
 
-#define BOTLEEXPECTEDVALUE 50.00
-#define BOTTLEMAXEXISTDAYS 3
+#define BOTLEEXPECTEDVALUE 100.00
+#define BOTTLEMAXEXISTDAYS 7
 #define MAXPOOLSIZE	200
 #define MINPOOLSIZE 20
 #define INITIALTPRATE 0.6
@@ -812,6 +812,17 @@ public:
 
 		double removeProb = min(1, rate * pow((double)this->getNumberOfAvailableBottles() / poolSize, 0.7));
 		return u8"当前剩余瓶数 = " + to_string(this->getNumberOfAvailableBottles()) + u8"\n总扔/捡数 = " + to_string((int)total_throw) + "/" + to_string((int)total_pick) + u8"\n扔捡率 = " + to_string(rate) + u8"\n期望池子大小 = " + to_string((int)poolSize) + u8"\n当前移除概率 = " + to_string(removeProb) + u8"\n近3天扔捡 = " + last3;
+  }
+
+	json getBottleByID(int id) {
+		try {
+			json j = this->Select("SELECT * FROM bottlemsgrecord where id = " + to_string(id));
+			return j;
+		}
+		catch (osucat::database_exception) {
+			json j;
+			return j;
+		}
 	}
 
 	bool RemoveBottle(int bottleExsitDays, int bottleid) {
@@ -880,9 +891,10 @@ public:
 		this->Insert("INSERT INTO bottletprecord (date,pickuprate) values (\"" + utils::unixTime2DateStr(time(NULL)) + "\"," + to_string(r) + ")");
 	}
 
-	int getBottleID(int64_t sender, string message) {
+	int getBottleID(int64_t sender, string message, time_t time) {
 		try {
-			json j = this->Select("SELECT id FROM bottlemsgrecord where sender=" + to_string(sender) + " and message=\"" + message + "\"");
+			string query = "SELECT id FROM bottlemsgrecord where sendtime=" + to_string(time) + " AND sender=" + to_string(sender) + " AND message=\"" + message + "\"";
+			json j = this->Select(query);
 			return stoi(j[0]["id"].get<std::string>());
 		}
 		catch (osucat::database_exception) {

@@ -50,7 +50,8 @@ namespace osucat {
 					osucat::utils::randomNum(1, 8));
 				coverLink = defaultCover;
 			}
-			Image cover(coverLink);
+			NetConnection::DownloadFile(coverLink, "./work/v1_cover/" + to_string(data.user_info.user_id) + "_temp.jpg");
+			Image cover("./work/v1_cover/" + to_string(data.user_info.user_id) + "_temp.jpg");
 			Image coverRoundrect(Geometry(1200, 350), Color("none"));
 			cover.resize(Geometry(100000, 350));
 			cover.crop(Geometry(1200, 350));
@@ -61,7 +62,7 @@ namespace osucat {
 			coverRoundrect.composite(cover, 0, 0, InCompositeOp);
 			coverRoundrect.quality(100);
 			coverRoundrect.write("./work/v1_cover/" + to_string(data.user_info.user_id) + ".jpg");
-			//logging::info_success(BOT_NAME, "用户Banner保存完成");
+			DeleteFileA(("./work/v1_cover/" + to_string(data.user_info.user_id) + "_temp.jpg").c_str());
 		}
 		Image Cover("./work/v1_cover/" + to_string(data.user_info.user_id) + ".jpg");
 		Info.composite(Cover, 0, 0, OverCompositeOp);

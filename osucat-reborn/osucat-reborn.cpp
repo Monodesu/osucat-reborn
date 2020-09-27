@@ -14,6 +14,7 @@ int main()
 	SetConsoleCP(CP_UTF8);
 	SetConsoleOutputCP(CP_UTF8);
 	std::vector<std::string> consoleWelcome;
+	consoleWelcome.push_back("Current version: 0.9.3");
 	consoleWelcome.push_back("-----------------------------------------------------------------------------------");
 	consoleWelcome.push_back("                                                                                   ");
 	consoleWelcome.push_back(R"(     _____         ___             ___         ___           _____                )");

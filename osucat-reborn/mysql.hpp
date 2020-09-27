@@ -801,7 +801,7 @@ public:
 			double kthrow = stoi(j[k]["throw"].get<std::string>());
 			total_pick += kpick;
 			total_throw += kthrow;
-			if (k < length -1) {
+			if (k < length - 1) {
 				poolSize = poolSize * 0.8 + 0.2 * kpick * 0.4;
 				if (kpick > 0.5) rate = rate * 0.8 + 0.2 * kthrow / kpick;
 			}
@@ -812,7 +812,7 @@ public:
 
 		double removeProb = min(1, rate * pow((double)this->getNumberOfAvailableBottles() / poolSize, 0.7));
 		return u8"当前剩余瓶数 = " + to_string(this->getNumberOfAvailableBottles()) + u8"\n总扔/捡数 = " + to_string((int)total_throw) + "/" + to_string((int)total_pick) + u8"\n扔捡率 = " + to_string(rate) + u8"\n期望池子大小 = " + to_string((int)poolSize) + u8"\n当前移除概率 = " + to_string(removeProb) + u8"\n近3天扔捡 = " + last3;
-  }
+	}
 
 	json getBottleByID(int id) {
 		try {
@@ -839,7 +839,6 @@ public:
 			}
 			if (poolSize > MAXPOOLSIZE) poolSize = MAXPOOLSIZE;
 			if (poolSize < MINPOOLSIZE) poolSize = MINPOOLSIZE;
-
 			double removeProb = pow(min(1, rate * pow((double)this->getNumberOfAvailableBottles() / poolSize, 0.7)), 1 / (max(1, bottleExsitDays - BOTTLEMAXEXISTDAYS)));
 			if (utils::randomNum(1, 10000) / 10000.0 < removeProb) {
 				this->writeBottle(osucat::addons::driftingBottleDBEvent::CHANGESTATUS, bottleid, 0, 0, "", "");
@@ -848,6 +847,8 @@ public:
 			else return false;
 		}
 		catch (osucat::database_exception) {
+			try { this->Insert("INSERT INTO bottletprecord (date,throw,pick) values (\"" + utils::unixTime2DateStr(time(NULL) - 86400) + "\",100,200)"); }
+			catch (osucat::database_exception) {}
 			return false;
 		}
 	}
@@ -875,20 +876,10 @@ public:
 	}
 
 	void setNewPickThrowRecord() {
-		json j;
-		try {
-			j = this->Select("SELECT * FROM bottletprecord where date=\"" + utils::unixTime2DateStr(time(NULL) - 86400) + "\"");
-		}
-		catch (osucat::database_exception) {
-			j[0]["pick"] = "0";
-			j[0]["throw"] = "0";
-			j[0]["pickuprate"] = "1";
-		}
-		double bpick = stod(j[0]["pick"].get<std::string>()),
-			bthrow = stod(j[0]["throw"].get<std::string>());
-		double br = stod(j[0]["pickuprate"].get<std::string>());
-		double r = 0.8 * br + 0.2 * (bthrow / bpick);
-		this->Insert("INSERT INTO bottletprecord (date,pickuprate) values (\"" + utils::unixTime2DateStr(time(NULL)) + "\"," + to_string(r) + ")");
+		//json j;
+		//try { j = this->Select("SELECT * FROM bottletprecord where date=\"" + utils::unixTime2DateStr(time(NULL) - 86400) + "\""); }
+		//catch (osucat::database_exception) {/*j[0]["pick"] = "0";j[0]["throw"] = "0";*/ }
+		this->Insert("INSERT INTO bottletprecord (date) values (\"" + utils::unixTime2DateStr(time(NULL)) + "\")");
 	}
 
 	int getBottleID(int64_t sender, string message, time_t time) {

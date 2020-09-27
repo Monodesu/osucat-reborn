@@ -447,6 +447,10 @@ namespace osucat::addons {
 						Sleep(500);
 					}
 				}
+				else {
+					send_message(tar.message_type == Target::MessageType::PRIVATE ? Target::MessageType::PRIVATE : Target::MessageType::GROUP,
+						tar.message_type == Target::MessageType::PRIVATE ? tar.user_id : tar.group_id, u8"你的漂流瓶已经漂往远方....");
+				}
 				return false;
 			}
 

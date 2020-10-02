@@ -149,14 +149,7 @@ namespace osucat::addons {
 					tar.user_id,
 					tar.message.c_str()
 				);
-				for (int fi = 0; fi < adminlist.size(); ++fi) {
-					Target exceptionReport;
-					exceptionReport.message_type = Target::MessageType::PRIVATE;
-					exceptionReport.user_id = adminlist[fi].user_id;
-					exceptionReport.message = reportMsg;
-					activepush(exceptionReport);
-					Sleep(500);
-				}
+				send_message(Target::MessageType::GROUP, management_groupid, reportMsg);
 			}
 		}
 		static void roll(string cmd, Target tar, string* params) {
@@ -429,8 +422,10 @@ namespace osucat::addons {
 				db.setBottleRemaining(2, tar.user_id);
 				db.writeBottle(driftingBottleDBEvent::WRITEIN, 0, timetmp, tar.user_id, senderinfo.nikename, cmd);
 				db.addPickThrowCount(false);
-				if (cmd.find("[CQ:image") != string::npos) {
-					char reportMsg[6000];
+				char reportMsg[6000];
+				if (cmd.find("[CQ:image") != string::npos) {	
+					send_message(tar.message_type == Target::MessageType::PRIVATE ? Target::MessageType::PRIVATE : Target::MessageType::GROUP,
+						tar.message_type == Target::MessageType::PRIVATE ? tar.user_id : tar.group_id, u8"你的漂流瓶已经漂往远方....");
 					sprintf_s(reportMsg,
 						"[%s]\n"
 						u8"用户 %s(%lld) 在漂流瓶内上传了图片\n漂流瓶ID: %d\n消息内容如下：\n%s",
@@ -440,16 +435,21 @@ namespace osucat::addons {
 						db.getBottleID(tar.user_id, cmd, timetmp),
 						tar.message.c_str()
 					);
-					send_message(tar.message_type == Target::MessageType::PRIVATE ? Target::MessageType::PRIVATE : Target::MessageType::GROUP,
-						tar.message_type == Target::MessageType::PRIVATE ? tar.user_id : tar.group_id, u8"你的漂流瓶已经漂往远方....");
-					for (int fi = 0; fi < adminlist.size(); ++fi) {
-						send_message(Target::MessageType::PRIVATE, adminlist[fi].user_id, reportMsg);
-						Sleep(500);
-					}
+					send_message(Target::MessageType::GROUP, management_groupid, reportMsg);
 				}
 				else {
 					send_message(tar.message_type == Target::MessageType::PRIVATE ? Target::MessageType::PRIVATE : Target::MessageType::GROUP,
 						tar.message_type == Target::MessageType::PRIVATE ? tar.user_id : tar.group_id, u8"你的漂流瓶已经漂往远方....");
+					sprintf_s(reportMsg,
+						"[%s]\n"
+						u8"用户 %s(%lld) 上传了漂流瓶\n漂流瓶ID: %d\n消息内容如下：\n%s",
+						utils::unixTime2Str(time(NULL)).c_str(),
+						senderinfo.nikename.c_str(),
+						tar.user_id,
+						db.getBottleID(tar.user_id, cmd, timetmp),
+						tar.message.c_str()
+					);
+					send_message(Target::MessageType::GROUP, management_groupid, reportMsg);
 				}
 				return false;
 			}

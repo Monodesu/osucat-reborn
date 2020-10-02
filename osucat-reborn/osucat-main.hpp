@@ -357,22 +357,20 @@ namespace osucat {
 							db.writeBottle(osucat::addons::driftingBottleDBEvent::DELETEBOTTLE, i, 0, 0, "", "");
 							return false;
 						}
-						if (_stricmp(msg.substr(0, 11).c_str(), "reloadadmin") == 0) {
-							if (adminlist[fi].role != 1) {
-								*params = u8"权限不足";
-								return true;
-							}
-							if (db.reloadAdmin()) {
-								*params = u8"管理员列表已更新。";
-							}
-							else {
-								*params = u8"更新失败.";
-							}
-							return true;
-						}
 					}
 				}
-
+				if (_stricmp(msg.substr(0, 11).c_str(), "reloadadmin") == 0) {
+					if (tar.user_id != owner_userid) {
+						return false;
+					}
+					if (db.reloadAdmin()) {
+						*params = u8"管理员列表已更新。";
+					}
+					else {
+						*params = u8"更新失败.";
+					}
+					return true;
+				}
 #pragma region 娱乐模块
 				if (tar.message_type == Target::MessageType::GROUP)if (db.isGroupEnable(tar.group_id, 4) == 0) return false; //拦截娱乐模块
 				if (addons::entertainment::cmdParse(msg, tar, senderinfo, params))return true;
@@ -3023,13 +3021,9 @@ namespace osucat {
 			coverRoundrect.write(filepath);
 			//baiduaip::imageBase64(filepath);
 			*params = 已上传待审核提示;
-			Target activepushTar;
-			activepushTar.message_type = Target::MessageType::PRIVATE;
-			activepushTar.user_id = owner_userid;
-			activepushTar.message = u8"有一个新的banner被上传，操作者UID：" + to_string(UserID) + u8"\n操作者QQ：" + to_string(QQ)
+			send_message(Target::MessageType::GROUP, management_groupid, u8"有一个新的banner被上传，操作者UID：" + to_string(UserID) + u8"\n操作者QQ：" + to_string(QQ)
 				+ u8" ,请尽快审核哦。\r\nbanner内容：\r\n"
-				+ "[CQ:image,file=" + filepath.substr(14) + "]";
-			activepush(activepushTar);
+				+ "[CQ:image,file=" + filepath.substr(14) + "]");
 		}
 		static void setinfopanel_v1(string cmd, Target tar, string* params) {
 			if (cmd.find("[CQ:image,file=") == string::npos) {
@@ -3067,13 +3061,10 @@ namespace osucat {
 				return;
 			}
 			*params = 已上传待审核提示;
-			Target activepushTar;
-			activepushTar.message_type = Target::MessageType::PRIVATE;
-			activepushTar.user_id = owner_userid;
-			activepushTar.message = u8"有一个新的InfoPanel被上传，操作者UID：" + to_string(UserID) + u8"\n操作者QQ：" + to_string(QQ)
+			send_message(Target::MessageType::GROUP, management_groupid,
+				u8"有一个新的InfoPanel被上传，操作者UID：" + to_string(UserID) + u8"\n操作者QQ：" + to_string(QQ)
 				+ u8" ,请尽快审核哦。\r\nInfoPanel内容：\r\n"
-				+ "[CQ:image,file=osucat\\custom\\infopanel_verify\\" + to_string(UserID) + ".png]";
-			activepush(activepushTar);
+				+ "[CQ:image,file=osucat\\custom\\infopanel_verify\\" + to_string(UserID) + ".png]");
 		}
 		static void resetbanner_v1(string cmd, Target tar, string* params) {
 			Database db;

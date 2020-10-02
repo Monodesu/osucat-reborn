@@ -14,7 +14,7 @@ int main()
 	SetConsoleCP(CP_UTF8);
 	SetConsoleOutputCP(CP_UTF8);
 	std::vector<std::string> consoleWelcome;
-	consoleWelcome.push_back("Current version: 0.9.3");
+	consoleWelcome.push_back("Current version: 0.9.4");
 	consoleWelcome.push_back("-----------------------------------------------------------------------------------");
 	consoleWelcome.push_back("                                                                                   ");
 	consoleWelcome.push_back(R"(     _____         ___             ___         ___           _____                )");
@@ -144,6 +144,8 @@ int main()
 			}
 			if (j["owner_userid"].get<string>() == "") { cout << "\nMissing owner user_id!\n" << endl; system("pause"); return 0; }
 			else owner_userid = stoll(j["owner_userid"].get<string>());
+			if (j["management_groupid"].get<string>() == "") { cout << "\nMissing management_groupid\n" << endl; system("pause"); return 0; }
+			else management_groupid = stoll(j["management_groupid"].get<string>());
 			if (j["apikey"].get<string>() == "") { cout << "\nMissing API key!\n" << endl; system("pause"); return 0; }
 			else sprintf_s(OSU_KEY, "%s", j["apikey"].get<string>().c_str());
 			if (j["debugmode"].get<bool>()) { DEBUGMODE = true; cout << u8"Debug mode is enabled...\n" << endl; }
@@ -272,6 +274,7 @@ int main()
 			j["remote_settings"]["sql_database"] = "";
 			j["remote_settings"]["sql_port"] = 3306;
 			j["owner_userid"] = "";
+			j["management_groupid"] = "";
 			writeconfig << j.dump().c_str() << endl;
 			writeconfig.close();
 			cout << "\n\nThe config file has created. Please complete the settings.\n\n\n";
@@ -286,16 +289,9 @@ int main()
 	if (ISACTIVE) {
 		cout << u8"Creating daily update thread..." << endl;
 		osucat::main::_CreateDUThread();
-		cout << "Loading the admin list..." << endl;
 		try {
 			Database db;
 			db.Connect();
-			if (db.reloadAdmin()) {
-				cout << "The admin list has successfully loaded!" << endl;
-			}
-			else {
-				cout << "Failed. Please check database settings." << endl;
-			}
 		}
 		catch (osucat::database_exception) {
 			cout << "\n\nUnable to connect to the database. Is the database settings correctly filled in?\n\n\n" << endl;

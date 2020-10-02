@@ -292,6 +292,12 @@ int main()
 		try {
 			Database db;
 			db.Connect();
+			if (db.reloadAdmin()) {
+				cout << "The admin list has been successfully loaded!" << endl;
+			}
+			else {
+				cout << "Failed. Has any user been set up as an administrator?" << endl;
+			}
 		}
 		catch (osucat::database_exception) {
 			cout << "\n\nUnable to connect to the database. Is the database settings correctly filled in?\n\n\n" << endl;
@@ -316,7 +322,7 @@ int main()
 			system("pause");
 			return 2;
 		}
-		cout << u8"WebSocket connection was successfully established!" << endl;
+		cout << u8"WebSocket connection has been successfully established!" << endl;
 		while (true) {
 			WebSocket::pointer wsp = &*ws;
 			ws->poll();

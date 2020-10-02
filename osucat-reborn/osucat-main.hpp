@@ -3236,22 +3236,9 @@ namespace osucat {
 					Database db;
 					db.Connect();
 					int64_t QQ = db.GetQQ(stoll(UserID));
-					Target userMsg;
-					userMsg.message_type = Target::MessageType::PRIVATE;
-					userMsg.user_id = QQ;
-					userMsg.message = u8"你上传的Banner通过审核啦，可以使用info指令查看~";
-					activepush(userMsg);
+					send_message(Target::MessageType::PRIVATE, QQ, u8"你上传的Banner通过审核啦，可以使用info指令查看~");
 					*params = u8"ID：" + UserID + u8" ，已成功通知用户Banner已审核成功。";
-					for (int fi = 0; fi < adminlist.size(); ++fi) {
-						if (adminlist[fi].role == 1 && adminlist[fi].user_id != tar.user_id) {
-							Target at;
-							at.message_type = Target::MessageType::PRIVATE;
-							at.user_id = adminlist[fi].user_id;
-							at.message = *params;
-							activepush(at);
-							Sleep(500);
-						}
-					}
+					if (tar.group_id != management_groupid) { send_message(Target::MessageType::GROUP, management_groupid, *params); }
 				}
 				else {
 					*params = u8"在移动文件时发生了一个错误。";
@@ -3276,22 +3263,9 @@ namespace osucat {
 					Database db;
 					db.Connect();
 					int64_t QQ = db.GetQQ(stoll(UserID));
-					Target userMsg;
-					userMsg.message_type = Target::MessageType::PRIVATE;
-					userMsg.user_id = QQ;
-					userMsg.message = u8"你上传的Info面板通过审核啦，可以使用info指令查看~";
-					activepush(userMsg);
+					send_message(Target::MessageType::PRIVATE, QQ, u8"你上传的Info面板通过审核啦，可以使用info指令查看~");
 					*params = u8"ID：" + UserID + u8" ，已成功通知用户InfoPanel已审核成功。";
-					for (int fi = 0; fi < adminlist.size(); ++fi) {
-						if (adminlist[fi].role == 1 && adminlist[fi].user_id != tar.user_id) {
-							Target at;
-							at.message_type = Target::MessageType::PRIVATE;
-							at.user_id = adminlist[fi].user_id;
-							at.message = *params;
-							activepush(at);
-							Sleep(500);
-						}
-					}
+					if (tar.group_id != management_groupid) { send_message(Target::MessageType::GROUP, management_groupid, *params); }
 				}
 				else {
 					*params = u8"在移动文件时发生了一个错误。";
@@ -3323,22 +3297,9 @@ namespace osucat {
 				Database db;
 				db.Connect();
 				int64_t QQ = db.GetQQ(stoll(UserID));
-				Target activepushTar;
-				activepushTar.message_type = Target::MessageType::PRIVATE;
-				activepushTar.user_id = QQ;
-				activepushTar.message = u8"你上传的Banner已被管理员驳回，详情：" + Content;
-				activepush(activepushTar);
+				send_message(Target::MessageType::PRIVATE, QQ, u8"你上传的Banner已被管理员驳回，详情：" + Content);
 				*params = "ID：" + UserID + u8" ，已成功通知用户Banner已被驳回。详情：" + Content;
-				for (int fi = 0; fi < adminlist.size(); ++fi) {
-					if (adminlist[fi].role == 1 && adminlist[fi].user_id != tar.user_id) {
-						Target at;
-						at.message_type = Target::MessageType::PRIVATE;
-						at.user_id = adminlist[fi].user_id;
-						at.message = *params;
-						activepush(at);
-						Sleep(500);
-					}
-				}
+				if (tar.group_id != management_groupid) { send_message(Target::MessageType::GROUP, management_groupid, *params); }
 			}
 			else {
 				*params = u8"此用户的内容不在待审核清单内。";
@@ -3367,21 +3328,9 @@ namespace osucat {
 				db.Connect();
 				int64_t QQ = db.GetQQ(stoll(UserID));
 				Target activepushTar;
-				activepushTar.message_type = Target::MessageType::PRIVATE;
-				activepushTar.user_id = QQ;
-				activepushTar.message = u8"你上传的InfoPanel已被管理员驳回，详情：" + Content;
-				activepush(activepushTar);
+				send_message(Target::MessageType::PRIVATE, QQ, u8"你上传的InfoPanel已被管理员驳回，详情：" + Content);
 				*params = "ID：" + UserID + u8" ，已成功通知用户InfoPanel已被驳回。详情：" + Content;
-				for (int fi = 0; fi < adminlist.size(); ++fi) {
-					if (adminlist[fi].role == 1 && adminlist[fi].user_id != tar.user_id) {
-						Target at;
-						at.message_type = Target::MessageType::PRIVATE;
-						at.user_id = adminlist[fi].user_id;
-						at.message = *params;
-						activepush(at);
-						Sleep(500);
-					}
-				}
+				if (tar.group_id != management_groupid) { send_message(Target::MessageType::GROUP, management_groupid, *params); }
 			}
 			else {
 				*params = u8"此用户的内容不在待审核清单内。";
@@ -3424,16 +3373,7 @@ namespace osucat {
 				activepushTar.message = u8"你的个人资料已被重置，详情：" + Content;
 				activepush(activepushTar);
 				*params = "ID：" + UserID + u8" ，已成功通知用户他的个人资料已被重置。详情：" + Content;
-				for (int fi = 0; fi < adminlist.size(); ++fi) {
-					if (adminlist[fi].role == 1 && adminlist[fi].user_id != tar.user_id) {
-						Target at;
-						at.message_type = Target::MessageType::PRIVATE;
-						at.user_id = adminlist[fi].user_id;
-						at.message = *params;
-						activepush(at);
-						Sleep(500);
-					}
-				}
+				if (tar.group_id != management_groupid) { send_message(Target::MessageType::GROUP, management_groupid, *params); }
 			}
 			else {
 				*params = u8"找不到此用户。";
@@ -3486,16 +3426,7 @@ namespace osucat {
 				db.Connect();
 				if (db.add_blacklist(stoll(cmd))) {
 					*params = u8"用户 " + cmd + u8" 已成功被列入黑名单";
-					for (int fi = 0; fi < adminlist.size(); ++fi) {
-						if (adminlist[fi].user_id != tar.user_id) {
-							Target at;
-							at.message_type = Target::MessageType::PRIVATE;
-							at.user_id = adminlist[fi].user_id;
-							at.message = *params;
-							activepush(at);
-							Sleep(500);
-						}
-					}
+					if (tar.group_id != management_groupid) { send_message(Target::MessageType::GROUP, management_groupid, *params); }
 				}
 				else {
 					*params = u8"用户 " + cmd + u8" 已存在于黑名单中";

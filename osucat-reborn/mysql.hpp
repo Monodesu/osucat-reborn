@@ -23,6 +23,12 @@ namespace osucat {
 		int64_t user_id;
 		int role; //0=normal user 1=admin/owner 2=moderator
 	};
+	struct Badgeinfo {
+		int id;
+		string name;
+		string name_chinese;
+		string description;
+	};
 	static vector<admins> adminlist;
 }
 
@@ -904,6 +910,102 @@ public:
 				s.role = stoi(j[i]["role"].get<std::string>());
 				adminlist.push_back(s);
 			}
+			return true;
+		}
+		catch (osucat::database_exception) {
+			return false;
+		}
+	}
+	/*
+	当id=65536
+	或name=404时
+	代表未找到此徽章
+	*/
+	Badgeinfo getBadgeInfo(int ID) {
+		string query = "SELECT * from badge_list where id=" + to_string(ID);
+		Badgeinfo bi;
+		try {
+			json j = this->Select(query);
+			bi.id = stoi(j[0]["id"].get<std::string>());
+			bi.name = j[0]["name"].get<std::string>();
+			bi.name_chinese = j[0]["name_chinese"].get<std::string>();
+			bi.description = j[0]["description"].get<std::string>();
+		}
+		catch (osucat::database_exception) {
+			bi.id = BADGENOTFOUND;
+			bi.name = "404";
+			bi.name_chinese = "未找到此勋章";
+			bi.description = "no badge found.";
+		}
+		return bi;
+	}
+
+	bool setNewBadge(Badgeinfo bi, int* id) {
+		string query = "INSERT INTO badge_list (name,name_chinese,description) VALUES (\"" + bi.name + "\",\"" + bi.name_chinese + "\",\"" + bi.description + "\")";
+		try {
+			this->Insert(query);
+			json j = this->Select("Select id from badge_list");
+			*id = j.size() - 1;
+			return true;
+		}
+		catch (osucat::database_exception) {
+			*id = -1;
+		}
+		return false;
+	}
+
+	/*
+	int f
+	1 = set name
+	2 = set describetion
+	*/
+	bool changeBadgeInfo(Badgeinfo bi, int f) {
+		string query;
+		if (f = 1) {
+			query = "UPDATE badge_list set name=\"" + bi.name + "\" where id=" + to_string(bi.id);
+		}
+		else if (f = 2) {
+			query = "UPDATE badge_list set description=\"" + bi.description + "\" where id=" + to_string(bi.id);
+		}
+		else return false;
+		try {
+			this->Update(query);
+			return true;
+		}
+		catch (osucat::database_exception) {
+			return false;
+		}
+	}
+
+	string getBadgeStr(int id) {
+		Badgeinfo bi = this->getBadgeInfo(id);
+		char tmp[2048];
+		sprintf_s(tmp, "[ID:%d] %s (%s)", bi.id, bi.name_chinese.c_str(), bi.name.c_str());
+		return tmp;
+	}
+
+	/*
+	int f
+	1 = update name
+	2 = update name_chinese
+	3 = update description
+	*/
+	bool updatebadgeinfo(Badgeinfo bi, int f) {
+		if (f > 3 || f < 1) {
+			return false;
+		}
+		string query;
+		if (f = 1) {
+			query = u8"UPDATE badge_list set name=\"" + bi.name + "\" where id=" + to_string(bi.id);
+		}
+		else if (f = 2) {
+			query = u8"UPDATE badge_list set name_chinese=\"" + bi.name_chinese + "\" where id=" + to_string(bi.id);
+		}
+		else if (f = 3) {
+			query = u8"UPDATE badge_list set description=\"" + bi.description + "\" where id=" + to_string(bi.id);
+		}
+		try {
+			this->Update(query);
 			return true;
 		}
 		catch (osucat::database_exception) {

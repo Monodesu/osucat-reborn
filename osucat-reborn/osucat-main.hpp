@@ -256,6 +256,10 @@ namespace osucat {
 					switchfunction(msg.substr(6), tar, senderinfo, params);
 					return true;
 				}
+				if (_stricmp(msg.substr(0, 12).c_str(), "getbadgeinfo") == 0) {
+					getbadgeinfo(msg.substr(12), tar, params);
+					return true;
+				}
 				// admin commands //
 				for (int fi = 0; fi < adminlist.size(); ++fi) {
 					if (tar.user_id == adminlist[fi].user_id) {
@@ -342,20 +346,19 @@ namespace osucat {
 								*params = u8"没有找到这个漂流瓶。";
 								return true;
 							}
-
 							returnmsg == "null" ?
 								*params = u8"已移除ID为 " + to_string(i) + u8" 的漂流瓶" : *params = u8"已移除ID为 " + to_string(i) + u8" 的漂流瓶，并返回以下消息：" + returnmsg;
-							for (int fi = 0; fi < adminlist.size(); ++fi) {
-								send_message(Target::MessageType::PRIVATE, adminlist[fi].user_id, *params);
-								/*Target at;
-								at.message_type = Target::MessageType::PRIVATE;
-								at.user_id = adminlist[fi].user_id;
-								at.message = *params;
-								activepush(at);*/
-								Sleep(500);
-							}
+							if (tar.group_id != management_groupid) { send_message(Target::MessageType::GROUP, management_groupid, *params); }
 							db.writeBottle(osucat::addons::driftingBottleDBEvent::DELETEBOTTLE, i, 0, 0, "", "");
-							return false;
+							return true;
+						}
+						if (_stricmp(msg.substr(0, 11).c_str(), "setnewbadge") == 0) {
+							if (adminlist[fi].role != 1) {
+								*params = u8"权限不足";
+								return true;
+							}
+							setnewbadge(msg.substr(11), tar, params);
+							return true;
 						}
 					}
 				}
@@ -2584,8 +2587,6 @@ namespace osucat {
 			}
 			string message;
 			int i;
-			badgeSystem::main bsm;
-			badgeSystem::main::badge badgeStr;
 			vector<int> t = db.GetBadgeList(uid);
 			if (t.size() == 0) {
 				*params = u8"你还没有获得过奖章。";
@@ -2593,7 +2594,7 @@ namespace osucat {
 			}
 			message = u8"你拥有 " + to_string(t.size()) + u8" 块勋章\n";
 			for (i = 0; i < t.size(); ++i) {
-				i == t.size() - 1 ? message += bsm.getBadgeStr(t[i]) : message += bsm.getBadgeStr(t[i]) + "\n";
+				i == t.size() - 1 ? message += db.getBadgeStr(t[i]) : message += db.getBadgeStr(t[i]) + "\n";
 			}
 			*params = message;
 		}
@@ -2960,14 +2961,13 @@ namespace osucat {
 				badgeID = stoi(cmd);
 			}
 			catch (std::exception) {
-				badgeID = 1025;
+				badgeID = 65536;
 			}
-			if (badgeID > 1024) {
+			if (badgeID > 65535) {
 				*params = u8"提供的ID有误";
 				return;
 			}
 			badgeSystem::main bsm;
-			badgeSystem::main::badge badgeStr;
 			vector<int> t = db.GetBadgeList(uid);
 			if (t.size() < 1) {
 				*params = u8"你还没有获得任何奖章呢。";
@@ -2976,7 +2976,8 @@ namespace osucat {
 			for (int i = 0; i < t.size(); ++i) {
 				if (badgeID == t[i]) {
 					db.setshownBadges(uid, badgeID);
-					*params = u8"你的主显奖章已设为 " + to_string(badgeID);
+					Badgeinfo bi = db.getBadgeInfo(badgeID);
+					*params = u8"你的主显奖章已设为 " + bi.name;
 					return;
 				}
 			}
@@ -3221,6 +3222,26 @@ namespace osucat {
 			*params = 参数不正确;
 			return;
 		}
+		static void getbadgeinfo(string cmd, Target tar, string* params) {
+			utils::trim(cmd);
+			int badge;
+			try {
+				badge = stoi(cmd);
+			}
+			catch (std::exception) {
+				*params = u8"没有查询到此徽章的任何信息";
+				return;
+			}
+			Database db;
+			db.Connect();
+			Badgeinfo bi = db.getBadgeInfo(badge);
+			if (bi.id != BADGENOTFOUND) {
+				*params = "[CQ:image,file=osucat\\badges\\" + to_string(bi.id) + ".png]\nID: " + to_string(bi.id) + u8"\n名称: " + bi.name_chinese + "(" + bi.name + u8")\n描述: " + bi.description;
+			}
+			else {
+				*params = u8"没有查询到此徽章的任何信息";
+			}
+		}
 		/* 管理指令*/
 		static void adoptbanner_v1(string cmd, Target tar, string* params) {
 			string UserID = cmd;
@@ -3398,8 +3419,8 @@ namespace osucat {
 				*params = u8"参数错误";
 				return;
 			}
-			if (badgeid >= (int)badgeSystem::main::badge::SELF_MAXIUMINDEX) {
-				*params = u8"badge not found.";
+			if (badgeid == BADGENOTFOUND) {
+				*params = u8"未找到此徽章";
 				return;
 			}
 			Database db;
@@ -3434,6 +3455,112 @@ namespace osucat {
 			}
 			catch (std::exception) {
 				*params = u8"请提供纯数字qq，不要掺杂中文。";
+			}
+		}
+		static void setnewbadge(string cmd, Target tar, string* params) {
+			if (cmd.find("CQ:image,file=") != string::npos) {
+				vector<string> tmp;
+				tmp = utils::string_split(cmd, '#');
+				if (tmp.size() != 4) {
+					*params = u8"参数不正确，请按照以下格式提交：\nbadge图像#英文名称#中文名称#详细信息";
+				}
+				Badgeinfo bi;
+				bi.name = tmp[1];
+				bi.name_chinese = tmp[2];
+				bi.description = tmp[3];
+				Database db;
+				db.Connect();
+				int* id;
+				if (db.setNewBadge(bi, id)) {
+					string picPath;
+					picPath = utils::GetMiddleText(cmd, "[CQ:image,file=", ",url");
+					picPath = picPath.substr(picPath.find(',') + 6);
+					PictureInfo p = getImage(picPath);
+					picPath = ".\\data\\cache\\" + picPath + "." + p.format;
+					if (!utils::copyFile(picPath, ".\\work\\badges\\" + to_string(*id) + ".png")) {
+						DeleteFileA((".\\work\\badges\\" + to_string(*id) + ".png").c_str());
+						*params = u8"移动文件失败";
+						return;
+					}
+					if (!utils::copyFile(picPath, ".\\data\\images\\osucat\\badges\\" + to_string(*id) + ".png")) {
+						DeleteFileA((".\\data\\images\\osucat\\badges\\" + to_string(*id) + ".png").c_str());
+						*params = u8"移动文件失败";
+						return;
+					}
+					*params = u8"已成功提交。\n[CQ:image,file=osucat\\badges\\" + to_string(bi.id) + ".png]\nID: " + to_string(bi.id) + u8"\n名称: " + bi.name_chinese + "(" + bi.name + u8")\n描述: " + bi.description;
+					return;
+				}
+				else {
+					*params = u8"添加badge失败";
+					return;
+				}
+			}
+			else {
+				*params = u8"请随附badge图像";
+			}
+		}
+		static void updatebadgeinfo(string cmd, Target tar, string* params) {
+			utils::trim(cmd);
+			if (cmd.length() < 3) {
+				*params = u8"请提供参数\n1=英文名称\n2=中文名称\n3=详细信息\n4=badge图像\n格式： 2#徽章ID#中文徽章名称";
+				return;
+			}
+			vector<string>tmp = utils::string_split(cmd, '#');
+			if (tmp.size() != 3) {
+				*params = u8"提供了过多的参数！\n1=英文名称\n2=中文名称\n3=详细信息\n4=badge图像\n格式： 2#徽章ID#中文徽章名称";
+				return;
+			}
+			if (!utils::isNum(tmp[0])) {
+				*params = u8"参数1必须为数字！\n1=英文名称\n2=中文名称\n3=详细信息\n4=badge图像\n格式： 2#徽章ID#中文徽章名称";
+				return;
+			}
+			if (!utils::isNum(tmp[1])) {
+				*params = u8"参数2必须为数字！\n1=英文名称\n2=中文名称\n3=详细信息\n4=badge图像\n格式： 2#徽章ID#中文徽章名称";
+				return;
+			}
+			Badgeinfo bi;
+			bi.id = stoi(tmp[1]);
+			Database db;
+			db.Connect();
+			if (tmp[0] == "1") {
+				bi.name = tmp[2];
+				if (db.updatebadgeinfo(bi, 1)) {
+					*params = u8"更新成功\n[CQ:image,file=osucat\\badges\\" + to_string(bi.id) + ".png]\nID: " + to_string(bi.id) + u8"\n名称: " + bi.name_chinese + "(" + bi.name + u8")\n描述: " + bi.description;
+					return;
+				}
+				else {
+					*params = u8"更新失败";
+					return;
+				}
+			}
+			else if (tmp[0] == "2") {
+				bi.name_chinese = tmp[2];
+				if (db.updatebadgeinfo(bi, 2)) {
+					*params = u8"更新成功\n[CQ:image,file=osucat\\badges\\" + to_string(bi.id) + ".png]\nID: " + to_string(bi.id) + u8"\n名称: " + bi.name_chinese + "(" + bi.name + u8")\n描述: " + bi.description;
+					return;
+				}
+				else {
+					*params = u8"更新失败";
+					return;
+				}
+			}
+			else if (tmp[0] == "3") {
+				bi.description = tmp[2];
+				if (db.updatebadgeinfo(bi, 3)) {
+					*params = u8"更新成功\n[CQ:image,file=osucat\\badges\\" + to_string(bi.id) + ".png]\nID: " + to_string(bi.id) + u8"\n名称: " + bi.name_chinese + "(" + bi.name + u8")\n描述: " + bi.description;
+					return;
+				}
+				else {
+					*params = u8"更新失败";
+					return;
+				}
+			}
+			else if (tmp[0] == "4") {
+				if (cmd.find("CQ:image,file=") == string::npos) {
+					*params = u8"请随附更改后的badge图像";
+					return;
+				}
+
 			}
 		}
 		/* 娱乐功能 */

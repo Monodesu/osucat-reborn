@@ -2,6 +2,8 @@
 #ifndef OSUCAT_ADDONS_HPP
 #define OSUCAT_ADDONS_HPP
 
+#include "games.hpp"
+
 namespace osucat::addons {
 
 	struct driftingBottle
@@ -10,7 +12,7 @@ namespace osucat::addons {
 		int pickcount;
 		string msg;
 		int64_t sender;
-		string nikename;
+		string nickname;
 		int sendTime;
 	};
 
@@ -91,6 +93,53 @@ namespace osucat::addons {
 					cardimagetest(msg.substr(7), tar, senderinfo, params);
 					return true;
 				}
+				//猜单词游戏部分
+				
+				if (_stricmp(msg.substr(0, 15).c_str(), u8"猜单词帮助") == 0) {
+					*params = u8"[CQ:image,file=osucat\\help\\hangmanhelp.png]";
+					return true;
+				}
+				if (_stricmp(msg.substr(0, 15).c_str(), u8"猜单词状态") == 0) {
+					HangmanGame::gameStatus(params);
+					return true;
+				}
+				if (_stricmp(msg.substr(0, 18).c_str(), u8"猜单词排行榜") == 0) {
+					int page = 1;
+					string page_str = msg.substr(18);
+					if (utils::isNum(page_str)) page = stoi(page_str);
+					HangmanGame::hangmanRanking(page, params);
+					return true;
+				}
+				if (_stricmp(msg.substr(0, 10).c_str(), u8"猜单词+") == 0) {
+					HangmanGame::startHangman(senderinfo, tar, msg.substr(10), params);
+					return true;
+				}
+				if (_stricmp(msg.substr(0, 9).c_str(), u8"猜单词") == 0) {
+					HangmanGame::startHangman(senderinfo, tar, "", params);
+					return true;
+				}
+				if (_stricmp(msg.substr(0, 6).c_str(), u8"放弃") == 0) {
+					HangmanGame::giveupHangman(senderinfo, tar, params);
+					return true;
+				}
+				if (msg.length() == 1 && HangmanGame::findPlayer(tar.user_id) != -1) {
+					HangmanGame::inputHangman(senderinfo, tar, msg, params);
+					return true;
+				}
+				if (_stricmp(msg.substr(0, 15).c_str(), u8"我的猜单词") == 0) {
+					HangmanGame::showPlayerData(senderinfo, tar, params);
+					return true;
+				}
+				if (_stricmp(msg.substr(0, 27).c_str(), "recalculateallhangmanscores") == 0) {
+					for (int i = 0; i < adminlist.size(); i++) {
+						if (tar.user_id == adminlist[i].user_id) {
+							HangmanGame::recalculateAllScores(params);
+							return true;
+						}
+					}
+					*params = u8"权限不足";
+					return true;
+				}
 			}
 			catch (osucat::database_exception& ex) {
 				*params = u8"访问数据库时出现了一个错误，请稍后重试...";
@@ -145,7 +194,7 @@ namespace osucat::addons {
 					"[%s]\n"
 					u8"用户 %s(%lld) 上传了图片,消息内容如下：\n%s",
 					utils::unixTime2Str(time(NULL)).c_str(),
-					senderinfo.nikename.c_str(),
+					senderinfo.nickname.c_str(),
 					tar.user_id,
 					tar.message.c_str()
 				);
@@ -427,7 +476,7 @@ namespace osucat::addons {
 				}
 				time_t timetmp = time(NULL);
 				db.setBottleRemaining(2, tar.user_id);
-				db.writeBottle(driftingBottleDBEvent::WRITEIN, 0, timetmp, tar.user_id, senderinfo.nikename, cmd);
+				db.writeBottle(driftingBottleDBEvent::WRITEIN, 0, timetmp, tar.user_id, senderinfo.nickname, cmd);
 				db.addPickThrowCount(false);
 				if (cmd.find("[CQ:image") != string::npos) {
 					char reportMsg[6000];
@@ -435,7 +484,7 @@ namespace osucat::addons {
 						"[%s]\n"
 						u8"用户 %s(%lld) 在漂流瓶内上传了图片\n漂流瓶ID: %d\n消息内容如下：\n%s",
 						utils::unixTime2Str(time(NULL)).c_str(),
-						senderinfo.nikename.c_str(),
+						senderinfo.nickname.c_str(),
 						tar.user_id,
 						db.getBottleID(tar.user_id, cmd, timetmp),
 						tar.message.c_str()
@@ -467,7 +516,7 @@ namespace osucat::addons {
 					}
 					driftingBottle dfb;
 					dfb.msg = j[tempi]["message"].get<std::string>();
-					dfb.nikename = j[tempi]["nickname"].get<std::string>();
+					dfb.nickname = j[tempi]["nickname"].get<std::string>();
 					dfb.sender = stoll(j[tempi]["sender"].get<std::string>());
 					dfb.sendTime = stoi(j[tempi]["sendtime"].get<std::string>());
 					dfb.id = stoi(j[tempi]["id"].get<std::string>());
@@ -479,7 +528,7 @@ namespace osucat::addons {
 						u8"这是来自 %s(%lld) 的漂流瓶....\n"
 						u8"发于 %s\n"
 						u8"内容是....\n%s",
-						dfb.nikename.c_str(), dfb.sender, utils::unixTime2StrChinese(dfb.sendTime).c_str(), dfb.msg.c_str());
+						dfb.nickname.c_str(), dfb.sender, utils::unixTime2StrChinese(dfb.sendTime).c_str(), dfb.msg.c_str());
 					*params = tempm;
 					if (db.RemoveBottle(floor((time(NULL) - stoll(j[tempi]["sendtime"].get<std::string>())) / 86400), dfb.id)) {
 						Target tar1;
@@ -491,7 +540,7 @@ namespace osucat::addons {
 								u8"的内容为....%s的消息已经被 %s(%lld) 捞起来了....\n",
 								utils::unixTime2StrChinese(dfb.sendTime).c_str(),
 								dfb.msg.c_str(),
-								senderinfo.nikename.c_str(), tar.user_id);
+								senderinfo.nickname.c_str(), tar.user_id);
 						}
 						else {
 							sprintf_s(tempm,
@@ -499,7 +548,7 @@ namespace osucat::addons {
 								u8"的内容为....%s的消息已经被 %s(%lld) 捞起来了....\n在此之前你的瓶子还被阅读了 %d 次...",
 								utils::unixTime2StrChinese(dfb.sendTime).c_str(),
 								dfb.msg.c_str(),
-								senderinfo.nikename.c_str(), tar.user_id, dfb.pickcount);
+								senderinfo.nickname.c_str(), tar.user_id, dfb.pickcount);
 						}
 						tar1.message = tempm;
 						activepush(tar1);

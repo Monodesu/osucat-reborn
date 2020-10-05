@@ -42,7 +42,7 @@ namespace osucat {
 		std::string member_role;
 		std::string card; //群昵称
 		std::string level;
-		std::string nikename; //原有用户名
+		std::string nickname; //原有用户名
 		std::string title; //头衔
 		std::string sex;
 	};

@@ -507,7 +507,7 @@ namespace osucat::addons {
 						"[%s]\n"
 						u8"用户 %s(%lld) 上传了漂流瓶\n漂流瓶ID: %d\n消息内容如下：\n%s",
 						utils::unixTime2Str(time(NULL)).c_str(),
-						senderinfo.nikename.c_str(),
+						senderinfo.nickname.c_str(),
 						tar.user_id,
 						db.getBottleID(tar.user_id, cmd, timetmp),
 						tar.message.c_str()

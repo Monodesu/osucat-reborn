@@ -88,6 +88,12 @@ namespace osucat::addons {
 					wyy(params);
 					return true;
 				}
+				//网抑云
+				if (_stricmp(msg.substr(0, 12).c_str(), u8"舔狗日记") == 0) {
+					tgrj(params);
+					return true;
+				}
+				//舔狗日记
 				if (_stricmp(msg.substr(0, 7).c_str(), "cardimg") == 0) {
 					return false;
 					cardimagetest(msg.substr(7), tar, senderinfo, params);
@@ -432,10 +438,18 @@ namespace osucat::addons {
 		}
 		static void wyy(string* params) {
 			try {
-				*params = NetConnection::HttpsGet("https://wyy.moebot.im/");
+				*params = NetConnection::HttpsGet("https://api.moebot.im/wyy/");
 			}
 			catch (osucat::NetWork_Exception) {
 				*params = u8"抑郁太多对身体不好...";
+			}
+		}
+		static void tgrj(string* params) {
+			try {
+				*params = NetConnection::HttpsGet("https://api.moebot.im/tg/");
+			}
+			catch (osucat::NetWork_Exception) {
+				*params = u8"访问api时超时...请稍后再试...";
 			}
 		}
 		static bool driftingBottleVoid(bool ThrowOrPick, string cmd, Target tar, SenderInfo senderinfo, string* params) {

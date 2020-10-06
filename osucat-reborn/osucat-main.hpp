@@ -32,7 +32,7 @@ namespace osucat {
 						tar.group_id = j["group_id"].get<int64_t>();
 					}
 					sdr.age = sj["age"].get<int>();
-					sdr.nikename = sj["nickname"].get<string>();
+					sdr.nickname = sj["nickname"].get<string>();
 					tar.user_id = j["user_id"].get<int64_t>();
 					tar.time = j["time"].get<int64_t>();
 					tar.message = j["message"].get<string>();
@@ -169,8 +169,12 @@ namespace osucat {
 					info(msg.substr(4), tar, params);
 					return true;
 				}
-				if (_stricmp(msg.substr(0, 1).c_str(), "i") == 0) {
-					textinfo(msg.substr(1), tar, params);
+				if ((_stricmp(msg.substr(0, 8).c_str(), "textinfo") == 0) || (_stricmp(msg.substr(0, 2).c_str(), "ti") == 0)) {
+					if (_stricmp(msg.substr(0, 2).c_str(), "ti") == 0){
+					textinfo(msg.substr(2), tar, params);
+					} else {
+					textinfo(msg.substr(8), tar, params);
+					}
 					return true;
 				}
 				if (_stricmp(msg.substr(0, 4).c_str(), "bpme") == 0) {
@@ -334,7 +338,7 @@ namespace osucat {
 							json j = db.getBottleByID(i);
 							addons::driftingBottle dfb;
 							if (j.size() == 1) {
-								dfb.nikename = j[0]["nickname"].get<std::string>();
+								dfb.nickname = j[0]["nickname"].get<std::string>();
 								dfb.sender = stoll(j[0]["sender"].get<std::string>());
 								dfb.sendTime = stoll(j[0]["sendtime"].get<std::string>());
 								string tmp;
@@ -3585,7 +3589,7 @@ namespace osucat {
 		}
 		static void memyselfact(string cmd, Target tar, SenderInfo senderinfo, string* params) {
 			utils::trim(cmd);
-			string username = senderinfo.card == "" ? senderinfo.nikename : senderinfo.card;
+			string username = senderinfo.card == "" ? senderinfo.nickname : senderinfo.card;
 			*params = username + " " + cmd;
 			Database db;
 			db.Connect();

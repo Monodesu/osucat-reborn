@@ -73,7 +73,7 @@ private:
 			pp = -57.0 * log(subStringSum(list, "", d + miss_count)) / d;
 		}
 		if (mods & HANGMAN_MOD_H) pp *= 1.12; 
-		if (mods & HANGMAN_MOD_D) pp *= 1.12; 
+		if (mods & HANGMAN_MOD_D) pp *= 1.18; 
 		if (mods & HANGMAN_MOD_I) extra += 4; 
 		double diff = -7.0 * log(1 - exp(-7000.1 * word.freq / H));
 		if (uncompleted_play == false) pp += diff;

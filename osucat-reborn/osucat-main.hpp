@@ -169,8 +169,12 @@ namespace osucat {
 					info(msg.substr(4), tar, params);
 					return true;
 				}
-				if (_stricmp(msg.substr(0, 1).c_str(), "textinfo") == 0) {
-					textinfo(msg.substr(1), tar, params);
+				if ((_stricmp(msg.substr(0, 8).c_str(), "textinfo") == 0) || (_stricmp(msg.substr(0, 2).c_str(), "ti") == 0)) {
+					if (_stricmp(msg.substr(0, 2).c_str(), "ti") == 0){
+					textinfo(msg.substr(2), tar, params);
+					} else {
+					textinfo(msg.substr(8), tar, params);
+					}
 					return true;
 				}
 				if (_stricmp(msg.substr(0, 4).c_str(), "bpme") == 0) {

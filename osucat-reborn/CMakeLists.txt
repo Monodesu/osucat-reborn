@@ -4,6 +4,8 @@
 cmake_minimum_required (VERSION 3.8)
 set(CMAKE_CXX_STANDARD 17)
 
+add_definitions(/bigobj)
+
 include_directories(include) # 设置 src 目录为包含目录, 可根据实际情况修改
 include_directories(extern/Mysql/include)
 include_directories(extern/Magick++/include)

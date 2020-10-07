@@ -130,10 +130,16 @@ namespace osucat {
 					return true;
 				}
 				if (_stricmp(msg.substr(0, 6).c_str(), "recent") == 0) {
+					if (tar.message_type == Target::MessageType::GROUP) {
+						if (db.isGroupEnable(tar.group_id, 3) == 0) return false;
+					}
 					recent(msg.substr(6), tar, params);
 					return true;
 				}
 				if (_stricmp(msg.substr(0, 2).c_str(), "pr") == 0) {
+					if (tar.message_type == Target::MessageType::GROUP) {
+						if (db.isGroupEnable(tar.group_id, 3) == 0) return false;
+					}
 					recent(msg.substr(2), tar, params);;
 					return true;
 				}
@@ -185,6 +191,9 @@ namespace osucat {
 					return true;
 				}
 				if (_stricmp(msg.substr(0, 2).c_str(), "bp") == 0) {
+					if (tar.message_type == Target::MessageType::GROUP) {
+						if (db.isGroupEnable(tar.group_id, 1) == 0) return false;
+					}
 					bp(msg.substr(2), tar, params);
 					return true;
 				}
@@ -201,6 +210,9 @@ namespace osucat {
 					return true;
 				}
 				if (_stricmp(msg.substr(0, 5).c_str(), "rctpp") == 0) {
+					if (tar.message_type == Target::MessageType::GROUP) {
+						if (db.isGroupEnable(tar.group_id, 2) == 0) return false;
+					}
 					rctpp(msg.substr(5), tar, params);
 					return true;
 				}
@@ -1015,9 +1027,6 @@ namespace osucat {
 			Database db;
 			db.Connect();
 			db.addcallcount();
-			if (tar.message_type == Target::MessageType::GROUP) {
-				if (db.isGroupEnable(tar.group_id, 3) == 0) return;
-			}
 			cmd = utils::unescape(cmd);
 			utils::trim(cmd);
 			utils::string_replace(cmd, u8"：", ":");
@@ -1277,9 +1286,6 @@ namespace osucat {
 			Database db;
 			db.Connect();
 			db.addcallcount();
-			if (tar.message_type == Target::MessageType::GROUP) {
-				if (db.isGroupEnable(tar.group_id, 1) == 0) return;
-			}
 			cmd = utils::unescape(cmd);
 			utils::trim(cmd);
 			utils::string_replace(cmd, u8"：", ":");
@@ -1917,9 +1923,6 @@ namespace osucat {
 			Database db;
 			db.Connect();
 			db.addcallcount();
-			if (tar.message_type == Target::MessageType::GROUP) {
-				if (db.isGroupEnable(tar.group_id, 2) == 0) return;
-			}
 			cmd = utils::unescape(cmd);
 			utils::trim(cmd);
 			utils::string_replace(cmd, u8"：", ":");

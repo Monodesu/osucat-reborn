@@ -84,10 +84,10 @@ namespace osucat::addons {
 					imagemonitor(msg, senderinfo, tar);
 					return true;
 				}
-				if (_stricmp(msg.substr(0, 6).c_str(), u8"上号") == 0) {
+				/*if (_stricmp(msg.substr(0, 6).c_str(), u8"上号") == 0) {
 					wyy(params);
 					return true;
-				}
+				}*/
 				//网抑云
 				if (_stricmp(msg.substr(0, 12).c_str(), u8"舔狗日记") == 0) {
 					tgrj(params);
@@ -436,14 +436,14 @@ namespace osucat::addons {
 				return;
 			}
 		}
-		static void wyy(string* params) {
+		/* static void wyy(string* params) {
 			try {
 				*params = NetConnection::HttpsGet("https://api.moebot.im/wyy/");
 			}
 			catch (osucat::NetWork_Exception) {
 				*params = u8"抑郁太多对身体不好...";
 			}
-		}
+		} */
 		static void tgrj(string* params) {
 			try {
 				*params = NetConnection::HttpsGet("https://api.moebot.im/tg/");

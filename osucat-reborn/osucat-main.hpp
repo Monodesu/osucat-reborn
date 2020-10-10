@@ -176,10 +176,11 @@ namespace osucat {
 					return true;
 				}
 				if ((_stricmp(msg.substr(0, 8).c_str(), "textinfo") == 0) || (_stricmp(msg.substr(0, 2).c_str(), "ti") == 0)) {
-					if (_stricmp(msg.substr(0, 2).c_str(), "ti") == 0){
-					textinfo(msg.substr(2), tar, params);
-					} else {
-					textinfo(msg.substr(8), tar, params);
+					if (_stricmp(msg.substr(0, 2).c_str(), "ti") == 0) {
+						textinfo(msg.substr(2), tar, params);
+					}
+					else {
+						textinfo(msg.substr(8), tar, params);
 					}
 					return true;
 				}
@@ -332,41 +333,110 @@ namespace osucat {
 							return true;
 						}
 						if (_stricmp(msg.substr(0, 8).c_str(), "rmbottle") == 0) {
+							utils::string_replace(msg, u8"；", ";");
 							string returnmsg = "null", cmd = msg.substr(8);
-							int i;
-							if (cmd.find('#') != string::npos) {
-								i = stoi(cmd.substr(0, cmd.find('#')));
-								returnmsg = cmd.substr(cmd.find('#') + 1);
+							if (msg.find(";") != string::npos) {
+								vector<string> splittmp;
+								splittmp = utils::string_split(cmd, ';');
+								for (int a = 0; a < splittmp.size(); ++a) {
+									int i;
+									if (splittmp[a].find('#') != string::npos) {
+										i = stoi(splittmp[a].substr(0, splittmp[a].find('#')));
+										returnmsg = splittmp[a].substr(splittmp[a].find('#') + 1);
+									}
+									else {
+										try {
+											i = stoi(splittmp[a]);
+										}
+										catch (std::exception) {
+											send_message(
+												tar.message_type == Target::MessageType::PRIVATE ?
+												Target::MessageType::PRIVATE : Target::MessageType::GROUP,
+												tar.message_type == Target::MessageType::PRIVATE ? tar.user_id : tar.group_id,
+												u8"参数错误"
+											);
+										}
+									}
+									json j = db.getBottleByID(i);
+									addons::driftingBottle dfb;
+									if (j.size() == 1) {
+										dfb.nickname = j[0]["nickname"].get<std::string>();
+										dfb.sender = stoll(j[0]["sender"].get<std::string>());
+										dfb.sendTime = stoll(j[0]["sendtime"].get<std::string>());
+										string tmp;
+										returnmsg != "null" ?
+											tmp = u8"你发于 " + utils::unixTime2Str(dfb.sendTime) + u8" 的消息已被管理员删除。\n详情：" + returnmsg : tmp = u8"你发于 " + utils::unixTime2Str(dfb.sendTime) + u8" 的消息已被管理员删除。";
+										send_message(Target::MessageType::PRIVATE, dfb.sender, tmp);
+									}
+									else {
+										send_message(
+											tar.message_type == Target::MessageType::PRIVATE ?
+											Target::MessageType::PRIVATE : Target::MessageType::GROUP,
+											tar.message_type == Target::MessageType::PRIVATE ? tar.user_id : tar.group_id,
+											u8"没有找到这个漂流瓶。"
+										);
+									}
+									if (returnmsg == "null") {
+										*params = u8"已移除ID为 " + to_string(i) + u8" 的漂流瓶";
+										send_message(
+											tar.message_type == Target::MessageType::PRIVATE ?
+											Target::MessageType::PRIVATE : Target::MessageType::GROUP,
+											tar.message_type == Target::MessageType::PRIVATE ? tar.user_id : tar.group_id,
+											*params
+										);
+									}
+									else {
+										*params = u8"已移除ID为 " + to_string(i) + u8" 的漂流瓶，并返回以下消息：" + returnmsg;
+										send_message(
+											tar.message_type == Target::MessageType::PRIVATE ?
+											Target::MessageType::PRIVATE : Target::MessageType::GROUP,
+											tar.message_type == Target::MessageType::PRIVATE ? tar.user_id : tar.group_id,
+											*params
+										);
+									}
+									if (tar.group_id != management_groupid) { send_message(Target::MessageType::GROUP, management_groupid, *params); }
+									db.writeBottle(osucat::addons::driftingBottleDBEvent::DELETEBOTTLE, i, 0, 0, "", "");
+									Sleep(2000);
+								}
+								return false;
 							}
 							else {
-								try {
-									i = stoi(cmd);
+								int i;
+								if (cmd.find('#') != string::npos) {
+									i = stoi(cmd.substr(0, cmd.find('#')));
+									returnmsg = cmd.substr(cmd.find('#') + 1);
 								}
-								catch (std::exception) {
-									*params = u8"参数错误";
+								else {
+									try {
+										i = stoi(cmd);
+									}
+									catch (std::exception) {
+										*params = u8"参数错误";
+										return true;
+									}
+								}
+								json j = db.getBottleByID(i);
+								addons::driftingBottle dfb;
+								if (j.size() == 1) {
+									dfb.nickname = j[0]["nickname"].get<std::string>();
+									dfb.sender = stoll(j[0]["sender"].get<std::string>());
+									dfb.sendTime = stoll(j[0]["sendtime"].get<std::string>());
+									string tmp;
+									returnmsg != "null" ?
+										tmp = u8"你发于 " + utils::unixTime2Str(dfb.sendTime) + u8" 的消息已被管理员删除。\n详情：" + returnmsg : tmp = u8"你发于 " + utils::unixTime2Str(dfb.sendTime) + u8" 的消息已被管理员删除。";
+									send_message(Target::MessageType::PRIVATE, dfb.sender, tmp);
+								}
+								else {
+									*params = u8"没有找到这个漂流瓶。";
 									return true;
 								}
-							}
-							json j = db.getBottleByID(i);
-							addons::driftingBottle dfb;
-							if (j.size() == 1) {
-								dfb.nickname = j[0]["nickname"].get<std::string>();
-								dfb.sender = stoll(j[0]["sender"].get<std::string>());
-								dfb.sendTime = stoll(j[0]["sendtime"].get<std::string>());
-								string tmp;
-								returnmsg != "null" ?
-									tmp = u8"你发于 " + utils::unixTime2Str(dfb.sendTime) + u8" 的消息已被管理员删除。\n详情：" + returnmsg : tmp = u8"你发于 " + utils::unixTime2Str(dfb.sendTime) + u8" 的消息已被管理员删除。";
-								send_message(Target::MessageType::PRIVATE, dfb.sender, tmp);
-							}
-							else {
-								*params = u8"没有找到这个漂流瓶。";
+								returnmsg == "null" ?
+									*params = u8"已移除ID为 " + to_string(i) + u8" 的漂流瓶" : *params = u8"已移除ID为 " + to_string(i) + u8" 的漂流瓶，并返回以下消息：" + returnmsg;
+								if (tar.group_id != management_groupid) { send_message(Target::MessageType::GROUP, management_groupid, *params); }
+								db.writeBottle(osucat::addons::driftingBottleDBEvent::DELETEBOTTLE, i, 0, 0, "", "");
 								return true;
+
 							}
-							returnmsg == "null" ?
-								*params = u8"已移除ID为 " + to_string(i) + u8" 的漂流瓶" : *params = u8"已移除ID为 " + to_string(i) + u8" 的漂流瓶，并返回以下消息：" + returnmsg;
-							if (tar.group_id != management_groupid) { send_message(Target::MessageType::GROUP, management_groupid, *params); }
-							db.writeBottle(osucat::addons::driftingBottleDBEvent::DELETEBOTTLE, i, 0, 0, "", "");
-							return true;
 						}
 						if (_stricmp(msg.substr(0, 11).c_str(), "setnewbadge") == 0) {
 							if (adminlist[fi].role != 1) {

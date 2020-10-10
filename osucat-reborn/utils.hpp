@@ -1300,6 +1300,18 @@ namespace osucat::utils {
 
 		return false;    // this is not a directory!
 	}
+	static inline std::string ocescape(const std::string& str) {
+		std::string res = str;
+		string_replace(res, "\"", "[OC:character,id=1]");
+		string_replace(res, "'", "[OC:character,id=2]");
+		return res;
+	}
+	static inline std::string ocunescape(const std::string& str) {
+		std::string res = str;
+		string_replace(res, "[OC:character,id=1]", "\"");
+		string_replace(res, "[OC:character,id=2]", "'");
+		return res;
+	}
 };
 
 namespace osucat {

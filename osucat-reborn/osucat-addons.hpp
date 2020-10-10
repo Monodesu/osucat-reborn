@@ -100,7 +100,7 @@ namespace osucat::addons {
 					return true;
 				}
 				//猜单词游戏部分
-				
+
 				if (_stricmp(msg.substr(0, 15).c_str(), u8"猜单词帮助") == 0) {
 					*params = u8"[CQ:image,file=osucat\\help\\hangmanhelp.png]";
 					return true;
@@ -483,10 +483,10 @@ namespace osucat::addons {
 				}
 				time_t timetmp = time(NULL);
 				db.setBottleRemaining(2, tar.user_id);
-				db.writeBottle(driftingBottleDBEvent::WRITEIN, 0, timetmp, tar.user_id, senderinfo.nickname, cmd);
+				db.writeBottle(driftingBottleDBEvent::WRITEIN, 0, timetmp, tar.user_id, senderinfo.nickname, utils::ocescape(cmd));
 				db.addPickThrowCount(false);
 				char reportMsg[6000];
-				if (cmd.find("[CQ:image") != string::npos) {	
+				if (cmd.find("[CQ:image") != string::npos) {
 					send_message(tar.message_type == Target::MessageType::PRIVATE ? Target::MessageType::PRIVATE : Target::MessageType::GROUP,
 						tar.message_type == Target::MessageType::PRIVATE ? tar.user_id : tar.group_id, u8"你的漂流瓶已经漂往远方....");
 					sprintf_s(reportMsg,
@@ -529,7 +529,7 @@ namespace osucat::addons {
 						else { Sleep(314); tempi = utils::randomNum(0, j.size() - 1); }
 					}
 					driftingBottle dfb;
-					dfb.msg = j[tempi]["message"].get<std::string>();
+					dfb.msg = utils::ocunescape(j[tempi]["message"].get<std::string>());
 					dfb.nickname = j[tempi]["nickname"].get<std::string>();
 					dfb.sender = stoll(j[tempi]["sender"].get<std::string>());
 					dfb.sendTime = stoi(j[tempi]["sendtime"].get<std::string>());
@@ -540,9 +540,9 @@ namespace osucat::addons {
 					char tempm[6000];
 					sprintf_s(tempm,
 						u8"这是来自 %s(%lld) 的漂流瓶....\n"
-						u8"发于 %s\n"
+						u8"ID:%d 发于 %s\n"
 						u8"内容是....\n%s",
-						dfb.nickname.c_str(), dfb.sender, utils::unixTime2StrChinese(dfb.sendTime).c_str(), dfb.msg.c_str());
+						dfb.nickname.c_str(), dfb.sender, dfb.id, utils::unixTime2StrChinese(dfb.sendTime).c_str(), dfb.msg.c_str());
 					*params = tempm;
 					if (db.RemoveBottle(floor((time(NULL) - stoll(j[tempi]["sendtime"].get<std::string>())) / 86400), dfb.id)) {
 						Target tar1;

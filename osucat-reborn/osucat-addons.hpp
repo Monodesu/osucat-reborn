@@ -387,6 +387,7 @@ namespace osucat::addons {
 		}
 		static void nbnhhsh(string cmd, string* params) {
 			cmd = utils::unescape(cmd);
+			utils::trim(cmd);
 			if (forbiddenWordsLibrary(cmd) == true) {
 				*params = u8"不想理你...";
 				return;
@@ -395,7 +396,10 @@ namespace osucat::addons {
 				*params = u8"太长了！";
 				return;
 			}
-			utils::trim(cmd);
+			if (cmd == "") {
+				*params = u8"你都不告诉我你要翻译啥（恼）";
+				return;
+			}
 			json jp;
 			jp["text"] = cmd;
 			try {
@@ -406,33 +410,39 @@ namespace osucat::addons {
 					for (int ii = 1, i = 0; i < j.size(); ++i) {
 						tmp2 = "\n[" + to_string(ii) + "] " + j[i].get<string>();
 						if (!forbiddenWordsLibrary(j[i].get<string>())) {
-							tmp1 += tmp2;
+							if (ii < 10) {
+								tmp1 += "\n/" + to_string(ii) + "/  " + j[i].get<string>();
+							}
+							else if (ii > 10) {
+								break;
+							}
+							else {
+								tmp1 += "\n/" + to_string(ii) + "/ " + j[i].get<string>();
+							}
 							++ii;
-						}
-						if (ii > 10) {
-							break;
 						}
 					}
 					if (tmp1 != "") {
 						char trntmp[8192];
 						//sprintf printf一类的 必须跟c_str不然乱码
 						sprintf_s(trntmp,
-							u8"\"%s\"的返回结果如下：%s",
+							u8"以下是\"%s\"的人话：%s",
 							cmd.c_str(),
 							tmp1.c_str());
 						*params = trntmp;
 					}
 					else {
-						*params = u8"该词尚未收录";
+						*params = u8"没有找到这堆缩写的翻译;w;";
 					}
 				}
 				catch (json::exception) {
-					*params = u8"参数错误";
+					//*params = u8"是不是写错了什么。。？再看看？";
+					*params = u8"没有找到这堆缩写的翻译;w;";
 					return;
 				}
 			}
 			catch (osucat::NetWork_Exception) {
-				*params = u8"访问api时超时...请稍后再试...";
+				*params = u8"获取翻译时超时...请稍后再试...";
 				return;
 			}
 		}

@@ -495,7 +495,7 @@ namespace osucat::addons {
 						utils::unixTime2Str(time(NULL)).c_str(),
 						senderinfo.nickname.c_str(),
 						tar.user_id,
-						db.getBottleID(tar.user_id, cmd, timetmp),
+						db.getBottleID(tar.user_id, utils::ocescape(cmd), timetmp),
 						tar.message.c_str()
 					);
 					send_message(Target::MessageType::GROUP, management_groupid, reportMsg);
@@ -509,7 +509,7 @@ namespace osucat::addons {
 						utils::unixTime2Str(time(NULL)).c_str(),
 						senderinfo.nickname.c_str(),
 						tar.user_id,
-						db.getBottleID(tar.user_id, cmd, timetmp),
+						db.getBottleID(tar.user_id, utils::ocescape(cmd), timetmp),
 						tar.message.c_str()
 					);
 					send_message(Target::MessageType::GROUP, management_groupid, reportMsg);

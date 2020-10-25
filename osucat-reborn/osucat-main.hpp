@@ -460,6 +460,7 @@ namespace osucat {
 					}
 					return true;
 				}
+				if (steamcheck::csgocheck::cmdParse(msg, tar, senderinfo, params))return true;
 #pragma region 娱乐模块
 				if (tar.message_type == Target::MessageType::GROUP)if (db.isGroupEnable(tar.group_id, 4) == 0) return false; //拦截娱乐模块
 				if (addons::entertainment::cmdParse(msg, tar, senderinfo, params))return true;
@@ -3753,6 +3754,7 @@ namespace osucat {
 					Database db;
 					db.Connect();
 					vector<int64_t> temp = db.GetUserSet();
+					db.Close();
 					char timeStr[30] = { 0 };
 					strftime(timeStr, sizeof(timeStr), "%Y-%m-%d 04:00:00", tm_now);
 					for (int i = 0; i < temp.size(); ++i) {
@@ -3954,7 +3956,7 @@ namespace osucat {
 			if (tar.message_type == Target::MessageType::PRIVATE) {
 				json jp;
 				jp["user_id"] = tar.user_id;
-				jp["message"] = tar.message;
+				tar.message.empty() ? jp["message"] = "null" : jp["message"] = tar.message;
 				try {
 					utils::fileExist(".\\.remote") ? NetConnection::HttpPost("http://192.168.0.103:5700/send_private_msg", jp) : NetConnection::HttpPost("http://127.0.0.1:5700/send_private_msg", jp);
 				}

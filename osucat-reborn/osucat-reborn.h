@@ -41,6 +41,7 @@ long long int management_groupid;
 #include "osu_api_v1.hpp"
 #include "badge.hpp"
 #include "mysql.hpp"
+#include "steam-check.hpp"
 #include "oppai-cpp/oppai.hpp"
 #include "imageMaker.hpp"
 #include "osucat-main.hpp"

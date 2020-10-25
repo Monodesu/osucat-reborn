@@ -18,6 +18,16 @@ namespace osucat::addons {
 	enum driftingBottleDBEvent { WRITEIN = 0, ADDCOUNTER, CHANGESTATUS, DELETEBOTTLE };
 }
 
+namespace osucat::steamcheck {
+	struct CSGOUserInfo {
+		int64_t SteamId;
+		bool IsBanned;
+		string BanDate;
+		string ReceiveUserId;
+		string ReceiveGroupId;
+	};
+}
+
 namespace osucat {
 	struct admins {
 		int64_t user_id;
@@ -1011,6 +1021,26 @@ public:
 		catch (osucat::database_exception) {
 			return false;
 		}
+	}
+
+	vector<osucat::steamcheck::CSGOUserInfo> steam_get_csgo_listen_list() {
+		vector <osucat::steamcheck::CSGOUserInfo> cui;
+		string query = "SELECT * FROM steam-ban-check WHERE IsBanned = 0";
+		json j = this->Select(query);
+		for (int i = 0; i < j.size(); ++i) {
+			osucat::steamcheck::CSGOUserInfo t;
+			t.SteamId = j[i]["SteamId"].get<int64_t>();
+			t.IsBanned = j[i]["IsBanned"].get<int>() == 1 ? true : false;
+			t.BanDate = j[i]["BanDate"].get<string>();
+			t.ReceiveUserId = j[i]["ReceiveUserId"].get<string>();
+			t.ReceiveGroupId = j[i]["ReceiveGroupId"].get<string>();
+			cui.push_back(t);
+		}
+		return cui;
+	}
+
+	void steam_change_ban_stats(int64_t SteamId) {
+		this->Update("UPDATE steam-ban-check SET IsBanned=1 WHERE SteamId=" + to_string(SteamId));
 	}
 
 	void Close() {

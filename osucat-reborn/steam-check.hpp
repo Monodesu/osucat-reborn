@@ -48,36 +48,7 @@ namespace osucat::steamcheck {
 						UserBanStats ubs = { 0 };
 						if (ban_check(stoll(j["steamid"].get<string>()), &ubs)) {
 							UserStatus us = get_user_status(stoll(j["steamid"].get<string>()));
-							string returnmsg;
-							returnmsg = u8"结果如下：\n用户名：" + us.personaname;
-							returnmsg += u8"\n真名：" + us.realname;
-							returnmsg += u8"\n地区：" + us.loccountrycode;
-							returnmsg += u8"\n上次登出：" + utils::unixTime2Str(us.lastlogoff);
-							if (ubs.CommunityBanned) {
-								returnmsg += u8"\n用户当前已被社区封禁";
-							}
-							if (ubs.EconomyBan != "none") {
-								returnmsg += u8"\n用户当前已被禁止交易";
-							}
-							if (ubs.VACBanned) {
-								returnmsg += u8"\nVAC封禁：是";
-							}
-							if (ubs.NumberOfGameBans > 0) {
-								returnmsg += u8"\n游戏封禁：是";
-							}
-							if (ubs.VACBanned) {
-								returnmsg += u8"\nVAC封禁次数：" + to_string(ubs.NumberOfVACBans);
-							}
-							if (ubs.NumberOfGameBans > 0) {
-								returnmsg += u8"\n游戏封禁次数：" + to_string(ubs.NumberOfGameBans);
-							}
-							if (ubs.VACBanned || ubs.NumberOfGameBans > 0) {
-								returnmsg += u8"\n上次封禁于：" + to_string(ubs.DaysSinceLastBan) + u8" 天前";
-							}
-							if (ubs.CommunityBanned == false && ubs.EconomyBan == "none" && ubs.NumberOfGameBans == 0 && ubs.VACBanned == false) {
-								returnmsg += u8"\n该用户无任何不良记录。";
-							}
-							*params = returnmsg;
+							*params = bancheckrtnmsg(us, ubs);
 							return true;
 						}
 					}
@@ -87,41 +58,12 @@ namespace osucat::steamcheck {
 					}
 				}
 				if (tmp.find("steamcommunity.com/profiles/") != string::npos) {
-					string t = tmp.substr(tmp.find("/profile/") + 9);
+					string t = tmp.substr(tmp.find("/profiles/") + 10);
 					utils::string_replace(t, "/", "");
 					UserBanStats ubs = { 0 };
 					if (ban_check(stoll(t), &ubs)) {
 						UserStatus us = get_user_status(stoll(t));
-						string returnmsg;
-						returnmsg = u8"结果如下：\n用户名：" + us.personaname;
-						returnmsg += u8"\n真名：" + us.realname;
-						returnmsg += u8"\n地区：" + us.loccountrycode;
-						returnmsg += u8"\n上次登出：" + utils::unixTime2Str(us.lastlogoff);
-						if (ubs.CommunityBanned) {
-							returnmsg += u8"\n用户当前已被社区封禁";
-						}
-						if (ubs.EconomyBan != "none") {
-							returnmsg += u8"\n用户当前已被禁止交易";
-						}
-						if (ubs.VACBanned) {
-							returnmsg += u8"\nVAC封禁：是";
-						}
-						if (ubs.NumberOfGameBans > 0) {
-							returnmsg += u8"\n游戏封禁：是";
-						}
-						if (ubs.VACBanned) {
-							returnmsg += u8"\nVAC封禁次数：" + to_string(ubs.NumberOfVACBans);
-						}
-						if (ubs.NumberOfGameBans > 0) {
-							returnmsg += u8"\n游戏封禁次数：" + to_string(ubs.NumberOfGameBans);
-						}
-						if (ubs.VACBanned || ubs.NumberOfGameBans > 0) {
-							returnmsg += u8"\n上次封禁于：" + to_string(ubs.DaysSinceLastBan) + u8" 天前";
-						}
-						if (ubs.CommunityBanned == false && ubs.EconomyBan == "none" && ubs.NumberOfGameBans == 0 && ubs.VACBanned == false) {
-							returnmsg += u8"\n该用户无任何不良记录。";
-						}
-						*params = returnmsg;
+						*params = bancheckrtnmsg(us, ubs);
 						return true;
 					}
 					else {
@@ -132,36 +74,7 @@ namespace osucat::steamcheck {
 					UserBanStats ubs = { 0 };
 					if (ban_check(stoll(tmp), &ubs)) {
 						UserStatus us = get_user_status(stoll(tmp));
-						string returnmsg;
-						returnmsg = u8"结果如下：\n用户名：" + us.personaname;
-						returnmsg += u8"\n真名：" + us.realname;
-						returnmsg += u8"\n地区：" + us.loccountrycode;
-						returnmsg += u8"\n上次登出：" + utils::unixTime2Str(us.lastlogoff);
-						if (ubs.CommunityBanned) {
-							returnmsg += u8"\n用户当前已被社区封禁";
-						}
-						if (ubs.EconomyBan != "none") {
-							returnmsg += u8"\n用户当前已被禁止交易";
-						}
-						if (ubs.VACBanned) {
-							returnmsg += u8"\nVAC封禁：是";
-						}
-						if (ubs.NumberOfGameBans > 0) {
-							returnmsg += u8"\n游戏封禁：是";
-						}
-						if (ubs.VACBanned) {
-							returnmsg += u8"\nVAC封禁次数：" + to_string(ubs.NumberOfVACBans);
-						}
-						if (ubs.NumberOfGameBans > 0) {
-							returnmsg += u8"\n游戏封禁次数：" + to_string(ubs.NumberOfGameBans);
-						}
-						if (ubs.VACBanned || ubs.NumberOfGameBans > 0) {
-							returnmsg += u8"\n上次封禁于：" + to_string(ubs.DaysSinceLastBan) + u8" 天前";
-						}
-						if (ubs.CommunityBanned == false && ubs.EconomyBan == "none" && ubs.NumberOfGameBans == 0 && ubs.VACBanned == false) {
-							returnmsg += u8"\n该用户无任何不良记录。";
-						}
-						*params = returnmsg;
+						*params = bancheckrtnmsg(us, ubs);
 						return true;
 					}
 					else {
@@ -175,36 +88,7 @@ namespace osucat::steamcheck {
 						UserBanStats ubs = { 0 };
 						if (ban_check(stoll(j["steamid"].get<string>()), &ubs)) {
 							UserStatus us = get_user_status(stoll(j["steamid"].get<string>()));
-							string returnmsg;
-							returnmsg = u8"结果如下：\n用户名：" + us.personaname;
-							returnmsg += u8"\n真名：" + us.realname;
-							returnmsg += u8"\n地区：" + us.loccountrycode;
-							returnmsg += u8"\n上次登出：" + utils::unixTime2Str(us.lastlogoff);
-							if (ubs.CommunityBanned) {
-								returnmsg += u8"\n用户当前已被社区封禁";
-							}
-							if (ubs.EconomyBan != "none") {
-								returnmsg += u8"\n用户当前已被禁止交易";
-							}
-							if (ubs.VACBanned) {
-								returnmsg += u8"\nVAC封禁：是";
-							}
-							if (ubs.NumberOfGameBans > 0) {
-								returnmsg += u8"\n游戏封禁：是";
-							}
-							if (ubs.VACBanned) {
-								returnmsg += u8"\nVAC封禁次数：" + to_string(ubs.NumberOfVACBans);
-							}
-							if (ubs.NumberOfGameBans > 0) {
-								returnmsg += u8"\n游戏封禁次数：" + to_string(ubs.NumberOfGameBans);
-							}
-							if (ubs.VACBanned || ubs.NumberOfGameBans > 0) {
-								returnmsg += u8"\n上次封禁于：" + to_string(ubs.DaysSinceLastBan) + u8" 天前";
-							}
-							if (ubs.CommunityBanned == false && ubs.EconomyBan == "none" && ubs.NumberOfGameBans == 0 && ubs.VACBanned == false) {
-								returnmsg += u8"\n该用户无任何不良记录。";
-							}
-							*params = returnmsg;
+							*params = bancheckrtnmsg(us, ubs);
 							return true;
 						}
 					}
@@ -215,6 +99,52 @@ namespace osucat::steamcheck {
 				}
 			}
 			return false;
+		}
+		static string bancheckrtnmsg(UserStatus us, UserBanStats ubs) {
+			string returnmsg, radstr = osucat::utils::rand_str();
+			string path = to_string(OC_ROOT_PATH) + "\\data\\images\\osucat\\" + radstr + ".png";
+			if (us.avatarfull != "null") {
+				NetConnection::DownloadFile(us.avatarfull, path);
+				returnmsg += u8"[CQ:image,file=osucat\\" + radstr + ".png]" + "\n";
+			}
+			returnmsg += u8"用户名：" + us.personaname;
+			returnmsg += u8"\n真实姓名：" + us.realname;
+			returnmsg += u8"\n地区：" + us.loccountrycode;
+			if (us.lastlogoff == 0) {
+				returnmsg += u8"\n这位用户已经很久没有登陆了";
+			}
+			else returnmsg += u8"\n最后登录于：" + utils::unixTime2Str(us.lastlogoff);	
+			returnmsg += u8"\nSteamID：" + to_string(us.steamid);
+			if (ubs.CommunityBanned) {
+				returnmsg += u8"\n用户当前已被社区封禁";
+			}
+			if (ubs.EconomyBan != "none") {
+				returnmsg += u8"\n用户当前已被禁止交易";
+			}
+			if (ubs.VACBanned) {
+				returnmsg += u8"\nVAC封禁：是";
+			}
+			if (ubs.NumberOfGameBans > 0) {
+				returnmsg += u8"\n游戏封禁：是";
+			}
+			if (ubs.VACBanned) {
+				returnmsg += u8"\nVAC封禁次数：" + to_string(ubs.NumberOfVACBans);
+			}
+			if (ubs.NumberOfGameBans > 0) {
+				returnmsg += u8"\n游戏封禁次数：" + to_string(ubs.NumberOfGameBans);
+			}
+			if (ubs.VACBanned || ubs.NumberOfGameBans > 0) {
+				returnmsg += u8"\n上次封禁于：" + to_string(ubs.DaysSinceLastBan) + u8" 天前";
+			}
+			if (ubs.CommunityBanned == false && ubs.EconomyBan == "none" && ubs.NumberOfGameBans == 0 && ubs.VACBanned == false) {
+				returnmsg += u8"\n该用户无任何不良记录。";
+			}
+			if (us.profileurl.find("/profiles/") == string::npos) {
+				returnmsg += u8"\n自定义链接：" + us.profileurl;
+			}
+			thread DFH(bind(&DelFileHandler, path, 20));
+			DFH.detach();
+			return returnmsg;
 		}
 		static void autocheck() {
 			cout << "CS:GO bans auto-check thread created." << endl;
@@ -359,6 +289,10 @@ namespace osucat::steamcheck {
 			}
 		}
 	private:
+		static void DelFileHandler(string filename, int delayTime = 0) {
+			if (delayTime > 0)Sleep(delayTime * 1000);
+			DeleteFileA(filename.c_str());
+		}
 		static UserStatus get_user_status(int64_t SteamId) {
 			char tmp[1024];
 			sprintf_s(tmp, "http://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key=%s&steamids=%lld", STEAM_WEB_API_KEY, SteamId);

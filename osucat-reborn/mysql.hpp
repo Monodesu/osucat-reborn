@@ -22,7 +22,6 @@ namespace osucat::steamcheck {
 	struct CSGOUserInfo {
 		int64_t SteamId;
 		bool IsBanned;
-		string BanDate;
 		string ReceiveUserId;
 		string ReceiveGroupId;
 	};
@@ -1025,22 +1024,116 @@ public:
 
 	vector<osucat::steamcheck::CSGOUserInfo> steam_get_csgo_listen_list() {
 		vector <osucat::steamcheck::CSGOUserInfo> cui;
-		string query = "SELECT * FROM steam-ban-check WHERE IsBanned = 0";
-		json j = this->Select(query);
-		for (int i = 0; i < j.size(); ++i) {
+		string query = R"(SELECT * from `steam-ban-check` where IsBanned=0)";
+		json j;
+		try {
+			j = this->Select(query);
+			for (int i = 0; i < j.size(); ++i) {
+				osucat::steamcheck::CSGOUserInfo t;
+				t.SteamId = stoll(j[i]["SteamId"].get<string>());
+				t.IsBanned = stoi(j[i]["IsBanned"].get<string>()) == 1 ? true : false;
+				t.ReceiveUserId = j[i]["ReceiveUserId"].get<string>();
+				t.ReceiveGroupId = j[i]["ReceiveGroupId"].get<string>();
+				cui.push_back(t);
+			}
+		}
+		catch (osucat::database_exception) {
 			osucat::steamcheck::CSGOUserInfo t;
-			t.SteamId = j[i]["SteamId"].get<int64_t>();
-			t.IsBanned = j[i]["IsBanned"].get<int>() == 1 ? true : false;
-			t.BanDate = j[i]["BanDate"].get<string>();
-			t.ReceiveUserId = j[i]["ReceiveUserId"].get<string>();
-			t.ReceiveGroupId = j[i]["ReceiveGroupId"].get<string>();
+			t.SteamId = -1;
+			t.IsBanned = false;
+			t.ReceiveUserId = "null";
+			t.ReceiveGroupId = "null";
 			cui.push_back(t);
+		}
+		catch (std::exception& ex) {
+			cout << ex.what() << endl;
 		}
 		return cui;
 	}
 
 	void steam_change_ban_stats(int64_t SteamId) {
-		this->Update("UPDATE steam-ban-check SET IsBanned=1 WHERE SteamId=" + to_string(SteamId));
+		this->Update("UPDATE `steam-ban-check` SET IsBanned=1 WHERE SteamId=" + to_string(SteamId));
+	}
+
+	bool steam_add_ban_listening(int64_t SteamId, int64_t ReceiveUserId = EOF, int64_t ReceiveGroupId = EOF) {
+		string query = "INSERT INTO `steam-ban-check` (SteamId,IsBanned,ReceiveUserId,ReceiveGroupId) VALUES (";
+		query += to_string(SteamId) + ",0,";
+		if (ReceiveUserId == EOF) {
+			query += "\"null\",";
+		}
+		else {
+			query += "\"" + to_string(ReceiveUserId) + "\",";
+		}
+		if (ReceiveGroupId == EOF) {
+			query += "\"null\")";
+		}
+		else {
+			query += "\"" + to_string(ReceiveGroupId) + "\")";
+		}
+
+		try {
+			this->Insert(query);
+		}
+		catch (osucat::database_exception) {
+			//用户已存在于监听列表中
+			return false;
+		}
+		return true;
+	}
+
+	bool steam_change_ban_listening_receive_groupid(int64_t SteamId, int64_t ReceiveGroupId) {
+		json j = this->Select("SELECT ReceiveGroupId FROM `steam-ban-check` WHERE SteamId=" + to_string(SteamId));
+		string tmp = j[0]["ReceiveGroupId"].get<string>();
+		if (tmp.find(';') == string::npos) {
+			vector<string> t = utils::string_split(tmp, ';');
+			for (int i = 0; i < t.size(); ++i) {
+				if (t[i] == to_string(ReceiveGroupId)) {
+					return false;
+				}
+			}
+			this->Update("UPDATE `steam-ban-check` SET ReceiveGroupId=\"" + tmp + ";" + to_string(ReceiveGroupId) + "\"" + "WHERE SteamId=" + to_string(SteamId));
+			return true;
+		}
+		else {
+			if (tmp == to_string(ReceiveGroupId)) {
+				return false;
+			}
+			if (tmp == "null") {
+				this->Update("UPDATE `steam-ban-check` SET ReceiveGroupId=\"" + to_string(ReceiveGroupId) + "\"" + "WHERE SteamId=" + to_string(SteamId));
+			}
+			else {
+				this->Update("UPDATE `steam-ban-check` SET ReceiveGroupId=\"" + tmp + ";" + to_string(ReceiveGroupId) + "\"" + "WHERE SteamId=" + to_string(SteamId));
+			}
+
+			return true;
+		}
+	}
+
+	bool steam_change_ban_listening_receive_userid(int64_t SteamId, int64_t ReceiveUserId) {
+		json j = this->Select("SELECT ReceiveUserId FROM `steam-ban-check` WHERE SteamId=" + to_string(SteamId));
+		string tmp = j[0]["ReceiveUserId"].get<string>();
+		if (tmp.find(';') == string::npos) {
+			vector<string> t = utils::string_split(tmp, ';');
+			for (int i = 0; i < t.size(); ++i) {
+				if (t[i] == to_string(ReceiveUserId)) {
+					return false;
+				}
+			}
+			this->Update("UPDATE `steam-ban-check` SET ReceiveUserId=\"" + tmp + ";" + to_string(ReceiveUserId) + "\"" + "WHERE SteamId=" + to_string(SteamId));
+			return true;
+		}
+		else {
+			if (tmp == to_string(ReceiveUserId)) {
+				return false;
+			}
+			if (tmp == "null") {
+				this->Update("UPDATE `steam-ban-check` SET ReceiveUserId=\"" + to_string(ReceiveUserId) + "\"" + "WHERE SteamId=" + to_string(SteamId));
+			}
+			else {
+				this->Update("UPDATE `steam-ban-check` SET ReceiveUserId=\"" + tmp + ";" + to_string(ReceiveUserId) + "\"" + "WHERE SteamId=" + to_string(SteamId));
+			}
+			return true;
+		}
 	}
 
 	void Close() {

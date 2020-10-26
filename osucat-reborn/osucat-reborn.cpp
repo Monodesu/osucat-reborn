@@ -14,7 +14,7 @@ int main()
 	SetConsoleCP(CP_UTF8);
 	SetConsoleOutputCP(CP_UTF8);
 	std::vector<std::string> consoleWelcome;
-	consoleWelcome.push_back("Current version: 0.9.4");
+	consoleWelcome.push_back("Current version: 0.9.5");
 	consoleWelcome.push_back("-----------------------------------------------------------------------------------");
 	consoleWelcome.push_back("                                                                                   ");
 	consoleWelcome.push_back(R"(     _____         ___             ___         ___           _____                )");
@@ -289,6 +289,8 @@ int main()
 	if (ISACTIVE) {
 		cout << u8"Creating daily update thread..." << endl;
 		osucat::main::_CreateDUThread();
+		cout << u8"Creating steam ban check thread..." << endl;
+		osucat::steamcheck::csgocheck::_AutoCheck();
 		try {
 			Database db;
 			db.Connect();
